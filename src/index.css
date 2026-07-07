@@ -2,10 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+
 html, body, #root {
   height: 100%;
   margin: 0;
 }
+
+/* * {
+  font-family:
+    system-ui,
+    sans-serif !important;
+} */
 
 /* Let Electron's title bar area feel native on Windows/macOS */
 .titlebar-drag {
@@ -26,8 +33,12 @@ html, body, #root {
 .ant-menu-dark .ant-menu-item-icon,
 .ant-menu-dark .ant-menu-item .ant-menu-title-content {
   color: #ffffff !important;
+  font-size: small;
 }
 
+.ant-menu-sub li{
+  padding-left: 30px!important;
+}
 
 /* Submenu container background (slightly different shade) */
 .ant-menu-dark .ant-menu-sub.ant-menu-inline {

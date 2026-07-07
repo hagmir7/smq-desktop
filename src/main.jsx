@@ -4,6 +4,7 @@ import { ConfigProvider, theme } from 'antd';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router.jsx';
 import './index.css';
+import "@fontsource/inter";
 import { AuthProvider } from './contexts/AuthContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(

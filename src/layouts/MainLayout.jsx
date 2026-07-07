@@ -1,36 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { Layout, Menu, ConfigProvider } from 'antd';
-import {
-  DashboardOutlined,
-  SettingOutlined,
-  AppstoreOutlined
-} from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import UpdateNotifier from '../components/UpdateNotifier.jsx';
 import DropMenu from '../components/DropMenu.jsx';
-import { ClipboardCheck, Layers, RefreshCcw } from 'lucide-react';
+import { Astroid, ClipboardCheck, Flag, Layers, LayoutDashboard, Logs, Pyramid, RefreshCcw, Settings, SquareMenu } from 'lucide-react';
+import MainHeader from '../components/MainHeader.jsx';
 
 const { Header, Sider, Content } = Layout;
 
 const menuItems = [
-  { key: '/', icon: <DashboardOutlined className='text-white' />, label: 'Dashboard' },
-  { key: '/apps', icon: <AppstoreOutlined className='text-white' />, label: 'Apps' },
+  { key: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
+  { key: '/reclamations', icon: <Flag size={18} />, label: 'Réclamations' },
+  { key: '/correction-actions', icon: <Astroid size={18} />, label: 'Actions Corrective' },
+  { key: '/improvements', icon: <Pyramid size={18} />, label: 'Améliorations' },
+  { key: '/improvements-journal', icon: <Logs size={18} />, label: 'Journal Améliorations' },
+  { key: '/register', icon: <SquareMenu size={18} />, label: 'Register ENR-06 ' },
   {
-    key: '/Paramètres', icon: <SettingOutlined className='text-white' />, label: 'Settings', children: [
+    key: '/Paramètres', icon: <Settings size={18} />, label: 'Settings', children: [
       {
         key: '/users',
-        icon: <RefreshCcw size={19} />,
-        label:  "Utilisateurs" ,
+        icon: <RefreshCcw size={18} />,
+        label: "Utilisateurs",
       },
       {
-
         key: '/roles',
-        icon: <ClipboardCheck size={19} />,
+        icon: <ClipboardCheck size={18} />,
         label: 'Rôles et permissions',
       },
       {
         key: '/connections',
-        icon: <Layers size={19} />,
+        icon: <Layers size={18} />,
         // disabled: true,
         label: 'Connexions DB',
       },
@@ -40,6 +39,19 @@ const menuItems = [
   }
 ];
 
+// Flattens menuItems (including nested children) into a single lookup array
+const flattenMenuItems = (items) => {
+  return items.reduce((acc, item) => {
+    acc.push(item);
+    if (item.children) {
+      acc.push(...flattenMenuItems(item.children));
+    }
+    return acc;
+  }, []);
+};
+
+const flatMenuItems = flattenMenuItems(menuItems);
+
 export default function MainLayout() {
   const [appVersion, setAppVersion] = useState('');
   const navigate = useNavigate();
@@ -48,6 +60,14 @@ export default function MainLayout() {
   useEffect(() => {
     window.electron?.getVersion().then(setAppVersion);
   }, []);
+
+  useEffect(() => {
+    const currentItem = flatMenuItems.find((item) => item.key === location.pathname);
+    if (currentItem) {
+      document.title = currentItem.label;
+      document.getElementById('title').innerHTML = currentItem.label;
+    }
+  }, [location.pathname]);
 
   return (
     <ConfigProvider
@@ -87,16 +107,11 @@ export default function MainLayout() {
         </Sider>
 
         <Layout>
-         <Header className="titlebar-drag flex items-center justify-between bg-white border-b border-gray-200 px-4 h-12 leading-none shadow-sm relative z-10">
-          <span className="titlebar-no-drag font-semibold text-gray-700">
-            SMQ {appVersion && <span className="text-gray-400 font-normal text-xs ml-1">v{appVersion}</span>}
-          </span>
-          <span className="titlebar-no-drag">
-            <DropMenu />
-          </span>
-        </Header>
+          <MainHeader appVersion={appVersion} />
           <Content className="bg-gray-100 overflow-auto">
-            <Outlet context={{ appVersion }} />
+            <div className='m-2 rounded-lg bg-white shadow-sm overflow-hidden'>
+              <Outlet context={{ appVersion }} />
+            </div>
           </Content>
         </Layout>
       </Layout>

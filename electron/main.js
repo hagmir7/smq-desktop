@@ -4,6 +4,7 @@ const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
 const { default: createLoginWindow } = require('./windows/loginWindow');
 
+
 const isDev = process.env.NODE_ENV === 'development';
 
 log.transports.file.level = 'info';

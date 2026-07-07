@@ -10,8 +10,15 @@ import MainLayout from "./layouts/MainLayout";
 // Lazy-load route components for code-splitting
 const Home = lazy(() => import("./routes/home"));
 const Dashboard = lazy(() => import("./routes/dashboard"));
-const Settings = lazy(() => import("./routes/settings"));
+const Users = lazy(() => import("./routes/users"));
+const Roles = lazy(() => import("./routes/roles"));
+const Connections = lazy(() => import("./routes/connections"));
+const Reclamations = lazy(() => import("./routes/reclamations"));
+const CorrectionActions = lazy(() => import("./routes/correction-actions"));
+const Improvements = lazy(() => import("./routes/improvements"));
+const Register = lazy(() => import("./routes/register"));
 
+const ImprovementsJournal = lazy(() => import("./routes/improvements-journal"));
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -29,8 +36,17 @@ export const router = createBrowserRouter([
           return res.json();
         },
       },
-      { path: "settings", element: <Settings /> },
 
+
+      { path: "reclamations", element: <Reclamations /> },
+      { path: "correction-actions", element: <CorrectionActions /> },
+      { path: "improvements", element: <Improvements /> },
+      { path: "improvements-journal", element: <ImprovementsJournal /> },
+      { path: "register", element: <Register /> },
+
+      { path: "roles", element: <Roles /> },
+      { path: "users", element: <Users /> },
+      { path: "connections", element: <Connections /> },
       { path: "*", element: <ErrorPage /> },
     ],
   },
