@@ -1,8 +1,19 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('appInfo', {
-  getVersion: () => ipcRenderer.invoke('app:get-version')
+contextBridge.exposeInMainWorld('electron', {
+  login: (data) => ipcRenderer.invoke('login', data),
+  logout: () => ipcRenderer.invoke('logout'),
+  user: (payload) => ipcRenderer.invoke('user', payload),
+  getSession: () => ipcRenderer.invoke('get-session'),
+  getVersion: () => ipcRenderer.invoke('app:get-version'),
+
+  // onUpdateAvailable: (cb) => ipcRenderer.on('update:available', (_e, info) => cb(info)),
+  // onUpdateProgress: (cb) => ipcRenderer.on('update:download-progress', (_e, p) => cb(p)),
+  // onUpdateDownloaded: (cb) => ipcRenderer.on('update:downloaded', (_e, info) => cb(info)),
+  // onUpdateError: (cb) => ipcRenderer.on('update:error', (_e, err) => cb(err)),
+  // quitAndInstall: () => ipcRenderer.invoke('update:quit-and-install'),
 });
+
 
 contextBridge.exposeInMainWorld('updater', {
   onUpdateAvailable: (callback) => {

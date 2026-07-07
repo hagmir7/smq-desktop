@@ -2,14 +2,16 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
+const { default: createLoginWindow } = require('./windows/loginWindow');
 
 const isDev = process.env.NODE_ENV === 'development';
 
-// --- Logging setup (also used by electron-updater internally) ---
 log.transports.file.level = 'info';
 autoUpdater.logger = log;
 
 let mainWindow = null;
+let loginWindow = null;
+let currentSession = null; // { access_token, user } — single source of truth for auth
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -36,6 +38,8 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => mainWindow.show());
   mainWindow.on('closed', () => (mainWindow = null));
+
+  return mainWindow;
 }
 
 function sendToRenderer(channel, ...args) {
@@ -44,10 +48,6 @@ function sendToRenderer(channel, ...args) {
   }
 }
 
-// --- Auto-update wiring ---
-// electron-builder's "publish" config in package.json (generic/GitHub/S3)
-// tells electron-updater where to look for a latest.yml + installer.
-// None of this does anything in dev mode or for unpackaged/unsigned builds.
 function setupAutoUpdater() {
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
@@ -75,7 +75,6 @@ function setupAutoUpdater() {
     autoUpdater.quitAndInstall();
   });
 
-  // Check on launch, then every 4 hours while the app is open.
   if (!isDev) {
     autoUpdater.checkForUpdates().catch((e) => log.error(e));
     setInterval(() => {
@@ -86,15 +85,76 @@ function setupAutoUpdater() {
 
 ipcMain.handle('app:get-version', () => app.getVersion());
 
-app.whenReady().then(() => {
-  createWindow();
-  setupAutoUpdater();
+// --- Auth ---
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+ipcMain.handle('login', async (event, data) => {
+  try {
+    if (data?.access_token) {
+      currentSession = data; // store in main process — shared source of truth
+
+      if (loginWindow && !loginWindow.isDestroyed()) {
+        loginWindow.close();
+      }
+
+      mainWindow = createWindow();
+      return { success: true };
+    }
+    return { success: false };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('logout', async () => {
+  try {
+    currentSession = null;
+
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.close();
+    }
+
+    if (!loginWindow || loginWindow.isDestroyed()) {
+      loginWindow = createLoginWindow();
+    } else {
+      loginWindow.show();
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Logout error:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+
+ipcMain.handle('get-session', () => currentSession);
+
+app.whenReady().then(() => {
+  loginWindow = createLoginWindow();
+  setupAutoUpdater();
 });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+
+
+ipcMain.handle('user', async (event, data) => {
+  try {
+
+    if (data.access_token) {
+      if (loginWindow && !loginWindow.isDestroyed()) {
+        loginWindow.close();
+      }
+
+      mainWindow = createWindow();
+      return true;
+    }
+    return null;
+  } catch (error) {
+    console.error('Login error:', error);
+    return null;
+  }
 });

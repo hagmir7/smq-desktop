@@ -14,3 +14,32 @@ html, body, #root {
 .titlebar-no-drag {
   -webkit-app-region: no-drag;
 }
+
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+
+.ant-menu-dark .ant-menu-item,
+.ant-menu-dark .ant-menu-item-icon,
+.ant-menu-dark .ant-menu-item .ant-menu-title-content {
+  color: #ffffff !important;
+}
+
+
+/* Submenu container background (slightly different shade) */
+.ant-menu-dark .ant-menu-sub.ant-menu-inline {
+  background: #1e7240 !important; /* darker green-900-ish, adjust as you like */
+}
+
+/* Optional: give each child item its own background too */
+.ant-menu-dark .ant-menu-sub.ant-menu-inline .ant-menu-item {
+  background: #1e7240 !important;
+}
+
+/* Keep selected child item distinct */
+.ant-menu-dark .ant-menu-sub.ant-menu-inline .ant-menu-item-selected {
+  background: #16a34a !important; /* your primary green-600 */
+}
