@@ -37,36 +37,52 @@ export const AuthProvider = ({ children }) => {
       setAuthLoading(false);
     }
   };
-
   const login = async (userData) => {
     setLoading(true);
     setMessage("");
 
     try {
       const response = await api.post("users/login", userData);
+
       const { access_token, user } = response.data;
+
+      const authData = {
+        roles: (user.roles ?? []).map(role => role.name),
+        permissions: (user.permissions ?? []).map(permission => permission.name),
+      };
 
       localStorage.setItem("authToken", access_token);
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem(
-        "roles",
-        JSON.stringify({ roles: user.roles, permissions: user.permissions })
-      );
+      localStorage.setItem("roles", JSON.stringify(authData));
 
-      getUser();
+      await getUser();
 
       if (window.electron) {
-        await window.electron.login(response.data);
-      }else{}
+        await window.electron.login({
+          access_token,
+          user,
+          roles: authData,
+        });
+      }
 
-      return { success: true, user };
+      return {
+        success: true,
+        user,
+        roles: authData,
+      };
     } catch (error) {
       console.error(error);
+
       const msg =
         error?.response?.data?.message ||
         "Impossible de se connecter au serveur. Veuillez vérifier votre connexion Internet.";
+
       setMessage(msg);
-      return { success: false, message: msg };
+
+      return {
+        success: false,
+        message: msg,
+      };
     } finally {
       setLoading(false);
     }

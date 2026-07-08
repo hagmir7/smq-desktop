@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('electron', {
   user: (payload) => ipcRenderer.invoke('user', payload),
   getSession: () => ipcRenderer.invoke('get-session'),
   getVersion: () => ipcRenderer.invoke('app:get-version'),
+  openShow: (payload) => ipcRenderer.send('openShow', payload),
 
   // onUpdateAvailable: (cb) => ipcRenderer.on('update:available', (_e, info) => cb(info)),
   // onUpdateProgress: (cb) => ipcRenderer.on('update:download-progress', (_e, p) => cb(p)),

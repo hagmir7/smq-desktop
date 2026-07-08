@@ -1,6 +1,5 @@
 import { BrowserWindow, app } from 'electron';
 import path from 'path';
-import { getPreloadPath, isDev } from '../util.js';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,14 +27,14 @@ export const createShowWindow = (data) => {
         // minimizable: false,
         alwaysOnTop: true,
         webPreferences: {
-            preload: getPreloadPath()
+           preload: path.join(__dirname, '..', 'preload.js'),
         }
     });
 
 
 
     if (isDev) {
-        childWindow.loadURL(`http://localhost:5173/#${data.url}`);
+        childWindow.loadURL(`http://localhost:5173/${data.url}`);
     } else {
         childWindow.loadFile(path.join(app.getAppPath(), 'react-dist', 'index.html'), {
             hash: data.url

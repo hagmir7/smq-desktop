@@ -3,6 +3,8 @@ const path = require('node:path');
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
 const { default: createLoginWindow } = require('./windows/loginWindow');
+const { createShowWindow } = require('./windows/showWindow');
+
 
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -12,6 +14,7 @@ autoUpdater.logger = log;
 
 let mainWindow = null;
 let loginWindow = null;
+let showWindow;
 let currentSession = null; // { access_token, user } — single source of truth for auth
 
 function createWindow() {
@@ -158,4 +161,25 @@ ipcMain.handle('user', async (event, data) => {
     console.error('Login error:', error);
     return null;
   }
+});
+
+
+
+ipcMain.on('openShow', async (event, preload) => {
+    try {
+        if (showWindow && !showWindow.isDestroyed()) {
+            await new Promise((resolve) => {
+                showWindow.once('closed', resolve);
+                showWindow.close();
+            });
+        }
+
+        showWindow = createShowWindow(preload);
+        showWindow.show();
+
+        event.reply('openShow-response', { success: true });
+    } catch (error) {
+        console.error('openShow error:', error);
+        event.reply('openShow-response', { success: false, error: error.message });
+    }
 });

@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   margin: 0;
 }
@@ -18,12 +20,15 @@ html, body, #root {
 .titlebar-drag {
   -webkit-app-region: drag;
 }
+
 .titlebar-no-drag {
   -webkit-app-region: no-drag;
 }
 
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   margin: 0;
 }
@@ -36,13 +41,14 @@ html, body, #root {
   font-size: small;
 }
 
-.ant-menu-sub li{
-  padding-left: 30px!important;
+.ant-menu-sub li {
+  padding-left: 30px !important;
 }
 
 /* Submenu container background (slightly different shade) */
 .ant-menu-dark .ant-menu-sub.ant-menu-inline {
-  background: #1e7240 !important; /* darker green-900-ish, adjust as you like */
+  background: #1e7240 !important;
+  /* darker green-900-ish, adjust as you like */
 }
 
 /* Optional: give each child item its own background too */
@@ -52,5 +58,11 @@ html, body, #root {
 
 /* Keep selected child item distinct */
 .ant-menu-dark .ant-menu-sub.ant-menu-inline .ant-menu-item-selected {
-  background: #16a34a !important; /* your primary green-600 */
+  background: #16a34a !important;
+  /* your primary green-600 */
+}
+
+
+.ant-form-item {
+  margin-bottom: 8px!important;
 }

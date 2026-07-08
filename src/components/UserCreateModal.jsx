@@ -91,16 +91,16 @@ export default function UserCreateModal({ fetchData }) {
 
     const handleShow = async (id) => {
         try {
-            const url = `profile/${id}`;
+            const url = `update-user/${id}`;
             if (window.electron && typeof window.electron.openShow === "function") {
                 await window.electron.openShow({
-                    width: 1100,
-                    height: 750,
+                    width: 900,
+                    height: 700,
                     url,
                     resizable: true,
                 });
             } else {
-                navigate(`layout/profile/${id}`);
+                navigate(`/layout/update-user/${id}`);
             }
         } catch (error) {
             console.error("Error navigating :", error);

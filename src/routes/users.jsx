@@ -7,7 +7,7 @@ import { message, Popconfirm, Table, Input, Tag, Button } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import UpdatePasswordModal from '../components/UpdatePasswordModal'
 import UserCreateModal from '../components/UserCreateModal'
-// import UpdatePasswordModal from '../components/UpdatePasswordModal'
+
 
 export default function Users() {
   const [users, setUsers] = useState([])
@@ -60,16 +60,16 @@ export default function Users() {
       return
     }
     try {
-      const url = `/profile/${id}`
+      const url = `update-user/${id}`
       if (window.electron && typeof window.electron.openShow === 'function') {
         await window.electron.openShow({
-          width: 1100,
-          height: 750,
+          width: 900,
+          height: 700,
           url,
           resizable: true,
         })
       } else {
-        navigate(`layout/profile/${id}`)
+        navigate(`/layout/update-user/${id}`)
       }
     } catch (error) {
       console.error('Error navigating :', error)
@@ -78,7 +78,7 @@ export default function Users() {
 
   const deleteUser = async (user_id) => {
     try {
-      await api.delete(`user/${user_id}/destroy`)
+      await api.delete(`users/${user_id}`)
       message.success('Utilisateur supprimé avec succès')
       getUsers()
     } catch (error) {
