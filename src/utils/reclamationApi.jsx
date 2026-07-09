@@ -49,6 +49,13 @@ export const reclamationApi = {
   // 11. POST /api/reclamations/{id}/corrective-actions
   createCorrectiveAction: (id, payload) =>
     api.post(`reclamations/${id}/corrective-actions`, payload),
+
+
+  deleteCorrectiveAction: (actionId) => api.delete(`corrective-actions/${actionId}`),
+  
+  // 13. POST /api/reclamations/{reclamationId}/corrective-actions/{actionId}
+  updateCorrectiveAction: (reclamationId, actionId, payload) =>
+    api.put(`corrective-actions/${actionId}`, payload),
 };
 
 export default reclamationApi;

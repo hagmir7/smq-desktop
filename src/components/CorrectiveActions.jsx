@@ -55,7 +55,7 @@ export default function CorrectiveActions({ reclamationId }) {
         type: values.type,
         effectiveness_criteria: values.effectiveness_criteria,
         due_date: values.due_date ? dayjs(values.due_date).format('YYYY-MM-DD') : undefined,
-        service_id: values.service_id,
+        service_id:  Number(values.service_id),
         responsable_id: values.responsable_id,
       });
       message.success('Action corrective créée.');
