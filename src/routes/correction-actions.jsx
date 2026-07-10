@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
     ConfigProvider, Layout, Table, Tag, Button, Drawer, Modal, Input,
-    Row, Col, Statistic, Space, Popconfirm, Segmented, message, Tooltip, Empty, Card,
+    Row, Col, Statistic, Space, Segmented, message, Empty, Card,
     Badge,
 } from "antd";
 import {
-    Plus, Pencil, Trash2, CheckCircle2, GitBranch, Search, Loader2, RefreshCw,
+    Plus, GitBranch, Search, Loader2, RefreshCw,
 } from "lucide-react";
 import dayjs from "dayjs";
 
@@ -14,6 +14,8 @@ import { correctiveActionsApi, extractErrorMessage } from "../utils/correctiveAc
 import { dateFormat, isOverdue } from "../utils/config";
 import DrawerBody from "../components/DrawerBody";
 import CreateForm from "../components/CorrectionActionCreateForm";
+import RightClickMenu from "../components/ui/RightClickMenu";
+import ImprovementSheetModal from "../components/ImprovementSheetModal";
 
 const { Header, Content } = Layout;
 
@@ -33,6 +35,18 @@ const theme = {
     },
 };
 
+// Static context-menu definition; per-row "id" is stamped on at render time
+// so RightClickMenu can build unique keys (e.g. "edit-42") and hand the id
+// back to us in onItemClick.
+const ROW_MENU_ITEMS = [
+    { label: "Modifier", key: "edit" },
+    { label: "Marquer comme terminée", key: "complete" },
+    { label: "Ajouter une sous-action", key: "child" },
+    { label: "Fiche d'améliorationsn", key: "improvement" },
+    { type: "divider", key: "divider" },
+    { label: "Supprimer", key: "delete", danger: true },
+];
+
 
 /* ------------------------------ App ------------------------------- */
 
@@ -48,6 +62,8 @@ export default function CorrectiveActions() {
     const [selectedId, setSelectedId] = useState(null);
     const [drawerTab, setDrawerTab] = useState("view");
     const [createOpen, setCreateOpen] = useState(false);
+
+     const [open, setOpen] = useState(false);
 
     const refresh = useCallback(async () => {
         setLoading(true);
@@ -123,6 +139,61 @@ export default function CorrectiveActions() {
         } catch (e) { message.error(extractErrorMessage(e)); } finally { setLoading(false); }
     }
 
+    // Handles clicks coming from the right-click context menu.
+    // `key` is the action (edit/complete/child/delete), `id` is the row id
+    // that RightClickMenu extracts from the composite key it built.
+    const handleRowMenuClick = useCallback((key, id) => {
+        const row = items.find(i => String(i.id) === String(id));
+        if (!row) return;
+
+        switch (key) {
+            case "edit":
+                openDrawer(row.id, "edit");
+                break;
+            case "complete":
+                openDrawer(row.id, "complete");
+                break;
+            case "child":
+                openDrawer(row.id, "child");
+                break;
+            case "improvement":
+                setOpen(true)
+                setSelectedId(row.id)
+                break;
+            case "delete":
+                Modal.confirm({
+                    title: "Supprimer cette action corrective ?",
+                    content: row.children?.length > 0
+                        ? `Elle a ${row.children.length} suivi(s) lié(s) — le comportement de l'API dans ce cas n'est pas confirmé.`
+                        : "Cette action est irréversible.",
+                    okText: "Supprimer",
+                    okButtonProps: { danger: true },
+                    cancelText: "Annuler",
+                    onOk: () => handleDelete(row.id),
+                });
+                break;
+            default:
+                break;
+        }
+    }, [items]);
+
+    // Wraps each <tr> so RightClickMenu can attach a contextmenu handler
+    // scoped to that specific row, replacing the old actions column.
+    const RowWithContextMenu = useCallback((props) => {
+        const rowId = props["data-row-key"];
+        const row = items.find(i => i.id === rowId);
+
+        const menuItems = ROW_MENU_ITEMS
+            .filter(item => item.key !== "complete" || row?.status !== "completed")
+            .map(item => ({ ...item, id: rowId }));
+
+        return (
+            <RightClickMenu menuItems={menuItems} onItemClick={handleRowMenuClick}>
+                <tr {...props} />
+            </RightClickMenu>
+        );
+    }, [items, handleRowMenuClick]);
+
     const overdueCount = items.filter(isOverdue).length;
     const openCount = items.filter(i => i.status === "open").length;
 
@@ -130,7 +201,7 @@ export default function CorrectiveActions() {
         {
             title: "Reclamation", dataIndex: "reclamation", width: 140,
             render: (reclamation) => (
-                <span className="flex items-center gap-1 font-mono">
+                <span className="flex items-center gap-1">
                     {reclamation?.code ?? "—"}
                 </span>
             ),
@@ -138,7 +209,7 @@ export default function CorrectiveActions() {
         {
             title: "Type", dataIndex: "type", width: 90,
             render: (type) => (
-                <Badge className="flex items-center gap-1 font-mono whitespace-nowrap">
+                <Badge className="flex items-center gap-1 whitespace-nowrap">
                     {type ?? "—"}
                 </Badge>
             ),
@@ -175,27 +246,8 @@ export default function CorrectiveActions() {
                 </span>
             ),
         },
-        {
-            title: "", key: "actions", width: 170, align: "right",
-            render: (_, row) => (
-                <Space size="small">
-                    <Tooltip title="Modifier"><Button size="small" icon={<Pencil size={13} />} onClick={() => openDrawer(row.id, "edit")} /></Tooltip>
-                    {row.status !== "completed" && (
-                        <Tooltip title="Marquer comme terminée"><Button size="small" icon={<CheckCircle2 size={13} />} onClick={() => openDrawer(row.id, "complete")} /></Tooltip>
-                    )}
-                    <Tooltip title="Ajouter un suivi"><Button size="small" icon={<GitBranch size={13} />} onClick={() => openDrawer(row.id, "child")} /></Tooltip>
-                    <Popconfirm
-                        title="Supprimer cette action corrective ?"
-                        description={row.children?.length > 0 ? `Elle a ${row.children.length} suivi(s) lié(s) — le comportement de l'API dans ce cas n'est pas confirmé.` : "Cette action est irréversible."}
-                        okText="Supprimer" okButtonProps={{ danger: true }}
-                        cancelText="Annuler"
-                        onConfirm={() => handleDelete(row.id)}
-                    >
-                        <Tooltip title="Supprimer"><Button size="small" danger icon={<Trash2 size={13} />} /></Tooltip>
-                    </Popconfirm>
-                </Space>
-            ),
-        },
+        // "actions" column removed — row actions now live in the right-click
+        // context menu (see RowWithContextMenu / ROW_MENU_ITEMS above).
     ];
 
     return (
@@ -248,6 +300,11 @@ export default function CorrectiveActions() {
                             loading={loading}
                             pagination={{ pageSize: 20 }}
                             locale={{ emptyText: <Empty description="Aucune action corrective trouvée" /> }}
+                            components={{
+                                body: {
+                                    row: RowWithContextMenu,
+                                },
+                            }}
                         />
                     </Card>
                 </Content>
@@ -256,7 +313,7 @@ export default function CorrectiveActions() {
                 <Drawer
                     open={!!selected}
                     onClose={closeDrawer}
-                    title={selected ? <span className="font-mono text-xs text-slate-400">#{selected.id}</span> : ""}
+                    title={selected ? <span className="text-sm text-slate-400">{selected.code}</span> : ""}
                     width={440}
                     extra={selected && <Tag color={STATUS_META[selected.status]?.color}>{STATUS_META[selected.status]?.label || selected.status}</Tag>}
                 >
@@ -287,6 +344,12 @@ export default function CorrectiveActions() {
                     <CreateForm onSubmit={handleCreate} onCancel={() => setCreateOpen(false)} loading={loading} />
                 </Modal>
             </Layout>
+
+            <ImprovementSheetModal
+                open={open}
+                onClose={() => setOpen(false)}
+                corrective_action_id={selectedId}
+            />
         </ConfigProvider>
     );
 }

@@ -52,7 +52,7 @@ export default function ShowCorrectiveAction({ item, children }) {
                     <Space direction="vertical" className="w-full">
                         {children.map(c => (
                             <Button key={c.id} block className="!flex !items-center !justify-between" onClick={() => onOpenRelated(c.id)}>
-                                <span className="font-mono text-xs text-slate-500">#{c.id}</span>
+                                <span className="text-xs text-slate-500">#{c.id}</span>
                                 <span className="mx-2 flex-1 truncate text-left text-xs text-slate-600">{c.description}</span>
                                 <Tag color={STATUS_META[c.status]?.color}>{STATUS_META[c.status]?.label || c.status}</Tag>
                             </Button>
