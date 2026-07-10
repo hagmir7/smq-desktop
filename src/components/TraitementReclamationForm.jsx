@@ -4,7 +4,7 @@ import reclamationApi from '../utils/reclamationApi';
 
 const { TextArea } = Input;
 
-const PRIORITIES = ['Basse', 'Normale', 'Haute', 'Urgente'];
+const PRIORITIES = ['Normale', 'Critique'];
 
 export default function TraitementReclamationForm({ reclamationId, reclamation }) {
     const [form] = Form.useForm();
@@ -77,7 +77,7 @@ export default function TraitementReclamationForm({ reclamationId, reclamation }
             <Form form={form} layout="vertical" className="mt-4">
                 <div className="flex gap-2 w-full">
                     <Form.Item
-                        label="Analyse de traitement"
+                        label="Analyse de la reclamation"
                         name="processing_analysis"
                         className='w-full'
                         rules={[{ required: true, message: 'Ce champ est requis.' }]}

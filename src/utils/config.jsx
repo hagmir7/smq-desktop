@@ -1,6 +1,6 @@
 
 
-
+import dayjs from "dayjs";
 
 export const locale = {
     "lang": {
@@ -102,3 +102,10 @@ export const dateFormat = (date) => {
 
     return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`
 }
+
+
+export function isOverdue(item) {
+    if (item.status === "completed") return false;
+    return dayjs(item.due_date).isBefore(dayjs(), "day");
+}
+ 

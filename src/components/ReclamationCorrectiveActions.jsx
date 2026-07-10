@@ -21,7 +21,7 @@ import RightClickMenu from './ui/RightClickMenu';
 
 const { TextArea } = Input;
 
-const ACTION_TYPES = ['Action corrective', 'Action préventive', 'Action curative'];
+const ACTION_TYPES = ['Action corrective'];
 
 // Recursively find a record by id inside a (possibly nested) actions tree
 const findActionById = (list, id) => {
@@ -233,24 +233,23 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
   ];
 
   const columns = [
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-      width: 180,
-      render: (type) => (
-        <Tag color="geekblue" style={{ verticalAlign: 'middle', marginRight: 0 }}>
-          {type}
-        </Tag>
-      ),
-    },
-
-    {
-      title: 'Responsable',
-      dataIndex: 'responsable',
-      key: 'responsable',
-      render: (responsable) => responsable?.full_name || '-',
-    },
+{
+  title: 'Responsable',
+  dataIndex: 'responsable',
+  key: 'responsable',
+  width: 180,
+  render: (responsable, record) => {
+    const name =
+      responsable?.full_name ||
+      responsibles.find((r) => r.value === Number(record.responsable_id))?.label ||
+      '-';
+    return (
+      <Tag color="geekblue" style={{ verticalAlign: 'middle', marginRight: 0 }}>
+        {name}
+      </Tag>
+    );
+  },
+},
     {
       title: 'Description',
       dataIndex: 'description',
@@ -283,7 +282,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
       dataIndex: 'effectiveness',
       key: 'effectiveness',
       width: 110,
-      // render: (date) => (date ? dayjs(date).format('DD/MM/YYYY') : '-'),
+      render: (date) => (date ? dayjs(date).format('DD/MM/YYYY') : '-'),
     },
   ];
 
@@ -393,7 +392,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
       >
         <Form form={form} layout="vertical" className="mt-4">
           <Form.Item label="Type" name="type" rules={[{ required: true, message: 'Le type est requis.' }]}>
-            <Select placeholder="Sélectionner un type">
+            <Select placeholder="Sélectionner un type" defaultValue='Action corrective'>
               {ACTION_TYPES.map((t) => (
                 <Select.Option key={t} value={t}>
                   {t}
