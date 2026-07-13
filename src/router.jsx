@@ -8,6 +8,7 @@ import Login from "./routes/login";
 import MainLayout from "./layouts/MainLayout";
 import UpdateUser from "./routes/update-user";
 import ShowReclamation from "./routes/show-reclamation";
+import ShowImprovement from "./routes/show-improvement";
 
 // Lazy-load route components for code-splitting
 const Home = lazy(() => import("./routes/home"));
@@ -25,7 +26,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: (<ProtectedRoute><MainLayout /></ProtectedRoute>),
-    errorElement: <ErrorPage />,
+    // errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Home /> },
       {
@@ -51,6 +52,8 @@ export const router = createBrowserRouter([
       { path: "users", element: <Users /> },
       { path: "connections", element: <Connections /> },
       { path: "layout/update-user/:id", element: <UpdateUser /> },
+
+       { path: "improvements/:id", element: <ShowImprovement /> },
 
       
       { path: "*", element: <ErrorPage /> },

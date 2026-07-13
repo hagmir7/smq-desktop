@@ -22,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { api } from "../utils/api";
+import { Link } from "react-router-dom";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -208,13 +209,26 @@ export default function Improvements() {
       width: 90,
       fixed: "right",
       render: (_, record) => (
-        <Tooltip title="Voir le détail">
+       <div>
+         <Tooltip title="Voir le détail">
           <Button
             type="text"
             icon={<EyeOutlined />}
             onClick={() => showDetails(record)}
           />
         </Tooltip>
+
+          <Tooltip title="Voir le détail">
+
+            <Link to={`/improvements/${record.id}`}>
+              <EyeOutlined />
+            </Link>
+
+          </Tooltip>
+
+       </div>
+
+        
       ),
     },
   ];
@@ -224,7 +238,7 @@ export default function Improvements() {
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <Title level={3} className="!mb-1">
+            <Title level={5} className="!mb-1">
               Fiches d'amélioration
             </Title>
             <Text type="secondary">{pagination.total} fiche(s) au total</Text>
@@ -266,33 +280,36 @@ export default function Improvements() {
           </Space>
         </div>
 
-        <Table
-          rowKey="id"
-          loading={loading}
-          columns={columns}
-          dataSource={filteredData}
-          scroll={{ x: 1400 }}
-          size="middle"
-          bordered={false}
-          className="rounded-xl overflow-hidden shadow-sm"
-          onRow={(record) => ({
-            onClick: () => showDetails(record),
-            className: "cursor-pointer",
-          })}
-          locale={{
-            emptyText: (
-              <Empty description="Aucune fiche d'amélioration." />
-            ),
-          }}
-          pagination={{
-            current: pagination.current,
-            total: pagination.total,
-            pageSize: pagination.perPage,
-            showSizeChanger: false,
-            showTotal: (total) => `${total} fiche(s)`,
-            onChange: loadData,
-          }}
-        />
+        <div className="border border-solid border-gray-200 rounded-lg overflow-hidden">
+            <Table
+                rowKey="id"
+                loading={loading}
+                columns={columns}
+                dataSource={filteredData}
+                scroll={{ x: 1400 }}
+                size="small"
+                bordered={false}
+                className="rounded-xl overflow-hidden shadow-sm"
+                // onRow={(record) => ({
+                //     onClick: () => showDetails(record),
+                //     className: "cursor-pointer",
+                // })}
+                locale={{
+                    emptyText: (
+                        <Empty description="Aucune fiche d'amélioration." />
+                    ),
+                }}
+                pagination={{
+                    current: pagination.current,
+                    total: pagination.total,
+                    pageSize: pagination.perPage,
+                    showSizeChanger: false,
+                    showTotal: (total) => `${total} fiche(s)`,
+                    onChange: loadData,
+                }}
+            />
+        </div>
+
       </div>
 
       <Modal

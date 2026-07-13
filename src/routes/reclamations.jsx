@@ -79,7 +79,7 @@ export default function Reclamations() {
 
 
   const columns = [
-     {
+    {
       title: "Ref",
       dataIndex: "code",
       // width: 250,
@@ -92,7 +92,7 @@ export default function Reclamations() {
       dataIndex: "client_company_name",
       // width: 250,
       render: (val, record) => (
-        <div className="text-xs text-gray-500">{record.client_code} - {record.client_company_name}</div>
+        <div className="text-xs text-gray-500">{record.client_code} - {record.client_company_name || record.claimant_name}</div>
       ),
     },
     {
@@ -217,19 +217,21 @@ export default function Reclamations() {
         </Space>
       </div>
 
-      <Table
-        rowKey="id"
-        loading={loading}
-        columns={columns}
-        dataSource={filtered}
-        style={{whiteSpace: 'nowrap'}}
-        size="small"
-        scroll={{ x: "max-content" }}
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-        }}
-      />
+      <div className="border border-solid border-gray-300 rounded-lg">
+        <Table
+          rowKey="id"
+          loading={loading}
+          columns={columns}
+          dataSource={filtered}
+          style={{ whiteSpace: 'nowrap' }}
+          size="small"
+          scroll={{ x: "max-content" }}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+          }}
+        />
+      </div>
       <ReclamationCreateModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}

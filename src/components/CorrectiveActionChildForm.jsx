@@ -90,7 +90,7 @@ export default function CorrectiveActionChildForm({ onSubmit, loading }) {
         >
             <Form.Item
                 name="description"
-                label="Description du suivi"
+                label="Description"
                 rules={[
                     {
                         required: true,
