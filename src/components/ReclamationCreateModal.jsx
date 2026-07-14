@@ -3,7 +3,6 @@ import { Modal, Form, Input, DatePicker, Select, Upload, Switch, message } from 
 import { UploadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import reclamationApi from '../utils/reclamationApi';
-import { locale } from '../utils/config';
 
 const { TextArea } = Input;
 
@@ -88,7 +87,7 @@ export default function ReclamationCreateModal({ open, onClose, onCreated }) {
             name="claimant_date"
             rules={[{ required: true, message: 'La date est requise.' }]}
           >
-            <DatePicker className="w-full" format="DD/MM/YYYY" locale={locale} />
+            <DatePicker className="w-full" format="DD/MM/YYYY" />
           </Form.Item>
 
           <Form.Item

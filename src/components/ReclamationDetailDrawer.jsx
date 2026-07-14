@@ -5,6 +5,7 @@ import ReclamationAttachments from './ReclamationAttachments';
 import CorrectiveActions from './CorrectiveActions';
 import ReclamationStep2Modal from './ReclamationStep2Modal';
 import ReclamationStep3Modal from './ReclamationStep3Modal';
+import { dateFormat } from '../utils/config';
 
 export default function ReclamationDetailDrawer({ reclamationId, open, onClose, onChanged }) {
   const [record, setRecord] = useState(null);
@@ -59,7 +60,7 @@ export default function ReclamationDetailDrawer({ reclamationId, open, onClose, 
 
             <Descriptions column={1} size="small" bordered>
               <Descriptions.Item label="Réclamant">{record.claimant_name}</Descriptions.Item>
-              <Descriptions.Item label="Date">{record.claimant_date}</Descriptions.Item>
+              <Descriptions.Item label="Date">{dateFormat(record.claimant_date)}</Descriptions.Item>
               <Descriptions.Item label="Client">
                 {record.client_company_name || record.claimant_name} ({record.client_code})
               </Descriptions.Item>
@@ -107,7 +108,7 @@ export default function ReclamationDetailDrawer({ reclamationId, open, onClose, 
 
           <ReclamationAttachments
             reclamationId={record.id}
-            attachments={record.attachments || []}
+            attachments={record.media || []}
             onChanged={refresh}
           />
 

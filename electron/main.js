@@ -19,8 +19,8 @@ let currentSession = null; // { access_token, user } — single source of truth 
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1400,
+    height: 900,
     minWidth: 900,
     minHeight: 600,
     show: false,

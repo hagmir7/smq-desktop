@@ -6,6 +6,11 @@ import { router } from './router.jsx';
 import './index.css';
 import "@fontsource/inter";
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import frFR from 'antd/locale/fr_FR'; // antd's built-in locale, or your custom one
+import dayjs from 'dayjs';
+import 'dayjs/locale/fr';
+
+dayjs.locale('fr');
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -19,7 +24,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             fontFamily:
               "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           },
+    
         }}
+
+        locale={frFR}
       >
         <RouterProvider router={router} />
       </ConfigProvider>

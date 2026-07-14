@@ -9,6 +9,7 @@ import {
   message,
   Typography,
   Tooltip,
+  Layout,
 } from 'antd';
 import {
   SearchOutlined,
@@ -16,15 +17,20 @@ import {
   EyeOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import reclamationApi from '../utils/reclamationApi';
 import ReclamationDetailDrawer from '../components/ReclamationDetailDrawer';
 import ReclamationCreateModal from '../components/ReclamationCreateModal';
 import { dateFormat } from '../utils/config';
 import { Link } from 'react-router-dom';
+import { Flag, GitBranch, Plus } from 'lucide-react';
 
 
 const { Title } = Typography;
+
+
+const { Header, Content } = Layout;
 
 const priorityColor = {
   Urgente: 'red',
@@ -164,11 +170,9 @@ export default function Reclamations() {
             />
           </Tooltip>
 
-          <Tooltip title="Voir le détail">
-            <Link
-              to={`/reclamations/show/${record.id}`}
-            >
-              <EyeOutlined />
+           <Tooltip title="Modifier">
+            <Link to={`/reclamations/show/${record.id}`}>
+              <Button  size="small" icon={<EditOutlined />} />
             </Link>
           </Tooltip>
 
@@ -194,59 +198,73 @@ export default function Reclamations() {
   ];
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <Title level={5} className="!mb-0 p-0 m-0">
-          Réclamations
-        </Title>
+
+    <Layout className='min-h-full bg-slate-100'>
+      <Header className="flex items-center justify-between !bg-white !px-6 border-b border-slate-200" style={{ height: 64, lineHeight: "64px" }}>
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-teal-700 text-white">
+            <Flag size={18} />
+          </div>
+          <div className="leading-tight">
+            <div className="text-base font-semibold text-slate-900">Réclamations</div>
+            <div className="text-xs text-slate-500">Gestion des réclamations</div>
+          </div>
+        </div>
+
+
+
         <Space>
-          <Input
-            allowClear
-            placeholder="Rechercher (client, objet, réclamant...)"
-            prefix={<SearchOutlined className="text-gray-400" />}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-72"
-          />
-          <Tooltip title="Actualiser">
-            <Button icon={<ReloadOutlined />} onClick={fetchData} />
-          </Tooltip>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
+            <Input
+                allowClear
+                placeholder="Rechercher (client, objet, réclamant...)"
+                prefix={<SearchOutlined className="text-gray-400" />}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-72"
+              />
+              <Tooltip title="Actualiser">
+                <Button icon={<ReloadOutlined />} onClick={fetchData} />
+              </Tooltip>
+          <Button type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
             Nouvelle
           </Button>
         </Space>
-      </div>
+      </Header>
+      <Content>
+        <div className="p-4">
+          <div className="border border-solid border-gray-200 rounded-lg bg-white">
+            <Table
+              rowKey="id"
+              loading={loading}
+              columns={columns}
+              dataSource={filtered}
+              style={{ whiteSpace: 'nowrap' }}
+              size="small"
+              scroll={{ x: "max-content" }}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+              }}
+            />
+          </div>
+          <ReclamationCreateModal
+            open={createOpen}
+            onClose={() => setCreateOpen(false)}
+            onCreated={() => {
+              setCreateOpen(false);
+              fetchData();
+            }}
+          />
 
-      <div className="border border-solid border-gray-300 rounded-lg">
-        <Table
-          rowKey="id"
-          loading={loading}
-          columns={columns}
-          dataSource={filtered}
-          style={{ whiteSpace: 'nowrap' }}
-          size="small"
-          scroll={{ x: "max-content" }}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-          }}
-        />
-      </div>
-      <ReclamationCreateModal
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        onCreated={() => {
-          setCreateOpen(false);
-          fetchData();
-        }}
-      />
+          <ReclamationDetailDrawer
+            reclamationId={selectedId}
+            open={!!selectedId}
+            onClose={() => setSelectedId(null)}
+            onChanged={fetchData}
+          />
+        </div>
+      </Content>
+    </Layout>
 
-      <ReclamationDetailDrawer
-        reclamationId={selectedId}
-        open={!!selectedId}
-        onClose={() => setSelectedId(null)}
-        onChanged={fetchData}
-      />
-    </div>
   );
 }

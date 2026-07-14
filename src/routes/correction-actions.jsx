@@ -25,15 +25,15 @@ const STATUS_META = {
     completed: { label: "Terminée", color: "green" },
 };
 
-const theme = {
-    token: {
-        colorSuccess: "#15803d",
-        colorWarning: "#b45309",
-        colorError: "#b91c1c",
-        borderRadius: 6,
-        fontFamily: "'Inter', ui-sans-serif, system-ui",
-    },
-};
+// const theme = {
+//     token: {
+//         colorSuccess: "#15803d",
+//         colorWarning: "#b45309",
+//         colorError: "#b91c1c",
+//         borderRadius: 6,
+//         fontFamily: "'Inter', ui-sans-serif, system-ui",
+//     },
+// };
 
 // Static context-menu definition; per-row "id" is stamped on at render time
 // so RightClickMenu can build unique keys (e.g. "edit-42") and hand the id
@@ -63,7 +63,7 @@ export default function CorrectiveActions() {
     const [drawerTab, setDrawerTab] = useState("view");
     const [createOpen, setCreateOpen] = useState(false);
 
-     const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(false);
 
     const refresh = useCallback(async () => {
         setLoading(true);
@@ -224,7 +224,7 @@ export default function CorrectiveActions() {
         },
         {
             title: "Responsable", dataIndex: "responsable", width: 140,
-            render: (responsable) => responsable?.full_name ?? "—",
+            render: (responsable) => <span className="whitespace-nowrap">{responsable?.full_name}</span> ?? "—",
         },
         {
             title: "Statut", dataIndex: "status", width: 130,
@@ -251,105 +251,97 @@ export default function CorrectiveActions() {
     ];
 
     return (
-        <ConfigProvider theme={theme}>
-            <Layout className="min-h-full bg-slate-100">
-                <Header className="flex items-center justify-between !bg-white !px-6 border-b border-slate-200" style={{ height: 64, lineHeight: "64px" }}>
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-teal-700 text-white">
-                            <GitBranch size={18} />
-                        </div>
-                        <div className="leading-tight">
-                            <div className="text-base font-semibold text-slate-900">Actions correctives</div>
-                            <div className="text-xs text-slate-500">Cycle de vie des actions correctives · gestion de la qualité</div>
-                        </div>
+        <Layout className="min-h-full bg-slate-100">
+            <Header className="flex items-center justify-between !bg-white !px-6 border-b border-slate-200" style={{ height: 64, lineHeight: "64px" }}>
+                <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-md bg-teal-700 text-white">
+                        <GitBranch size={18} />
                     </div>
-                    <Space>
-                        <Button type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
-                            Nouvelle
-                        </Button>
-                    </Space>
-                </Header>
-
-                <Content className="mx-auto w-full max-w-7xl px-4 py-4">
-
-                    <div className="mb-4 flex flex-wrap items-center gap-3">
-                        <Input
-                            allowClear
-                            placeholder="Rechercher par description ou identifiant…"
-                            prefix={<Search size={14} className="text-slate-400" />}
-                            value={query}
-                            onChange={e => setQuery(e.target.value)}
-                            className="max-w-xs"
-                        />
-                        <Segmented
-                            options={["Toutes", "Ouverte", "Terminée"]}
-                            value={statusFilter}
-                            onChange={setStatusFilter}
-                        />
-                        <Button icon={loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} onClick={refresh}>
-                            Actualiser
-                        </Button>
+                    <div className="leading-tight">
+                        <div className="text-base font-semibold text-slate-900">Actions correctives</div>
+                        <div className="text-xs text-slate-500">Cycle de vie des actions correctives.</div>
                     </div>
+                </div>
+                <Space>
+                    <Input
+                        allowClear
+                        placeholder="Ref, description..."
+                        prefix={<Search size={14} className="text-slate-400" />}
+                        value={query}
+                        onChange={e => setQuery(e.target.value)}
+                        className="max-w-xs"
+                    />
+                    <Segmented
+                        options={["Toutes", "Ouverte", "Terminée"]}
+                        value={statusFilter}
+                        onChange={setStatusFilter}
+                    />
+                    <Button icon={loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} onClick={refresh}></Button>
 
-                    <Card size="small" bodyStyle={{ padding: 0 }}>
-                        <Table
-                            rowKey="id"
-                            size="small"
-                            columns={columns}
-                            dataSource={filtered}
-                            loading={loading}
-                            pagination={{ pageSize: 20 }}
-                            locale={{ emptyText: <Empty description="Aucune action corrective trouvée" /> }}
-                            components={{
-                                body: {
-                                    row: RowWithContextMenu,
-                                },
-                            }}
-                        />
-                    </Card>
-                </Content>
+                    <Button type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
+                        Nouvelle
+                    </Button>
+                </Space>
+            </Header>
 
-                {/* Detail drawer */}
-                <Drawer
-                    open={!!selected}
-                    onClose={closeDrawer}
-                    title={selected ? <span className="text-sm text-slate-400">{selected.code}</span> : ""}
-                    width={440}
-                    extra={selected && <Tag color={STATUS_META[selected.status]?.color}>{STATUS_META[selected.status]?.label || selected.status}</Tag>}
-                >
-                    {selected && (
-                        <DrawerBody
-                            item={selected}
-                            parent={parentOf(selected)}
-                            children={childrenOf(selected.id)}
-                            activeTab={drawerTab}
-                            setActiveTab={setDrawerTab}
-                            onOpenRelated={(id) => openDrawer(id, "view")}
-                            onUpdate={(payload) => handleUpdate(selected.id, payload)}
-                            onComplete={(payload) => handleComplete(selected.id, payload)}
-                            onCreateChild={(payload) => handleCreateChild(selected.id, payload)}
-                            loading={loading}
-                        />
-                    )}
-                </Drawer>
+            <Content className="mx-auto w-full px-4 py-4">
+                <Card size="small" bodyStyle={{ padding: 0 }}>
+                    <Table
+                        rowKey="id"
+                        size="small"
+                        columns={columns}
+                        dataSource={filtered}
+                        loading={loading}
+                        pagination={{ pageSize: 20 }}
+                        locale={{ emptyText: <Empty description="Aucune action corrective trouvée" /> }}
+                        components={{
+                            body: {
+                                row: RowWithContextMenu,
+                            },
+                        }}
+                    />
+                </Card>
+            </Content>
 
-                {/* Create modal */}
-                <Modal
-                    open={createOpen}
-                    title="Nouvelle action corrective"
-                    onCancel={() => setCreateOpen(false)}
-                    footer={null}
-                    destroyOnClose
-                >
-                    <CreateForm onSubmit={handleCreate} onCancel={() => setCreateOpen(false)} loading={loading} />
-                </Modal>
-            </Layout>
+            {/* Detail drawer */}
+            <Drawer
+                open={!!selected}
+                onClose={closeDrawer}
+                title={selected ? <span className="text-sm text-slate-400">{selected.code}</span> : ""}
+                width={440}
+                extra={selected && <Tag color={STATUS_META[selected.status]?.color}>{STATUS_META[selected.status]?.label || selected.status}</Tag>}
+            >
+                {selected && (
+                    <DrawerBody
+                        item={selected}
+                        parent={parentOf(selected)}
+                        children={childrenOf(selected.id)}
+                        activeTab={drawerTab}
+                        setActiveTab={setDrawerTab}
+                        onOpenRelated={(id) => openDrawer(id, "view")}
+                        onUpdate={(payload) => handleUpdate(selected.id, payload)}
+                        onComplete={(payload) => handleComplete(selected.id, payload)}
+                        onCreateChild={(payload) => handleCreateChild(selected.id, payload)}
+                        loading={loading}
+                    />
+                )}
+            </Drawer>
 
+            {/* Create modal */}
+            <Modal
+                open={createOpen}
+                title="Nouvelle action corrective"
+                onCancel={() => setCreateOpen(false)}
+                footer={null}
+                destroyOnClose
+            >
+                <CreateForm onSubmit={handleCreate} onCancel={() => setCreateOpen(false)} loading={loading} />
+            </Modal>
             <ImprovementSheetModal
                 open={open}
                 onClose={() => setOpen(false)}
                 corrective_action_id={selectedId}
             />
-        </ConfigProvider>
+        </Layout>
     );
 }

@@ -13,16 +13,25 @@ import {
   message,
   Tooltip,
   Avatar,
+  Popconfirm,
+  Layout,
 } from "antd";
 import {
   EyeOutlined,
   SearchOutlined,
   UserOutlined,
   FileTextOutlined,
+  EditOutlined,
+  AuditOutlined,
+  DeleteOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { api } from "../utils/api";
 import { Link } from "react-router-dom";
+import ImprovementEvaluationModal from "../components/ImprovementEvaluationModal";
+import { Plus, Pyramid } from "lucide-react";
+const { Header, Content } = Layout;
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -54,6 +63,13 @@ export default function Improvements() {
   const [statusFilter, setStatusFilter] = useState(null);
   const [impactFilter, setImpactFilter] = useState(null);
 
+  // Evaluation modal state
+  const [evaluateOpen, setEvaluateOpen] = useState(false);
+  const [evaluatingRecord, setEvaluatingRecord] = useState(null);
+
+  // Per-row deleting state, so only the clicked row shows a loading spinner
+  const [deletingId, setDeletingId] = useState(null);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -83,6 +99,29 @@ export default function Improvements() {
     setOpen(true);
   };
 
+  const openEvaluateModal = (record) => {
+    setEvaluatingRecord(record);
+    setEvaluateOpen(true);
+  };
+
+  const handleEvaluateSuccess = () => {
+    setEvaluateOpen(false);
+    loadData(pagination.current);
+  };
+
+  const handleDelete = async (record) => {
+    setDeletingId(record.id);
+    try {
+      await api.delete(`improvement-sheets/${record.id}`);
+      message.success("Fiche d'amélioration supprimée.");
+      loadData(pagination.current);
+    } catch {
+      message.error("Erreur lors de la suppression de la fiche.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const filteredData = useMemo(() => {
     return improvements.filter((item) => {
       const matchesSearch =
@@ -102,7 +141,7 @@ export default function Improvements() {
 
   const columns = [
     {
-      title: "Code",
+      title: "Ref.",
       dataIndex: "code",
       key: "code",
       width: 130,
@@ -206,111 +245,127 @@ export default function Improvements() {
     {
       title: "",
       key: "actions",
-      width: 90,
+      width: 150,
       fixed: "right",
       render: (_, record) => (
-       <div>
-         <Tooltip title="Voir le détail">
-          <Button
-            type="text"
-            icon={<EyeOutlined />}
-            onClick={() => showDetails(record)}
-          />
-        </Tooltip>
-
+        <Space size="small">
           <Tooltip title="Voir le détail">
-
-            <Link to={`/improvements/${record.id}`}>
-              <EyeOutlined />
-            </Link>
-
+            <Button
+              type="text"
+              icon={<EyeOutlined />}
+              onClick={() => showDetails(record)}
+            />
           </Tooltip>
 
-       </div>
+          <Tooltip title="Modifier">
+            <Link to={`/improvements/${record.id}`}>
+              <Button type="text" icon={<EditOutlined />} />
+            </Link>
+          </Tooltip>
 
-        
+          <Tooltip title="Évaluer">
+            <Button
+              type="text"
+              icon={<AuditOutlined />}
+              onClick={() => openEvaluateModal(record)}
+            />
+          </Tooltip>
+
+          <Popconfirm
+            title="Supprimer cette fiche ?"
+            description="Cette action est irréversible."
+            okText="Supprimer"
+            cancelText="Annuler"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => handleDelete(record)}
+          >
+            <Tooltip title="Supprimer">
+              <Button
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+                loading={deletingId === record.id}
+              />
+            </Tooltip>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
 
   return (
-    <>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <Title level={5} className="!mb-1">
-              Fiches d'amélioration
-            </Title>
-            <Text type="secondary">{pagination.total} fiche(s) au total</Text>
+    <Layout className='min-h-full bg-slate-100'>
+      <Header className="flex items-center justify-between !bg-white !px-6 border-b border-slate-200" style={{ height: 64, lineHeight: "64px" }}>
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-teal-700 text-white">
+            <Pyramid size={18} />
           </div>
-
-          <Space wrap>
-            <Input
-              allowClear
-              placeholder="Rechercher un code, un titre, un responsable..."
-              prefix={<SearchOutlined className="text-gray-400" />}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{ width: 280 }}
-            />
-
-            <Select
-              allowClear
-              placeholder="Statut"
-              style={{ width: 150 }}
-              value={statusFilter}
-              onChange={setStatusFilter}
-              options={Object.keys(statusColors).map((s) => ({
-                label: s,
-                value: s,
-              }))}
-            />
-
-            <Select
-              allowClear
-              placeholder="Impact"
-              style={{ width: 130 }}
-              value={impactFilter}
-              onChange={setImpactFilter}
-              options={Object.keys(impactColors).map((i) => ({
-                label: i,
-                value: i,
-              }))}
-            />
-          </Space>
+          <div className="leading-tight">
+            <div className="text-base font-semibold text-slate-900">Fiches d'amélioration</div>
+            <div className="text-xs text-slate-500">{pagination.total} fiche(s) au total</div>
+          </div>
         </div>
 
-        <div className="border border-solid border-gray-200 rounded-lg overflow-hidden">
-            <Table
-                rowKey="id"
-                loading={loading}
-                columns={columns}
-                dataSource={filteredData}
-                scroll={{ x: 1400 }}
-                size="small"
-                bordered={false}
-                className="rounded-xl overflow-hidden shadow-sm"
-                // onRow={(record) => ({
-                //     onClick: () => showDetails(record),
-                //     className: "cursor-pointer",
-                // })}
-                locale={{
-                    emptyText: (
-                        <Empty description="Aucune fiche d'amélioration." />
-                    ),
-                }}
-                pagination={{
-                    current: pagination.current,
-                    total: pagination.total,
-                    pageSize: pagination.perPage,
-                    showSizeChanger: false,
-                    showTotal: (total) => `${total} fiche(s)`,
-                    onChange: loadData,
-                }}
-            />
-        </div>
 
-      </div>
+
+        <Space>
+          <Input
+            allowClear
+            placeholder="Rechercher (Ref, Titre, description...)"
+            prefix={<SearchOutlined className="text-gray-400" />}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-72"
+          />
+          <Select
+            allowClear
+            placeholder="Statut"
+            style={{ width: 150 }}
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={Object.keys(statusColors).map((s) => ({
+              label: s,
+              value: s,
+            }))}
+          />
+          <Tooltip title="Actualiser">
+            <Button icon={<ReloadOutlined />} onClick={loadData} />
+          </Tooltip>
+          <Button type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
+            Nouvelle
+          </Button>
+        </Space>
+      </Header>
+      <Content >
+        <div className="p-4"> 
+          <div className="border border-solid border-gray-200 rounded-lg overflow-hidden">
+          <Table
+            rowKey="id"
+            loading={loading}
+            columns={columns}
+            dataSource={filteredData}
+            scroll={{ x: 1450 }}
+            size="small"
+            bordered={false}
+            className="rounded-xl overflow-hidden shadow-sm"
+            locale={{
+              emptyText: (
+                <Empty description="Aucune fiche d'amélioration." />
+              ),
+            }}
+            pagination={{
+              current: pagination.current,
+              total: pagination.total,
+              pageSize: pagination.perPage,
+              showSizeChanger: false,
+              showTotal: (total) => `${total} fiche(s)`,
+              onChange: loadData,
+            }}
+          />
+        </div>
+        </div>
+      </Content>
+
 
       <Modal
         open={open}
@@ -414,6 +469,15 @@ export default function Improvements() {
           </Descriptions>
         )}
       </Modal>
-    </>
+
+      <ImprovementEvaluationModal
+        open={evaluateOpen}
+        record={evaluatingRecord}
+        onClose={() => setEvaluateOpen(false)}
+        onSuccess={handleEvaluateSuccess}
+      />
+
+    </Layout>
+
   );
 }
