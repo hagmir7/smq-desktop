@@ -10,8 +10,14 @@
 import { api } from "./api";
 
 export const correctiveActionsApi = {
-    list: (perPage = 20) =>
-        api.get("corrective-actions", { params: { per_page: perPage } }).then(r => r.data),
+    list: (perPage = 20, filters = {}) =>
+        api.get("corrective-actions", {
+            params: {
+                per_page: perPage,
+                ...filters,
+            },
+        })
+            .then((r) => r.data),
 
     get: (id) =>
         api.get(`corrective-actions/${id}`).then(r => r.data),

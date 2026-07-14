@@ -338,7 +338,7 @@ export default function Improvements() {
       </Header>
       <Content >
         <div className="p-4"> 
-          <div className="border border-solid border-gray-200 rounded-lg overflow-hidden">
+          <div className="border border-solid border-gray-200 rounded-lg overflow-hidden bg-white">
           <Table
             rowKey="id"
             loading={loading}
