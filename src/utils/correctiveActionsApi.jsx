@@ -1,5 +1,3 @@
-
-
 /* ---------------------------------------------------------------------
    Corrective Actions API wrapper
    baseURL already includes the trailing /api/, so paths here are
@@ -10,14 +8,12 @@
 import { api } from "./api";
 
 export const correctiveActionsApi = {
-    list: (perPage = 20, filters = {}) =>
-        api.get("corrective-actions", {
-            params: {
-                per_page: perPage,
-                ...filters,
-            },
-        })
-            .then((r) => r.data),
+    // Takes a single params object: { page, per_page, search, status,
+    // effectiveness, service_id, date_from, date_to, ... } and forwards
+    // it straight through as the query string. Matches what the
+    // CorrectiveActions page's buildParams() produces.
+    list: (params = {}) =>
+        api.get("corrective-actions", { params }).then((r) => r.data),
 
     get: (id) =>
         api.get(`corrective-actions/${id}`).then(r => r.data),

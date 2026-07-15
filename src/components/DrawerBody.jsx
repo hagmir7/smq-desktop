@@ -35,7 +35,7 @@ export default function DrawerBody({
                     { key: "edit", label: "Modifier", children: <CorrectiveActionEditForm item={item} onSubmit={onUpdate} loading={loading} /> },
                     {
                         key: "complete", label: "Clôturer", disabled: item.status === "completed",
-                        children: <CorrectiveActionCompleteForm onSubmit={onComplete} loading={loading} />,
+                        children: <CorrectiveActionCompleteForm onSubmit={onComplete} loading={loading} item={item} />,
                     },
                     { key: "child", label: "Sous-action", children: <CorrectionActionChildForm onSubmit={onCreateChild} loading={loading} /> },
                 ]}

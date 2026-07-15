@@ -13,6 +13,9 @@ export default function ReclamationDetailDrawer({ reclamationId, open, onClose, 
   const [step2Open, setStep2Open] = useState(false);
   const [step3Open, setStep3Open] = useState(false);
 
+
+  
+
   const fetchRecord = async () => {
     if (!reclamationId) return;
     setLoading(true);

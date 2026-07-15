@@ -70,3 +70,14 @@ body,
 .ant-table-pagination{
   padding-right: 10px!important;
 }
+
+.ant-table-tbody > tr.sub-action-row > td {
+    background-color: #f8fafc;
+}
+.ant-table-tbody > tr.sub-action-row:hover > td {
+    background-color: #f1f5f9;
+}
+
+.ant-table-tbody > tr.bg-slate-50\/70 > td {
+    background: #f8fafc;
+}

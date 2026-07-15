@@ -57,6 +57,7 @@ export default function TraitementReclamationForm({ reclamationId, reclamation }
             });
             message.success('Étape 3 enregistrée.');
         } catch (err) {
+            console.error(err)
             if (err?.errorFields) return;
             message.error(err?.response?.data?.message || "Échec de l'enregistrement de l'étape 3.");
         } finally {

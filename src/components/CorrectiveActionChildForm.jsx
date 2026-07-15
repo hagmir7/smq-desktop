@@ -69,8 +69,6 @@ export default function CorrectiveActionChildForm({ onSubmit, loading }) {
     }, []);
 
     const handleFinish = (values) => {
-        console.log(values);
-
         const payload = {
             description: values.description,
             due_date: values.due_date?.format("YYYY-MM-DD"),

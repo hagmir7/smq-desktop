@@ -12,11 +12,15 @@ import {
     Row,
     Col,
     Divider,
-    Radio
+    Radio,
+    Tag,
+    Tooltip
 } from "antd";
 import axios from "axios";
 import dayjs from "dayjs";
 import { api } from "../utils/api";
+import ImprovementEvaluationModal from "./ImprovementEvaluationModal";
+import { AuditOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -25,7 +29,6 @@ const IMPACT_OPTIONS = ["Faible", "Moyen", "Élevé"];
 const STATUT_OPTIONS = ["Planifié", "En cours", "Terminé", "Annulé"];
 const EFFECTIVENESS_OPTIONS = ["Efficace", "Partiellement efficace", "Non efficace"];
 
-// Date fields that need dayjs <-> ISO string conversion for the DatePicker
 const DATE_FIELDS = ["observation_date", "closing_date"];
 
 export default function ImprovementSheetForm({ id, onSaved }) {
@@ -34,9 +37,18 @@ export default function ImprovementSheetForm({ id, onSaved }) {
     const [saving, setSaving] = useState(false);
     const [services, setServices] = useState([]);
     const [responsables, setResponsables] = useState([]);
+    const [evaluateOpen, setEvaluateOpen] = useState(false)
 
-    // Load the sheet + the two select data sources in parallel
+    const [sheet, setSheet] = useState(null)
+
+    const handleEvaluateSuccess = () => {
+        setEvaluateOpen(false);
+        loadData();
+    };
+
+
     const loadData = useCallback(async () => {
+
         setLoading(true);
         try {
             const [sheetRes, servicesRes, responsablesRes] = await Promise.all([
@@ -46,6 +58,7 @@ export default function ImprovementSheetForm({ id, onSaved }) {
             ]);
 
             const sheet = sheetRes.data;
+            setSheet(sheet);
             setServices(servicesRes.data?.data || servicesRes.data || []);
             setResponsables(responsablesRes.data?.data || responsablesRes.data || []);
 
@@ -104,10 +117,24 @@ export default function ImprovementSheetForm({ id, onSaved }) {
     }
 
     return (
-        <Card title="Modifier la fiche d'amélioration">
+        <div className="px-3">
+            <div className="flex justify-between p-0  mt-3 pb-0">
+                <h1 className="text-lg" style={{ paddingBottom: 0 }}>Fiche d'amélioration <Tag>{sheet?.code}</Tag></h1>
+                <Tooltip title="Évaluer">
+                    <Button
+                        type="primary"
+                        icon={<AuditOutlined />}
+                        onClick={() => setEvaluateOpen(true)}
+                    >Évaluer</Button>
+                </Tooltip>
+            </div>
             <Form form={form} layout="vertical" onFinish={handleFinish}>
                 <div className="md:flex gap-4">
                     <div className="w-full">
+                        <Divider orientation="left" orientationMargin={0}>
+                            Informations générales
+                        </Divider>
+
                         <Row gutter={16}>
                             <Col span={24}>
                                 <Form.Item
@@ -201,13 +228,15 @@ export default function ImprovementSheetForm({ id, onSaved }) {
                         </Form.Item>
                     </div>
 
-                    {/* <Divider>Suivi & clôture</Divider> */}
-
                     <div className="w-full">
+                        <Divider orientation="left" orientationMargin={0}>
+                            Suivi & Évaluation
+                        </Divider>
+
                         <Row gutter={16}>
                             <Col span={8}>
                                 <Form.Item name="statut" label="Statut" rules={[{ required: true }]}>
-                                    <Select placeholder="Sélectionner le statut">
+                                    <Select disabled placeholder="Sélectionner le statut">
                                         {STATUT_OPTIONS.map((opt) => (
                                             <Option key={opt} value={opt}>
                                                 {opt}
@@ -216,21 +245,23 @@ export default function ImprovementSheetForm({ id, onSaved }) {
                                     </Select>
                                 </Form.Item>
                             </Col>
+
                             <Col span={10}>
                                 <Form.Item
                                     name="effectiveness"
                                     label="Efficacité"
-                                    rules={[{ required: true, message: "L'efficacité est requise" }]}
+                                // rules={[{ required: true, message: "L'efficacité est requise" }]}
                                 >
-                                    <Radio.Group>
+                                    <Radio.Group disabled>
                                         <Radio.Button value={true}>Efficace</Radio.Button>
                                         <Radio.Button value={false}>Non efficace</Radio.Button>
                                     </Radio.Group>
                                 </Form.Item>
                             </Col>
+
                             <Col span={6}>
                                 <Form.Item name="closed" label="Clôturée" valuePropName="checked">
-                                    <Switch />
+                                    <Switch disabled />
                                 </Form.Item>
                             </Col>
                         </Row>
@@ -238,18 +269,34 @@ export default function ImprovementSheetForm({ id, onSaved }) {
                         <Row gutter={16}>
                             <Col span={12}>
                                 <Form.Item name="observation_date" label="Date d'observation">
-                                    <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+                                    <DatePicker
+                                        disabled
+                                        style={{ width: "100%" }}
+                                        format="DD/MM/YYYY"
+                                    />
                                 </Form.Item>
                             </Col>
+
                             <Col span={12}>
                                 <Form.Item name="closing_date" label="Date de clôture">
-                                    <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+                                    <DatePicker
+                                        disabled
+                                        style={{ width: "100%" }}
+                                        format="DD/MM/YYYY"
+                                    />
                                 </Form.Item>
                             </Col>
                         </Row>
 
-                        <Form.Item name="observation_description" label="Description de l'observation">
-                            <TextArea rows={3} placeholder="Description de l'observation" />
+                        <Form.Item
+                            name="observation_description"
+                            label="Description de l'observation"
+                        >
+                            <TextArea
+                                disabled
+                                rows={3}
+                                placeholder="Description de l'observation"
+                            />
                         </Form.Item>
                     </div>
                 </div>
@@ -263,6 +310,13 @@ export default function ImprovementSheetForm({ id, onSaved }) {
                     </Button>
                 </Form.Item>
             </Form>
-        </Card>
+
+            <ImprovementEvaluationModal
+                open={evaluateOpen}
+                record={sheet}
+                onClose={() => setEvaluateOpen(false)}
+                onSuccess={handleEvaluateSuccess}
+            />
+        </div>
     );
 }

@@ -1,15 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Form, DatePicker, Select, Button } from "antd";
 import { CheckCircle2 } from "lucide-react";
 import dayjs from "dayjs";
 
-export default function CorrectiveActionCompleteForm({ onSubmit, loading }) {
+export default function CorrectiveActionCompleteForm({ onSubmit, loading, item }) {
     const [form] = Form.useForm();
+
+    useEffect(() => {
+        form.setFieldsValue({
+            completion_date: item?.completion_date ? dayjs(item.completion_date) : dayjs(),
+            effectiveness: item?.effectiveness || "Efficace",
+        });
+    }, [item, form]);
+
     return (
         <Form
             form={form}
             layout="vertical"
-            initialValues={{ completion_date: dayjs(), effectiveness: "Efficace" }}
             onFinish={(vals) => onSubmit({
                 completion_date: vals.completion_date.format("YYYY-MM-DD"),
                 effectiveness: vals.effectiveness,

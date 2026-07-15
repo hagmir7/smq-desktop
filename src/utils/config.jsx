@@ -124,3 +124,31 @@ export function isOverdue(item) {
     return dayjs(item.due_date).isBefore(dayjs(), "day");
 }
  
+
+
+export const STATUS_AC = {
+    "Créée": {
+        label: "Créée",
+        color: "blue",
+    },
+    "Affectée": {
+        label: "Affectée",
+        color: "cyan",
+    },
+    "En cours": {
+        label: "En cours",
+        color: "processing",
+    },
+    "Réalisé": {
+        label: "Réalisé",
+        color: "green",
+    },
+    "Clôturée": {
+        label: "Clôturée",
+        color: "default",
+    },
+    "Rejetée": {
+        label: "Rejetée",
+        color: "red",
+    },
+};

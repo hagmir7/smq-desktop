@@ -1,43 +1,26 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
     ConfigProvider, Layout, Table, Tag, Button, Drawer, Modal, Input,
     Row, Col, Statistic, Space, Segmented, message, Empty, Card,
-    Badge,
+    Badge, Select, DatePicker,
 } from "antd";
 import {
-    Plus, GitBranch, Search, Loader2, RefreshCw,
+    Plus, GitBranch, Search, Loader2, RefreshCw, X,
 } from "lucide-react";
 import dayjs from "dayjs";
 
 import "antd/dist/reset.css";
 import { correctiveActionsApi, extractErrorMessage } from "../utils/correctiveActionsApi";
-import { dateFormat, isOverdue } from "../utils/config";
+import { dateFormat, isOverdue, STATUS_AC } from "../utils/config";
+import { api } from "../utils/api";
 import DrawerBody from "../components/DrawerBody";
 import CreateForm from "../components/CorrectionActionCreateForm";
 import RightClickMenu from "../components/ui/RightClickMenu";
 import ImprovementSheetModal from "../components/ImprovementSheetModal";
 
 const { Header, Content } = Layout;
+const { RangePicker } = DatePicker;
 
-
-const STATUS_META = {
-    open: { label: "Ouverte", color: "gold" },
-    completed: { label: "Terminée", color: "green" },
-};
-
-// const theme = {
-//     token: {
-//         colorSuccess: "#15803d",
-//         colorWarning: "#b45309",
-//         colorError: "#b91c1c",
-//         borderRadius: 6,
-//         fontFamily: "'Inter', ui-sans-serif, system-ui",
-//     },
-// };
-
-// Static context-menu definition; per-row "id" is stamped on at render time
-// so RightClickMenu can build unique keys (e.g. "edit-42") and hand the id
-// back to us in onItemClick.
 const ROW_MENU_ITEMS = [
     { label: "Modifier", key: "edit" },
     { label: "Marquer comme terminée", key: "complete" },
@@ -48,16 +31,50 @@ const ROW_MENU_ITEMS = [
 ];
 
 
+const EFFECTIVENESS_OPTIONS = [
+    { value: "efficace", label: "Efficace" },
+    { value: "non_efficace", label: "Non efficace" },
+    // { value: "en_cours", label: "En cours d'évaluation" },
+];
+
+// Recursively flattens a tree of records (each possibly carrying a
+// `children` array, as returned by the API / consumed by AntD's Table
+// for expand/collapse rendering) into a single flat array. This lets us
+// look up ANY row — parent or nested child — by id, while still passing
+// the original nested `items` to <Table dataSource> so AntD keeps
+// drawing the tree expand arrows correctly.
+function flattenTree(list) {
+    const out = [];
+    const walk = (arr) => {
+        arr.forEach(item => {
+            out.push(item);
+            if (Array.isArray(item.children) && item.children.length) {
+                walk(item.children);
+            }
+        });
+    };
+    walk(list || []);
+    return out;
+}
+
+
 /* ------------------------------ App ------------------------------- */
 
 export default function CorrectiveActions() {
 
-
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const [query, setQuery] = useState("");
+    // --- Search & filters (all resolved server-side) ---
+    const [search, setSearch] = useState("");           // matches CA code OR reclamation code
     const [statusFilter, setStatusFilter] = useState("Toutes");
+    const [effectiveness, setEffectiveness] = useState(undefined);
+    const [serviceId, setServiceId] = useState(undefined);
+    const [services, setServices] = useState([]);
+    const [dateRange, setDateRange] = useState(null);    // [dayjs, dayjs] for created_at
+
+    // --- Server-side pagination ---
+    const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
 
     const [selectedId, setSelectedId] = useState(null);
     const [drawerTab, setDrawerTab] = useState("view");
@@ -65,27 +82,113 @@ export default function CorrectiveActions() {
 
     const [open, setOpen] = useState(false);
 
-    const refresh = useCallback(async () => {
-        setLoading(true);
-        try {
-            const res = await correctiveActionsApi.list(50);
-            const arr = Array.isArray(res) ? res : res?.data;
-            setItems(Array.isArray(arr) ? arr : []);
-        } catch (e) {
-        } finally { setLoading(false); }
+    // Debounce ref for the free-text search input so we don't fire a
+    // request on every keystroke.
+    const debounceRef = useRef(null);
+
+    // Fetch the services list once for the filter Select.
+    useEffect(() => {
+        (async () => {
+            try {
+                const { data } = await api.get("services");
+                const opts = (data?.data || []).map((item) => ({
+                    label: item.name,
+                    value: item.id,
+                }));
+                setServices(opts);
+            } catch (error) {
+                message.error(
+                    error?.response?.data?.message || "Erreur lors du chargement des services."
+                );
+            }
+        })();
     }, []);
 
-    useEffect(() => { refresh(); }, [refresh]);
+    // Resolves the backend `status` value from the human label shown in
+    // the Segmented control, using whatever keys STATUS_AC defines —
+    // avoids hardcoding status codes here.
+    const statusValue = useMemo(() => {
+        if (statusFilter === "Toutes") return undefined;
+        const entry = Object.entries(STATUS_AC).find(([, v]) => v.label === statusFilter);
+        return entry?.[0];
+    }, [statusFilter]);
 
-    const filtered = useMemo(() => {
-        return items
-            .filter(i => statusFilter === "Toutes" || STATUS_META[i.status]?.label === statusFilter)
-            .filter(i => !query || i.description?.toLowerCase().includes(query.toLowerCase()) || String(i.id).includes(query));
-    }, [items, statusFilter, query]);
+    const buildParams = useCallback((page, pageSize) => {
+        const params = { page, per_page: pageSize };
+        if (search) params.search = search;
+        if (statusValue) params.status = statusValue;
+        if (effectiveness) params.effectiveness = effectiveness;
+        if (serviceId) params.service_id = serviceId;
+        if (dateRange?.[0]) params.date_from = dateRange[0].format("YYYY-MM-DD");
+        if (dateRange?.[1]) params.date_to = dateRange[1].format("YYYY-MM-DD");
+        return params;
+    }, [search, statusValue, effectiveness, serviceId, dateRange]);
 
-    const selected = items.find(i => i.id === selectedId) || null;
-    const childrenOf = (id) => items.filter(i => i.parent_id === id);
-    const parentOf = (item) => items.find(i => i.id === item?.parent_id);
+    const fetchPage = useCallback(async (page, pageSize) => {
+        setLoading(true);
+        try {
+            const params = buildParams(page, pageSize);
+            const res = await correctiveActionsApi.list(params);
+            // Laravel's paginate() returns { data, current_page, per_page, total, ... }.
+            // Some axios setups wrap the whole response one level deeper
+            // (e.g. { data: { data, current_page, ... } }), so unwrap defensively.
+            const paginator = Array.isArray(res?.data) || res?.current_page !== undefined
+                ? res
+                : res?.data ?? res;
+            const list = Array.isArray(paginator) ? paginator : paginator?.data;
+            setItems(Array.isArray(list) ? list : []);
+            setPagination({
+                current: paginator?.current_page ?? page,
+                pageSize: paginator?.per_page ?? pageSize,
+                total: paginator?.total ?? (Array.isArray(list) ? list.length : 0),
+            });
+        } catch (e) {
+            message.error(extractErrorMessage(e));
+        } finally { setLoading(false); }
+    }, [buildParams]);
+
+    // Any filter change resets to page 1 (only triggers a state update —
+    // and therefore a re-render — when the page actually needs to move).
+    useEffect(() => {
+        setPagination(prev => (prev.current === 1 ? prev : { ...prev, current: 1 }));
+    }, [search, statusValue, effectiveness, serviceId, dateRange]);
+
+    // Single source of truth for fetching: fires on mount, on page/pageSize
+    // change, and on filter change (via the effect above resetting `current`).
+    useEffect(() => {
+        fetchPage(pagination.current, pagination.pageSize);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pagination.current, pagination.pageSize, search, statusValue, effectiveness, serviceId, dateRange]);
+
+    const refresh = useCallback(() => fetchPage(pagination.current, pagination.pageSize),
+        [fetchPage, pagination.current, pagination.pageSize]);
+
+    function handleSearchChange(value) {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => setSearch(value), 400);
+    }
+
+    function resetFilters() {
+        setSearch("");
+        setStatusFilter("Toutes");
+        setEffectiveness(undefined);
+        setServiceId(undefined);
+        setDateRange(null);
+    }
+
+    function handleTableChange(paginationConfig) {
+        const { current, pageSize } = paginationConfig;
+        refresh(current, pageSize);
+    }
+
+    // Flat lookup table containing every row (parents AND nested
+    // children) keyed only by array membership — used for id-based
+    // lookups (selected item, right-click target, parent/child resolution).
+    const flatItems = useMemo(() => flattenTree(items), [items]);
+
+    const selected = flatItems.find(i => String(i.id) === String(selectedId)) || null;
+    const childrenOf = (id) => flatItems.filter(i => String(i.parent_id) === String(id));
+    const parentOf = (item) => flatItems.find(i => String(i.id) === String(item?.parent_id));
 
     function openDrawer(id, tab = "view") { setSelectedId(id); setDrawerTab(tab); }
     function closeDrawer() { setSelectedId(null); }
@@ -94,6 +197,7 @@ export default function CorrectiveActions() {
         setLoading(true);
         try {
             await correctiveActionsApi.create(payload);
+            setPagination(prev => (prev.current === 1 ? prev : { ...prev, current: 1 }));
             await refresh();
             setCreateOpen(false);
             message.success("Action corrective créée.");
@@ -114,7 +218,7 @@ export default function CorrectiveActions() {
         try {
             await correctiveActionsApi.remove(id);
             await refresh();
-            if (selectedId === id) closeDrawer();
+            if (String(selectedId) === String(id)) closeDrawer();
             message.success("Action corrective supprimée.");
         } catch (e) { message.error(extractErrorMessage(e)); } finally { setLoading(false); }
     }
@@ -139,11 +243,18 @@ export default function CorrectiveActions() {
         } catch (e) { message.error(extractErrorMessage(e)); } finally { setLoading(false); }
     }
 
+    const STATUS_AC_OPTIONS = Object.values(STATUS_AC).map((status) => ({
+        label: status.label,
+        value: status.label,
+    }));
+
     // Handles clicks coming from the right-click context menu.
     // `key` is the action (edit/complete/child/delete), `id` is the row id
     // that RightClickMenu extracts from the composite key it built.
+    // Looks up in `flatItems` (not `items`) so this works for nested
+    // child rows too, not just top-level parents.
     const handleRowMenuClick = useCallback((key, id) => {
-        const row = items.find(i => String(i.id) === String(id));
+        const row = flatItems.find(i => String(i.id) === String(id));
         if (!row) return;
 
         switch (key) {
@@ -175,13 +286,14 @@ export default function CorrectiveActions() {
             default:
                 break;
         }
-    }, [items]);
+    }, [flatItems]);
 
     // Wraps each <tr> so RightClickMenu can attach a contextmenu handler
     // scoped to that specific row, replacing the old actions column.
+    // Looks up in `flatItems` so nested child rows resolve correctly.
     const RowWithContextMenu = useCallback((props) => {
         const rowId = props["data-row-key"];
-        const row = items.find(i => i.id === rowId);
+        const row = flatItems.find(i => String(i.id) === String(rowId));
 
         const menuItems = ROW_MENU_ITEMS
             .filter(item => item.key !== "complete" || row?.status !== "completed")
@@ -192,10 +304,12 @@ export default function CorrectiveActions() {
                 <tr {...props} />
             </RightClickMenu>
         );
-    }, [items, handleRowMenuClick]);
+    }, [flatItems, handleRowMenuClick]);
 
-    const overdueCount = items.filter(isOverdue).length;
-    const openCount = items.filter(i => i.status === "open").length;
+    const overdueCount = flatItems.filter(isOverdue).length;
+    const openCount = flatItems.filter(i => i.status === "open").length;
+
+    const hasActiveFilters = !!(search || statusFilter !== "Toutes" || effectiveness || serviceId || dateRange);
 
     const columns = [
         {
@@ -216,38 +330,36 @@ export default function CorrectiveActions() {
         },
         {
             title: "Client", dataIndex: "reclamation", width: 90,
-            render: (reclamation) => <div>{reclamation?.client_code ?? "—"}</div>,
+            render: (reclamation) => <div>{reclamation?.client_code ?? ""}</div>,
         },
         {
             title: "Procusse", dataIndex: "service", width: 90,
-            render: (service) => <div className="whitespace-nowrap">{service?.name ?? "—"}</div>,
+            render: (service) => <div className="whitespace-nowrap">{service?.name ?? ""}</div>,
         },
         {
             title: "Responsable", dataIndex: "responsable", width: 140,
-            render: (responsable) => <span className="whitespace-nowrap">{responsable?.full_name}</span> ?? "—",
+            render: (responsable) => <span className="whitespace-nowrap">{responsable?.full_name}</span> ?? "",
         },
         {
             title: "Statut", dataIndex: "status", width: 130,
-            render: (s) => <Tag color={STATUS_META[s]?.color}>{STATUS_META[s]?.label || s}</Tag>,
+            render: (s) => <Tag color={STATUS_AC[s]?.color}>{STATUS_AC[s]?.label || s}</Tag>,
         },
         {
             title: "Efficacité", dataIndex: "effectiveness", width: 90,
-            render: (effectiveness) => effectiveness ?? "—",
+            render: (effectiveness) => <span className="whitespace-nowrap">{effectiveness}</span> ?? "",
         },
         {
             title: "Réalisation", dataIndex: "completion_date", width: 90,
-            render: (completion_date) => completion_date ? dateFormat(completion_date) : "—",
+            render: (completion_date) => completion_date ? dateFormat(completion_date) : "",
         },
         {
             title: "Échéance", dataIndex: "due_date", width: 130,
             render: (d, row) => (
                 <span className={isOverdue(row) ? "font-medium text-red-600" : "text-slate-600"}>
-                    {d ? dayjs(d).format("DD MMM YYYY") : "—"}
+                    {d ? dayjs(d).format("DD MMM YYYY") : ""}
                 </span>
             ),
         },
-        // "actions" column removed — row actions now live in the right-click
-        // context menu (see RowWithContextMenu / ROW_MENU_ITEMS above).
     ];
 
     return (
@@ -263,21 +375,7 @@ export default function CorrectiveActions() {
                     </div>
                 </div>
                 <Space>
-                    <Input
-                        allowClear
-                        placeholder="Ref, description..."
-                        prefix={<Search size={14} className="text-slate-400" />}
-                        value={query}
-                        onChange={e => setQuery(e.target.value)}
-                        className="max-w-xs"
-                    />
-                    <Segmented
-                        options={["Toutes", "Ouverte", "Terminée"]}
-                        value={statusFilter}
-                        onChange={setStatusFilter}
-                    />
-                    <Button icon={loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} onClick={refresh}></Button>
-
+                    <Button icon={loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} onClick={() => refresh()}></Button>
                     <Button type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
                         Nouvelle
                     </Button>
@@ -285,15 +383,97 @@ export default function CorrectiveActions() {
             </Header>
 
             <Content className="mx-auto w-full px-4 py-4">
+                {/* Search & filters */}
+                <Card size="small" className="mb-3">
+                    <Row gutter={[12, 12]} align="middle">
+                        <Col flex="270px">
+                            <Input
+                                allowClear
+                                placeholder="Ref réclamation, AC..."
+                                prefix={<Search size={14} className="text-slate-400" />}
+                                defaultValue={search}
+                                onChange={e => handleSearchChange(e.target.value)}
+                            />
+                        </Col>
+                        <Col flex="270px">
+                            <RangePicker
+                                className="w-full"
+                                placeholder={["Créée après", "Créée avant"]}
+                                value={dateRange}
+                                onChange={setDateRange}
+                                format="DD MMM YYYY"
+                            />
+                        </Col>
+
+                         <Col flex="200px">
+                            <Select
+                                allowClear
+                                showSearch
+                                placeholder="Service"
+                                className="w-full"
+                                options={services}
+                                value={serviceId}
+                                onChange={setServiceId}
+                                filterOption={(input, option) =>
+                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                }
+                            />
+                        </Col>
+                        
+                         <Col flex="180px">
+                            <Select
+                                allowClear
+                                placeholder="Efficacité"
+                                className="w-full"
+                                options={EFFECTIVENESS_OPTIONS}
+                                value={effectiveness}
+                                onChange={setEffectiveness}
+                            />
+                        </Col>
+
+
+                        <Col flex="180px">
+
+
+                             <Select
+                                allowClear
+                                placeholder="Efficacité"
+                                className="w-full"
+                                options={STATUS_AC_OPTIONS}
+                                value={statusFilter}
+                                onChange={setStatusFilter}
+                            />
+                        </Col>
+                       
+                       
+                        
+                        {hasActiveFilters && (
+                            <Col>
+                                <Button icon={<X size={14} />} onClick={resetFilters}>
+                                    Réinitialiser
+                                </Button>
+                            </Col>
+                        )}
+                    </Row>
+                </Card>
+
                 <Card size="small" bodyStyle={{ padding: 0 }}>
                     <Table
                         rowKey="id"
                         size="small"
                         columns={columns}
-                        dataSource={filtered}
+                        dataSource={items}
                         loading={loading}
-                        pagination={{ pageSize: 20 }}
+                        pagination={{
+                            current: pagination.current,
+                            pageSize: pagination.pageSize,
+                            total: pagination.total,
+                            showSizeChanger: true,
+                            showTotal: (total) => `${total} action(s) corrective(s)`,
+                        }}
+                        onChange={handleTableChange}
                         locale={{ emptyText: <Empty description="Aucune action corrective trouvée" /> }}
+                        rowClassName={(record) => (record.parent_id ? "bg-slate-50/70" : "")}
                         components={{
                             body: {
                                 row: RowWithContextMenu,
@@ -309,7 +489,7 @@ export default function CorrectiveActions() {
                 onClose={closeDrawer}
                 title={selected ? <span className="text-sm text-slate-400">{selected.code}</span> : ""}
                 width={440}
-                extra={selected && <Tag color={STATUS_META[selected.status]?.color}>{STATUS_META[selected.status]?.label || selected.status}</Tag>}
+                extra={selected && <Tag color={STATUS_AC[selected.status]?.color}>{STATUS_AC[selected.status]?.label || selected.status}</Tag>}
             >
                 {selected && (
                     <DrawerBody

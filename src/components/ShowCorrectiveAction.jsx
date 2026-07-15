@@ -4,6 +4,16 @@ import { ArrowUpRight } from "lucide-react";
 import InfoRow from './ui/InfoRow';
 import dayjs from "dayjs";
 
+
+const STATUS_META = {
+    recevable: { color: "red", label: "Recevable" },
+    en_analyse: { color: "orange", label: "En analyse" },
+    en_traitement: { color: "blue", label: "En traitement" },
+    en_cloture: { color: "purple", label: "En clôture" },
+    cloturee: { color: "green", label: "Clôturée" },
+};
+
+
 export default function ShowCorrectiveAction({ item, children }) {
     return (
         <div className="space-y-4 text-sm">
@@ -22,7 +32,7 @@ export default function ShowCorrectiveAction({ item, children }) {
                 <Col span={12}><InfoRow label="Type" value={item.type} /></Col>
                 <Col span={12}><InfoRow label="Efficacité" value={item.effectiveness} /></Col>
                 <Col span={12}><InfoRow label="Date de réalisation" value={item.completion_date ? dayjs(item.due_date).format("DD MMM YYYY") : "—"} /></Col>
-                <Col span={12}><InfoRow label="Créé par" value={item.user.full_name} /></Col>
+                <Col span={12}><InfoRow label="Créé par" value={item?.user?.full_name} /></Col>
             </Row>
             
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, DatePicker, Select, Upload, Switch, message, Button, Spin } from 'antd';
+import { Form, Input, DatePicker, Select, Upload, message, Button, Spin } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import reclamationApi from '../utils/reclamationApi';
@@ -14,7 +14,7 @@ export default function CreateRecalmationForm({ reclamationId, reclamation, onCr
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(isEditMode && !reclamation);
-  const [withAttachments, setWithAttachments] = useState(false);
+
   const [fileList, setFileList] = useState([]); // newly added files
   const [existingAttachments, setExistingAttachments] = useState([]); // already on server (edit mode only)
 
@@ -48,7 +48,6 @@ export default function CreateRecalmationForm({ reclamationId, reclamation, onCr
   const resetAndClose = () => {
     form.resetFields();
     setFileList([]);
-    setWithAttachments(false);
   };
 
   useEffect(() => {
@@ -99,7 +98,7 @@ export default function CreateRecalmationForm({ reclamationId, reclamation, onCr
 
         message.success('Réclamation mise à jour avec succès.');
         setFileList([]);
-        setWithAttachments(false);
+  
         onUpdated?.();
       } else {
         if (withAttachments && fileList.length > 0) {
@@ -239,15 +238,8 @@ export default function CreateRecalmationForm({ reclamationId, reclamation, onCr
         </div>
       )}
 
-      <div className="flex items-center gap-2 mb-3">
-        <Switch checked={withAttachments} onChange={setWithAttachments} />
-        <span className="text-sm text-gray-600">
-          {isEditMode ? 'Ajouter de nouveaux fichiers' : 'Joindre des fichiers à la création'}
-        </span>
-      </div>
 
-      {withAttachments && (
-        <Upload
+       <Upload
           multiple
           beforeUpload={() => false}
           fileList={fileList}
@@ -260,7 +252,6 @@ export default function CreateRecalmationForm({ reclamationId, reclamation, onCr
             <UploadOutlined /> Ajouter des fichiers
           </button>
         </Upload>
-      )}
 
       <div className='w-full flex justify-center'>
         <Button onClick={handleSubmit} loading={submitting} className='mt-3 w-1/3' type='primary'>Enregistrer</Button>

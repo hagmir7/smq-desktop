@@ -119,7 +119,7 @@ export default function CorrectiveActionsRegister() {
       title: <span className="whitespace-nowrap">Date d'enregistrement</span>,
       dataIndex: "reclamation",
       width: 90,
-      render: (reclamation) => reclamation?.registration_date ?? "—",
+      render: (reclamation) => reclamation?.registration_date ? dateFormat(reclamation?.registration_date) : "—",
     },
     {
       title: "Objet",

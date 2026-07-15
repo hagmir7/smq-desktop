@@ -156,7 +156,7 @@ export default function ImprovementsJournal() {
         record.responsable?.full_name ? (
           <Space size="small">
             <Avatar size="small" icon={<UserOutlined />} />
-            <span className="whitespace-nowrap">{record.responsable.full_name}</span>
+            <span className="whitespace-nowrap">{record?.responsable?.full_name}</span>
           </Space>
         ) : (
           <Text type="secondary">-</Text>

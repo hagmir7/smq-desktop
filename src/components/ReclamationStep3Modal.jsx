@@ -11,8 +11,31 @@ export default function ReclamationStep3Modal({ reclamationId, open, onClose, on
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (open) form.resetFields();
-  }, [open, form]);
+    if (!open || !reclamationId) return;
+    form.resetFields();
+    fetchReclamation();
+  }, [open, reclamationId, form]);
+
+  const populateForm = (data) => {
+    form.setFieldsValue({
+      processing_analysis: data?.processing_analysis,
+      cause_analysis: data?.cause_analysis,
+      priority: data?.priority,
+      is_justifiee: data?.is_justifiee != null ? Number(data.is_justifiee) : undefined,
+    });
+  };
+
+  const fetchReclamation = async () => {
+    try {
+      setSubmitting(true);
+      const response = await reclamationApi.show(reclamationId);
+      populateForm(response.data);
+    } catch (err) {
+      message.error("Impossible de charger les données de l'étape 3.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleSubmit = async () => {
     try {
@@ -28,8 +51,9 @@ export default function ReclamationStep3Modal({ reclamationId, open, onClose, on
       onUpdated?.();
       onClose();
     } catch (err) {
+      console.error(err);
       if (err?.errorFields) return;
-      message.error("Échec de l'enregistrement de l'étape 3.");
+      message.error(err?.response?.data?.message || "Échec de l'enregistrement de l'étape 3.");
     } finally {
       setSubmitting(false);
     }

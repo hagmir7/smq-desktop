@@ -102,7 +102,7 @@ export default function Connections() {
       fetchConnections();
     } catch (error) {
       if (error?.errorFields) return; // validation error, already shown inline
-      message.error("Échec de l'enregistrement de la connexion");
+      message.error(error?.response?.data?.message || "Échec de l'enregistrement de la connexion");
     } finally {
       setSaving(false);
     }

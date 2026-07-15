@@ -26,7 +26,7 @@ const { TextArea } = Input;
  *   />
  */
 
-const EFFECTIVENESS_OPTIONS = ["Efficace", "Partiellement efficace", "Non efficace"];
+const EFFECTIVENESS_OPTIONS = ["Efficace", "Non efficace"];
 export default function ImprovementEvaluationModal({ open, record, onClose, onSuccess }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
@@ -85,7 +85,7 @@ export default function ImprovementEvaluationModal({ open, record, onClose, onSu
       form.resetFields();
       onClose?.();
     } catch (err) {
-      if (err?.errorFields) return; // form validation error, already shown inline
+      if (err?.errorFields) return;
       console.error(err);
       message.error("Une erreur est survenue lors de l'évaluation.");
     } finally {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Form, Input, DatePicker, Select, Upload, Switch, message } from 'antd';
+import { Modal, Form, Input, DatePicker, Select, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import reclamationApi from '../utils/reclamationApi';
@@ -11,13 +11,11 @@ const RECEPTION_METHODS = ['Whatsapp', 'Email', 'Téléphone', 'Courrier', 'Visi
 export default function ReclamationCreateModal({ open, onClose, onCreated }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-  const [withAttachments, setWithAttachments] = useState(false);
   const [fileList, setFileList] = useState([]);
 
   const resetAndClose = () => {
     form.resetFields();
     setFileList([]);
-    setWithAttachments(false);
     onClose();
   };
 
@@ -149,13 +147,9 @@ export default function ReclamationCreateModal({ open, onClose, onCreated }) {
           <TextArea rows={4} placeholder="Détails de la réclamation" />
         </Form.Item>
 
-        <div className="flex items-center gap-2 mb-3">
-          <Switch checked={withAttachments} onChange={setWithAttachments} />
-          <span className="text-sm text-gray-600">Joindre des fichiers à la création</span>
-        </div>
 
-        {withAttachments && (
-          <Upload
+
+         <Upload
             multiple
             beforeUpload={() => false}
             fileList={fileList}
@@ -168,7 +162,6 @@ export default function ReclamationCreateModal({ open, onClose, onCreated }) {
               <UploadOutlined /> Ajouter des fichiers
             </button>
           </Upload>
-        )}
       </Form>
     </Modal>
   );

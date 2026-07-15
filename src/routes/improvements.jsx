@@ -204,7 +204,7 @@ export default function Improvements() {
         record.responsable?.full_name ? (
           <Space size="small">
             <Avatar size="small" icon={<UserOutlined />} />
-            <span>{record.responsable.full_name}</span>
+            <span>{record?.responsable?.full_name}</span>
           </Space>
         ) : (
           <Text type="secondary">-</Text>
