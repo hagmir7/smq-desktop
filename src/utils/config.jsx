@@ -152,3 +152,12 @@ export const STATUS_AC = {
         color: "red",
     },
 };
+
+
+export const WORKFLOW_STEPS = {
+  1: "Création",
+  2: "Validation",
+  3: "Analyse et Traitement",
+  4: "Affectation",
+  5: "Clôturé",
+};
