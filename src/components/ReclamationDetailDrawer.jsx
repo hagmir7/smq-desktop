@@ -74,15 +74,7 @@ export default function ReclamationDetailDrawer({ reclamationId, open, onClose, 
               </Descriptions.Item>
               <Descriptions.Item label="Objet">{record.object}</Descriptions.Item>
               <Descriptions.Item label="Description">{record.description}</Descriptions.Item>
-              <Descriptions.Item label="Recevable">
-                {record.is_recevable === null || record.is_recevable === undefined ? (
-                  <Tag>En attente</Tag>
-                ) : record.is_recevable ? (
-                  <Tag color="green">Oui</Tag>
-                ) : (
-                  <Tag color="red">Non</Tag>
-                )}
-              </Descriptions.Item>
+
               <Descriptions.Item label="Analyse (étape 2)">
                 {record.post_analysis || '—'}
               </Descriptions.Item>
@@ -103,6 +95,24 @@ export default function ReclamationDetailDrawer({ reclamationId, open, onClose, 
               </Descriptions.Item>
               <Descriptions.Item label="Analyse de cause">
                 {record.cause_analysis || '—'}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Remplis par">
+                {record.user.full_name || '—'}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Recevable">
+                {record.is_recevable === null || record.is_recevable === undefined ? (
+                  <Tag>En attente</Tag>
+                ) : record.is_recevable ? (
+                  <Tag color="green">Oui</Tag>
+                ) : (
+                  <Tag color="red">Non</Tag>
+                )}
+              </Descriptions.Item>
+              
+              <Descriptions.Item label="Remis le">
+                {dateFormat(record.created_at) || '—'}
               </Descriptions.Item>
             </Descriptions>
           </div>

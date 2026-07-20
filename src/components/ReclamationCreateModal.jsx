@@ -38,21 +38,18 @@ export default function ReclamationCreateModal({ open, onClose, onCreated }) {
         description: values.description,
       };
 
-      if (withAttachments && fileList.length > 0) {
-        await reclamationApi.createStep1WithAttachments(
+      await reclamationApi.createStep1WithAttachments(
           payload,
           fileList.map((f) => f.originFileObj)
         );
-      } else {
-        await reclamationApi.createStep1(payload);
-      }
 
       message.success('Réclamation créée avec succès.');
       resetAndClose();
       onCreated?.();
     } catch (err) {
-      if (err?.errorFields) return; // validation error, already shown inline
-      message.error(err?.response?.data?.message || "Échec de la création de la réclamation.");
+      console.log(err);
+      if (err?.errorFields) return;
+      message.error(err?.response?.data?.message  || "Échec de la mise à jour de la réclamation.")
     } finally {
       setSubmitting(false);
     }

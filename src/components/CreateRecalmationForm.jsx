@@ -116,12 +116,8 @@ export default function CreateRecalmationForm({ reclamationId, reclamation, onCr
       }
     } catch (err) {
       console.error(err)
-      if (err?.errorFields) return; // validation error, already shown inline
-      message.error(
-        isEditMode
-          ? "Échec de la mise à jour de la réclamation."
-          : "Échec de la création de la réclamation."
-      );
+      if (err?.errorFields) return;
+      message.error(err?.response?.data?.message  || (isEditMode ? "Échec de la mise à jour de la réclamation." : "Échec de la création de la réclamation."))
     } finally {
       setSubmitting(false);
     }

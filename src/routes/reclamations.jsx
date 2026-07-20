@@ -21,6 +21,7 @@ import {
   EditOutlined,
   CheckCircleOutlined,
   CheckSquareOutlined,
+  SendOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import reclamationApi from '../utils/reclamationApi';
@@ -59,6 +60,19 @@ export default function Reclamations() {
     pageSize: 10,
     total: 0,
   });
+
+  const handleCloseAction = async ({ completion_date }) => {
+    try {
+      await reclamationApi.post(`/corrective-actions/${id}/close`, {
+        completion_date,
+      });
+
+      message.success("Action clôturée avec succès.");
+      loadData();
+    } catch (error) {
+      message.error("Erreur lors de la clôture.");
+    }
+  };
 
   // Keep a ref to the latest pagination/filters so the debounced search
   // handler always fires with fresh values without re-creating itself.
@@ -218,6 +232,10 @@ export default function Reclamations() {
             </Link>
           </Tooltip>
 
+           <Tooltip title="Clôture">
+            <Button size="small" icon={<SendOutlined />} />
+          </Tooltip>
+
           <Tooltip title="Validation et recevabilité">
             <Button
               onClick={() => {
@@ -229,7 +247,7 @@ export default function Reclamations() {
             />
           </Tooltip>
 
-          <Tooltip title="Traitement et cause">
+          <Tooltip title="Traitement et Analyse">
             <Button
               onClick={() => {
                 setSelectedId(record.id);

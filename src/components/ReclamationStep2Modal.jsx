@@ -35,7 +35,7 @@ export default function ReclamationStep2Modal({
       const response = await reclamationApi.show(reclamationId);
       populateForm(response.data);
     } catch (err) {
-      message.error("Impossible de charger les données de l'étape 2.");
+      message.error("Impossible de charger les données.");
     } finally {
       setSubmitting(false);
     }
@@ -60,12 +60,12 @@ export default function ReclamationStep2Modal({
         corrective_action: values.is_recevable ? values.corrective_action : null,
       });
 
-      message.success('Étape 2 enregistrée.');
+      message.success('Enregistrée.');
       onUpdated?.();
       onClose();
     } catch (err) {
       if (err?.errorFields) return;
-      message.error("Échec de l'enregistrement de l'étape 2.");
+      message.error("Échec de l'enregistrement");
     } finally {
       setSubmitting(false);
     }
@@ -73,7 +73,7 @@ export default function ReclamationStep2Modal({
 
   return (
     <Modal
-      title="Étape 2 — Validation et recevabilité"
+      title="Validation et recevabilité"
       open={open}
       onCancel={onClose}
       onOk={handleSubmit}

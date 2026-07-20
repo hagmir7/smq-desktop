@@ -1,36 +1,52 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Radio, Select, message } from 'antd';
+import { Modal, Form, Input, Radio, Select, message, DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import reclamationApi from '../utils/reclamationApi';
 
 const { TextArea } = Input;
 
 const PRIORITIES = ['Basse', 'Normale', 'Haute', 'Urgente'];
 
-export default function ReclamationStep3Modal({ reclamationId, open, onClose, onUpdated }) {
+export default function ReclamationStep3Modal({
+  reclamationId,
+  open,
+  onClose,
+  onUpdated,
+}) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open || !reclamationId) return;
+
     form.resetFields();
     fetchReclamation();
-  }, [open, reclamationId, form]);
+  }, [open, reclamationId]);
 
   const populateForm = (data) => {
     form.setFieldsValue({
-      processing_analysis: data?.processing_analysis,
-      cause_analysis: data?.cause_analysis,
-      priority: data?.priority,
-      is_justifiee: data?.is_justifiee != null ? Number(data.is_justifiee) : undefined,
+      processing_analysis: data?.processing_analysis || '',
+      cause_analysis: data?.cause_analysis || '',
+      priority: data?.priority || undefined,
+      planned_closing_date: data?.planned_closing_date
+        ? dayjs(data.planned_closing_date)
+        : null,
+      is_justifiee:
+        data?.is_justifiee !== null && data?.is_justifiee !== undefined
+          ? Number(data.is_justifiee)
+          : undefined,
     });
   };
 
   const fetchReclamation = async () => {
     try {
       setSubmitting(true);
+
       const response = await reclamationApi.show(reclamationId);
+
       populateForm(response.data);
     } catch (err) {
+      console.error(err);
       message.error("Impossible de charger les données de l'étape 3.");
     } finally {
       setSubmitting(false);
@@ -40,20 +56,32 @@ export default function ReclamationStep3Modal({ reclamationId, open, onClose, on
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+
       setSubmitting(true);
+
       await reclamationApi.updateStep3(reclamationId, {
         processing_analysis: values.processing_analysis,
         is_justifiee: values.is_justifiee,
         cause_analysis: values.cause_analysis,
         priority: values.priority,
+        planned_closing_date: values.planned_closing_date
+          ? values.planned_closing_date.format('YYYY-MM-DD')
+          : null,
       });
+
       message.success('Étape 3 enregistrée.');
+
       onUpdated?.();
       onClose();
     } catch (err) {
       console.error(err);
+
       if (err?.errorFields) return;
-      message.error(err?.response?.data?.message || "Échec de l'enregistrement de l'étape 3.");
+
+      message.error(
+        err?.response?.data?.message ||
+          "Échec de l'enregistrement de l'étape 3."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -61,7 +89,7 @@ export default function ReclamationStep3Modal({ reclamationId, open, onClose, on
 
   return (
     <Modal
-      title="Étape 3 — Traitement et cause"
+      title="Traitement et Analyse"
       open={open}
       onCancel={onClose}
       onOk={handleSubmit}
@@ -76,13 +104,22 @@ export default function ReclamationStep3Modal({ reclamationId, open, onClose, on
           name="processing_analysis"
           rules={[{ required: true, message: 'Ce champ est requis.' }]}
         >
-          <TextArea rows={3} placeholder="Analyse ou traitement effectué" />
+          <TextArea
+            rows={3}
+            placeholder="Analyse ou traitement effectué"
+          />
         </Form.Item>
 
         <Form.Item
           label="Réclamation justifiée ?"
           name="is_justifiee"
-          rules={[{ required: true, message: 'Veuillez indiquer si la réclamation est justifiée.' }]}
+          rules={[
+            {
+              required: true,
+              message:
+                'Veuillez indiquer si la réclamation est justifiée.',
+            },
+          ]}
         >
           <Radio.Group>
             <Radio.Button value={1}>Oui</Radio.Button>
@@ -95,22 +132,47 @@ export default function ReclamationStep3Modal({ reclamationId, open, onClose, on
           name="cause_analysis"
           rules={[{ required: true, message: 'Ce champ est requis.' }]}
         >
-          <TextArea rows={3} placeholder="Cause racine identifiée" />
+          <TextArea
+            rows={3}
+            placeholder="Cause racine identifiée"
+          />
         </Form.Item>
 
-        <Form.Item
-          label="Priorité"
-          name="priority"
-          rules={[{ required: true, message: 'La priorité est requise.' }]}
-        >
-          <Select placeholder="Sélectionner une priorité">
-            {PRIORITIES.map((p) => (
-              <Select.Option key={p} value={p}>
-                {p}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
+        <div className="flex gap-3">
+          <Form.Item
+            label="Priorité"
+            name="priority"
+            className="w-full"
+            rules={[
+              {
+                required: true,
+                message: 'La priorité est requise.',
+              },
+            ]}
+          >
+            <Select placeholder="Sélectionner une priorité">
+              {PRIORITIES.map((priority) => (
+                <Select.Option
+                  key={priority}
+                  value={priority}
+                >
+                  {priority}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            label="Clôture prévue"
+            name="planned_closing_date"
+            className="w-full"
+          >
+            <DatePicker
+              className="w-full"
+              format="YYYY-MM-DD"
+            />
+          </Form.Item>
+        </div>
       </Form>
     </Modal>
   );

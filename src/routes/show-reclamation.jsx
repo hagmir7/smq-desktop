@@ -33,8 +33,8 @@ function getStatusMeta(status) {
 
 const STEP_ITEMS = [
     { title: "Création" },
+    { title: "Validation" },
     { title: "Analyse" },
-    { title: "Traitement" },
     { title: "Affectation" },
     { title: "Clôture" },
 ];

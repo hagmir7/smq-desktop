@@ -20,8 +20,6 @@ const { TextArea } = Input;
 
 const ACTION_TYPES = [
   "Action corrective",
-  "Action préventive",
-  "Action curative",
 ];
 
 export default function CorrectiveActions({ reclamationId }) {
@@ -203,6 +201,7 @@ export default function CorrectiveActions({ reclamationId }) {
           >
             <Select
               placeholder="Sélectionner un type"
+              defaultValue={'Action corrective'}
               options={ACTION_TYPES.map((t) => ({
                 label: t,
                 value: t,
