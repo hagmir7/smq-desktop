@@ -19,7 +19,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         theme={{
           algorithm: theme.defaultAlgorithm,
           token: {
-            colorPrimary: '#1677ff',
+            colorPrimary: '#16a34a',
             borderRadius: 8,
             fontFamily:
               "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",

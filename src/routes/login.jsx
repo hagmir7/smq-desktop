@@ -19,21 +19,18 @@ const Login = () => {
   const [errorType, setErrorType] = useState(null);
 
 
+
+   useEffect(() => {
+      window.electron?.getVersion().then(setAppVersion);
+    }, []);
+
+
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('usernames') || '[]');
     setUsernames(saved);
   }, []);
 
 
-  useEffect(() => {
-    const loadVersion = async () => {
-      if (window.electron?.version) {
-        const version = await window.electron.version();
-        setAppVersion(version);
-      }
-    };
-    loadVersion();
-  }, []);
 
   useEffect(() => {
     form.setFieldsValue({

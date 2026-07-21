@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import {
-    ConfigProvider, Layout, Table, Tag, Button, Drawer, Modal, Input,
+import {Layout, Table, Tag, Button, Drawer, Modal, Input,
     Row, Col, Statistic, Space, Segmented, message, Empty, Card,
     Badge, Select, DatePicker,
 } from "antd";

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Layout, Menu, ConfigProvider } from 'antd';
+import { Layout, Menu } from 'antd';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import UpdateNotifier from '../components/UpdateNotifier.jsx';
 import DropMenu from '../components/DropMenu.jsx';
@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const { Header, Sider, Content } = Layout;
 
-// Flattens menuItems (including nested children) into a single lookup array
+
 const flattenMenuItems = (items) => {
   return items.reduce((acc, item) => {
     acc.push(item);
@@ -84,41 +84,36 @@ export default function MainLayout() {
   }, [location.pathname, flatMenuItems]);
 
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#16a34a', // green-600
-        },
-      }}
-    >
-      <Layout style={{ height: '100vh' }}>
-        <UpdateNotifier />
 
-        <Sider
-          width={220}
-          theme="light"
-          className="border-r border-gray-100 flex flex-col bg-green-900"
-          style={{ height: '100vh' }}
-        >
-          <div className="px-4 py-4">
-            <Link to="/">
-              <h1 className='text-white text-xl p-0 m-0 text-start'>SMQ PRO</h1>
-              <span className='text-white'> Intercocina {appVersion && <span className="text-gray-400 font-normal text-xs ml-1">v{appVersion}</span>}</span>
-            </Link>
-          </div>
-          <Menu
-            mode="inline"
-            theme="dark"
-            selectedKeys={[location.pathname]}
-            onClick={(e) => navigate(e.key)}
-            className="border-r-0 flex-1 bg-green-900 sidebar-menu"
-            items={menuItems}
-            style={{
-              '--ant-menu-item-selected-bg': '#dcfce7', // green-100
-              '--ant-menu-item-selected-color': '#16a34a', // green-600
-            }}
-          />
-          <style>{`
+
+    <Layout style={{ height: '100vh' }}>
+      <UpdateNotifier />
+
+      <Sider
+        width={220}
+        theme="light"
+        className="border-r border-gray-100 flex flex-col bg-green-900"
+        style={{ height: '100vh' }}
+      >
+        <div className="px-4 py-4">
+          <Link to="/">
+            <h1 className='text-white text-xl p-0 m-0 text-start'>SMQ PRO</h1>
+            <span className='text-white'> Intercocina {appVersion && <span className="text-gray-400 font-normal text-xs ml-1">v{appVersion}</span>}</span>
+          </Link>
+        </div>
+        <Menu
+          mode="inline"
+          theme="dark"
+          selectedKeys={[location.pathname]}
+          onClick={(e) => navigate(e.key)}
+          className="border-r-0 flex-1 bg-green-900 sidebar-menu"
+          items={menuItems}
+          style={{
+            '--ant-menu-item-selected-bg': '#dcfce7', // green-100
+            '--ant-menu-item-selected-color': '#16a34a', // green-600
+          }}
+        />
+        <style>{`
             .sidebar-menu .ant-menu-item-disabled,
             .sidebar-menu .ant-menu-submenu-disabled > .ant-menu-submenu-title {
               opacity: 0.4 !important;
@@ -132,17 +127,16 @@ export default function MainLayout() {
               color: rgba(255, 255, 255, 0.45) !important;
             }
           `}</style>
-        </Sider>
+      </Sider>
 
-        <Layout>
-          <MainHeader appVersion={appVersion} />
-          <Content className="bg-gray-100 overflow-auto">
-            <div className='m-2 rounded-lg bg-white shadow-sm overflow-hidden'>
-              <Outlet context={{ appVersion }} />
-            </div>
-          </Content>
-        </Layout>
+      <Layout>
+        <MainHeader appVersion={appVersion} />
+        <Content className="bg-gray-100 overflow-auto">
+          <div className='m-2 rounded-lg bg-white shadow-sm overflow-hidden'>
+            <Outlet context={{ appVersion }} />
+          </div>
+        </Content>
       </Layout>
-    </ConfigProvider>
+    </Layout>
   );
 }
