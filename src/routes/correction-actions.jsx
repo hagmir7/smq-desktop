@@ -17,6 +17,7 @@ import DrawerBody from "../components/DrawerBody";
 import CreateForm from "../components/CorrectionActionCreateForm";
 import RightClickMenu from "../components/ui/RightClickMenu";
 import ImprovementSheetModal from "../components/ImprovementSheetModal";
+import { useAuth } from "../contexts/AuthContext";
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -79,6 +80,7 @@ export default function CorrectiveActions() {
     const [selectedId, setSelectedId] = useState(null);
     const [drawerTab, setDrawerTab] = useState("view");
     const [createOpen, setCreateOpen] = useState(false);
+    const { permissions } = useAuth();
 
     const [open, setOpen] = useState(false);
 
@@ -376,7 +378,7 @@ export default function CorrectiveActions() {
                 </div>
                 <Space>
                     <Button icon={loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} onClick={() => refresh()}></Button>
-                    <Button type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
+                    <Button disabled={!permissions('creer.action_corrective')} type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
                         Nouvelle
                     </Button>
                 </Space>

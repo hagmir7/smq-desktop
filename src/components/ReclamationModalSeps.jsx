@@ -15,6 +15,7 @@ import {
 } from "@ant-design/icons";
 import { api } from "../utils/api";
 import ReclamationCorrectiveActions from "./ReclamationCorrectiveActions";
+import { useAuth } from "../contexts/AuthContext";
 
 // ---------------------------------------------------------------------------
 // Adjust this import to point at your own axios/fetch instance.
@@ -28,7 +29,7 @@ const STEPS = [
   { key: "creation", label: "Création", tab: "general" },
   { key: "validation", label: "Validation", tab: "general" },
   { key: "analyse", label: "Analyse", tab: "analyse" },
-  { key: "affectation", label: "Affectation", tab: "affectation" },
+  { key: "affectation", label: "Affectation", tab: "affectation"},
   { key: "cloture", label: "Clôturé", tab: "cloture" },
 ];
 
@@ -101,6 +102,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("general");
+  const {permissions} = useAuth();
 
   const fetchReclamation = useCallback(async (id) => {
     setLoading(true);
@@ -312,6 +314,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                 {
                   key: "affectation",
                   label: "Affectation",
+                  disabled: !permissions('voir.action_corrective'),
                   children: <ReclamationCorrectiveActions reclamationId={reclamationId} />,
                 },
                 {
