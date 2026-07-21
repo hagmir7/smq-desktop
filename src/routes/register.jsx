@@ -50,6 +50,7 @@ export default function CorrectiveActionsRegister() {
       const arr = Array.isArray(res) ? res : res?.data;
       setItems(Array.isArray(arr) ? arr : []);
     } catch (e) {
+      console.error("Error fetching corrective actions:", e);
       message.error(e?.response?.data?.message || "Une erreur est survenue.");
     } finally {
       setLoading(false);

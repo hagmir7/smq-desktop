@@ -3,6 +3,7 @@ import { Card, Row, Col, Typography, Divider, Spin, Alert } from "antd";
 import ReactApexChart from "react-apexcharts";
 import axios from "axios";
 import { api } from "../utils/api";
+import LastReclamations from "../dashobard/LastReclamations";
 
 const { Text, Title } = Typography;
 
@@ -314,38 +315,7 @@ export default function Dashboard() {
         </Col>
       </Row>
 
-      {/* Recent Claims Row */}
-      <Row gutter={[16, 16]} className="mt-4">
-        <Col xs={24}>
-          <SectionCard title="Dernières réclamations">
-            <div className="flex flex-col">
-              {recentClaims.length === 0 && (
-                <Text className="text-sm text-gray-400">Aucune réclamation récente.</Text>
-              )}
-              {recentClaims.map((claim, idx) => (
-                <div key={claim.id}>
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-3">
-                      <Text strong className="text-gray-900">
-                        REC-{String(claim.id).padStart(3, "0")}
-                      </Text>
-                      <Text className="text-sm text-gray-500">
-                        {claim.client_name || claim.name || "—"}
-                      </Text>
-                    </div>
-                    <Text className={`text-sm font-medium ${statusColorClass(
-                      claim.closing_date ? "Clôturée" : (claim.priority || "En cours")
-                    )}`}>
-                      {claim.closing_date ? "Clôturée" : (claim.priority === "critique" ? "Critique" : "En cours")}
-                    </Text>
-                  </div>
-                  {idx < recentClaims.length - 1 && <Divider className="!my-0" />}
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-        </Col>
-      </Row>
+     <LastReclamations recentClaims={recentClaims} />
     </div>
   );
 }
