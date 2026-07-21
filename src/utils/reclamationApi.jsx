@@ -13,6 +13,8 @@ export const reclamationApi = {
   // 1. POST /api/reclamations (step 1 - intake, JSON)
   createStep1: (payload) => api.post('reclamations', payload),
 
+  close: (reclamationId, payload) => api.post(`reclamations/${reclamationId}/close`, payload),  
+
   // 4. POST /api/reclamations (step 1 - intake with attachments, multipart)
   createStep1WithAttachments: (payload, files = []) => {
     const formData = new FormData();
@@ -40,22 +42,22 @@ export const reclamationApi = {
   },
 
   // 9. DELETE /api/reclamations/{reclamationId}/attachments/{attachmentId}
-  deleteAttachment: (reclamationId, attachmentId) =>
-    api.delete(`reclamations/${reclamationId}/attachments/${attachmentId}`),
+  deleteAttachment: (reclamationId, attachmentId) => api.delete(`reclamations/${reclamationId}/attachments/${attachmentId}`),
 
   // 10. GET /api/reclamations/{id}/corrective-actions
   listCorrectiveActions: (id) => api.get(`reclamations/${id}/corrective-actions`),
 
   // 11. POST /api/reclamations/{id}/corrective-actions
-  createCorrectiveAction: (id, payload) =>
-    api.post(`reclamations/${id}/corrective-actions`, payload),
+  createCorrectiveAction: (id, payload) => api.post(`reclamations/${id}/corrective-actions`, payload),
 
 
   deleteCorrectiveAction: (actionId) => api.delete(`corrective-actions/${actionId}`),
-  
+
+
+
   // 13. POST /api/reclamations/{reclamationId}/corrective-actions/{actionId}
-  updateCorrectiveAction: (reclamationId, actionId, payload) =>
-    api.put(`corrective-actions/${actionId}`, payload),
+  updateCorrectiveAction: (reclamationId, actionId, payload) => api.put(`corrective-actions/${actionId}`, payload),
+
 };
 
 export default reclamationApi;

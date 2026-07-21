@@ -21,7 +21,6 @@ import {
   EditOutlined,
   CheckCircleOutlined,
   CheckSquareOutlined,
-  SendOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import reclamationApi from '../utils/reclamationApi';
@@ -32,6 +31,9 @@ import { Link } from 'react-router-dom';
 import { Flag, Plus } from 'lucide-react';
 import ReclamationStep2Modal from '../components/ReclamationStep2Modal';
 import ReclamationStep3Modal from '../components/ReclamationStep3Modal';
+import CloseReclamation from '../components/CloseReclamation';
+import ReclamationModalSeps from '../components/ReclamationModalSeps';
+import { useAuth } from '../contexts/AuthContext';
 
 const { Title } = Typography;
 const { Header, Content } = Layout;
@@ -44,6 +46,16 @@ const priorityColor = {
   Basse: 'default',
 };
 
+const workflowStepConfig = {
+  1: { label: 'Création', color: 'default' },
+  2: { label: 'Validation', color: 'blue' },
+  3: { label: 'Analyse et Traitement', color: 'orange' },
+  4: { label: 'Affectation', color: 'purple' },
+  5: { label: 'Clôturé', color: 'green' },
+};
+
+
+
 export default function Reclamations() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -52,27 +64,16 @@ export default function Reclamations() {
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [step2Open, setStep2Open] = useState(false);
-  const [drowerOpen, setDrowerOpn] = useState(false)
+  const [drowerOpen, setDrowerOpn] = useState(false);
   const [step3Open, setStep3Open] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const {permissions} = useAuth();
 
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
     total: 0,
   });
-
-  const handleCloseAction = async ({ completion_date }) => {
-    try {
-      await reclamationApi.post(`/corrective-actions/${id}/close`, {
-        completion_date,
-      });
-
-      message.success("Action clôturée avec succès.");
-      loadData();
-    } catch (error) {
-      message.error("Erreur lors de la clôture.");
-    }
-  };
 
   // Keep a ref to the latest pagination/filters so the debounced search
   // handler always fires with fresh values without re-creating itself.
@@ -163,6 +164,29 @@ export default function Reclamations() {
     });
   };
 
+
+  const handleCloseReclamation = async (id, { closing_date }) => {
+    try {
+      await reclamationApi.close(id, {
+        closing_date:closing_date,
+      });
+
+      message.success('Action clôturée avec succès.');
+      fetchData();
+    } catch (error) {
+      console.error('Error closing action:', error);
+      message.error(error?.response?.data?.message || 'Une erreur est survenue lors de la clôture de l\'action.');
+    }
+  };
+
+
+  const getEtat = (record) => {
+    if (record.statut === 'cloturee' || record.closing_date) {
+      return workflowStepConfig[5];
+    }
+    return workflowStepConfig[record.workflow_step] ?? { label: 'Inconnu', color: 'default' };
+  };
+
   const columns = [
     {
       title: 'Ref',
@@ -199,6 +223,17 @@ export default function Reclamations() {
         val == null ? <Tag>En attente</Tag> : val ? <Tag color="green">Oui</Tag> : <Tag color="red">Non</Tag>,
     },
     {
+      title: 'Etat',
+      dataIndex: 'workflow_step',
+      render: (val, record) => {
+        const etat = workflowStepConfig[val] ?? { label: 'Inconnu', color: 'default' };
+        // If using the separate statut/closing_date approach instead, use:
+        // const etat = getEtat(record);
+        return <Tag color={etat.color}>{etat.label}</Tag>;
+      },
+    },
+
+    {
       title: 'Justifiée',
       dataIndex: 'is_justifiee',
       render: (val) =>
@@ -222,19 +257,47 @@ export default function Reclamations() {
       fixed: 'right',
       render: (_, record) => (
         <Space>
+          {/* <Tooltip title="Voir le détail">
+            <Button
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => {
+                setDrowerOpn(true);
+                setSelectedId(record.id);
+              }}
+            />
+          </Tooltip> */}
+
+
           <Tooltip title="Voir le détail">
-            <Button size="small" icon={<EyeOutlined />} onClick={() => { setDrowerOpn(true); setSelectedId(record.id) }} />
+            <Button
+              disabled={!permissions('voir.reclamation')}
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => {
+                setSelectedId(record.id);
+                setIsModalOpen(true);
+              }}
+            />
           </Tooltip>
 
-          <Tooltip title="Modifier">
+
+
+          {/* <Tooltip title="Modifier">
             <Link to={`/reclamations/show/${record.id}`}>
               <Button size="small" icon={<EditOutlined />} />
             </Link>
-          </Tooltip>
+          </Tooltip> */}
 
-           <Tooltip title="Clôture">
-            <Button size="small" icon={<SendOutlined />} />
-          </Tooltip>
+          {/* <Tooltip title="Modifier">
+              <Button size="small" onClick={()=>{
+                 setSelectedId(record.id);
+                setIsModalOpen(true);
+              }} icon={<EditOutlined />} />
+          </Tooltip> */}
+
+
+ 
 
           <Tooltip title="Validation et recevabilité">
             <Button
@@ -243,6 +306,7 @@ export default function Reclamations() {
                 setStep2Open(true);
               }}
               size="small"
+              disabled={!permissions('valider.reclamation')}
               icon={<CheckCircleOutlined />}
             />
           </Tooltip>
@@ -254,9 +318,15 @@ export default function Reclamations() {
                 setStep3Open(true);
               }}
               size="small"
+              disabled={!permissions('analyse.reclamation')}
               icon={<CheckSquareOutlined />}
             />
           </Tooltip>
+
+          <CloseReclamation
+            onCloseAction={(payload) => handleCloseReclamation(record.id, payload)}
+            record={record}
+          />
 
           <Popconfirm
             title="Supprimer cette réclamation ?"
@@ -267,9 +337,13 @@ export default function Reclamations() {
             onConfirm={() => handleDelete(record.id)}
           >
             <Tooltip title="Supprimer">
-              <Button size="small" danger icon={<DeleteOutlined />} />
+              <Button disabled={!permissions('supprimer.reclamation')} size="small" danger icon={<DeleteOutlined />} />
             </Tooltip>
           </Popconfirm>
+
+          
+
+
         </Space>
       ),
     },
@@ -314,7 +388,7 @@ export default function Reclamations() {
             <Button icon={<ReloadOutlined />} onClick={() => fetchData()} />
           </Tooltip>
 
-          <Button type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
+          <Button disabled={!permissions('creer.reclamation')} type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
             Nouvelle
           </Button>
         </Space>
@@ -365,12 +439,17 @@ export default function Reclamations() {
             onChanged={() => fetchData()}
           />
 
-
           <ReclamationStep3Modal
             reclamationId={selectedId}
             open={step3Open}
             onClose={() => setStep3Open(false)}
             onUpdated={fetchData}
+          />
+
+          <ReclamationModalSeps
+            reclamationId={selectedId}
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
           />
         </div>
       </Content>

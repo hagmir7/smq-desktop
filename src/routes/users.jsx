@@ -134,6 +134,7 @@ export default function Users() {
           <Button
             type='text'
             size='small'
+            disabled={!permissions('modifier.utilisateur')}
             onClick={() => {
               setSelectedUser(users.find((u) => parseInt(u.id) === parseInt(user.id)))
               setModalVisible(true)
@@ -141,16 +142,17 @@ export default function Users() {
             icon={<Lock size={16} className='text-blue-600' />}
           />
 
-          {roles('admin') && (
+  
             <Button
               type='text'
               size='small'
+              disabled={!permissions('modifier.utilisateur')}
               onClick={() => handleShow(user.id)}
               icon={<Edit size={16} className='text-blue-600' />}
             />
-          )}
+ 
 
-          {roles('admin') && (
+
             <Popconfirm
               title="Supprimer l'utilisateur"
               description='Êtes-vous sûr de supprimer cet utilisateur ?'
@@ -162,10 +164,11 @@ export default function Users() {
                 type='text'
                 size='small'
                 danger
+                disabled={!permissions('supprimer.utilisateur')}
                 icon={<Trash size={16} className='text-red-600' />}
               />
             </Popconfirm>
-          )}
+
         </div>
       ),
     },

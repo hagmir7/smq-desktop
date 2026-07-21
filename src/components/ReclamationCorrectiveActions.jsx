@@ -18,6 +18,7 @@ import { Building, User } from 'lucide-react';
 import { api } from '../utils/api';
 import RightClickMenu from './ui/RightClickMenu';
 import dayjs from 'dayjs';
+import { useAuth } from '../contexts/AuthContext';
 
 const { TextArea } = Input;
 
@@ -58,6 +59,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [showChildren, setShowChildren] = useState(false);
+  const { permissions } = useAuth();
 
   // null => creating a new top-level action; object => editing that action
   const [editingAction, setEditingAction] = useState(null);
@@ -282,7 +284,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
       dataIndex: 'effectiveness',
       key: 'effectiveness',
       width: 110,
-      render: (date) => (date ? dayjs(date).format('DD/MM/YYYY') : '-'),
+      // render: (date) => ),
     },
   ];
 
@@ -330,7 +332,12 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
               />
             </Tooltip>
           )}
-          <Button size="small" type="primary" icon={<PlusOutlined />} onClick={() => openCreateModal(null)}>
+          <Button
+            size="small"
+            type="primary"
+            disabled={!permissions('creer.action_corrective')}
+            icon={<PlusOutlined />}
+            onClick={() => openCreateModal(null)}>
             Ajouter
           </Button>
         </div>

@@ -35,7 +35,7 @@ const ROLE_MENU_ITEMS = [
  * Roles
  * -----------------
  * Left: Ant Design List of roles (searchable, right-click to rename/delete).
- * Right: Permissions panel for whichever role is selected.
+ * Right: Permissions panel for whichever role is selected, grouped by category.
  */
 function Roles() {
   // ----- Roles (left sidebar) -----
@@ -137,23 +137,27 @@ function Roles() {
     fetchRoleData(selectedRoleId);
   }, [selectedRoleId, fetchRoleData]);
 
-  // Group permissions by category
+  // Group permissions by category (key + label both come from the backend)
   const groupedPermissions = useMemo(() => {
     return permissions.reduce((groups, permission) => {
-      const category = permission.category || 'Uncategorized';
-      if (!groups[category]) groups[category] = [];
-      groups[category].push(permission);
+      const categoryKey = permission.category || 'uncategorized';
+      const categoryLabel = permission.category_label || permission.category || 'Non catégorisé';
+
+      if (!groups[categoryKey]) {
+        groups[categoryKey] = { label: categoryLabel, items: [] };
+      }
+      groups[categoryKey].items.push(permission);
       return groups;
     }, {});
   }, [permissions]);
 
   const totalPermissionsCount = useMemo(
-    () => Object.values(groupedPermissions).flat().length,
+    () => Object.values(groupedPermissions).reduce((sum, g) => sum + g.items.length, 0),
     [groupedPermissions]
   );
 
   const allPermissionsSelected = useMemo(() => {
-    const allPerms = Object.values(groupedPermissions).flat().map((p) => p.name);
+    const allPerms = Object.values(groupedPermissions).flatMap((g) => g.items.map((p) => p.name));
     return allPerms.length > 0 && allPerms.every((p) => selectedPermissions.includes(p));
   }, [selectedPermissions, groupedPermissions]);
 
@@ -171,7 +175,7 @@ function Roles() {
   }, []);
 
   const toggleAllPermissions = useCallback(() => {
-    const allPerms = Object.values(groupedPermissions).flat().map((p) => p.name);
+    const allPerms = Object.values(groupedPermissions).flatMap((g) => g.items.map((p) => p.name));
     setSelectedPermissions((prev) => (prev.length === allPerms.length ? [] : allPerms));
   }, [groupedPermissions]);
 
@@ -363,11 +367,11 @@ function Roles() {
 
         <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
           {rolesLoading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '30px 0' }}>
               <Spin size="small" />
             </div>
           ) : filteredRoles.length === 0 ? (
-            <div style={{ padding: '32px 16px' }}>
+            <div style={{ padding: '24px 12px' }}>
               <Empty description="Aucun rôle trouvé" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             </div>
           ) : (
@@ -386,7 +390,7 @@ function Roles() {
                     <List.Item
                       onClick={() => setSelectedRoleId(r.name)}
                       style={{
-                        padding: '12px 16px',
+                        padding: '8px 10px',
                         margin: 0,
                         cursor: 'pointer',
                         opacity: isDeleting ? 0.5 : 1,
@@ -486,7 +490,7 @@ function Roles() {
                 </Space>
               </Card>
 
-              {/* Permissions section */}
+              {/* Permissions section, grouped by category */}
               <div>
                 {Object.keys(groupedPermissions).length > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
@@ -503,10 +507,10 @@ function Roles() {
                     style={{ padding: '32px 0' }}
                   />
                 ) : (
-                  Object.entries(groupedPermissions).map(([category, perms]) => {
-                    const selectedCount = perms.filter((p) => isPermissionSelected(p.name)).length;
+                  Object.entries(groupedPermissions).map(([categoryKey, { label, items }]) => {
+                    const selectedCount = items.filter((p) => isPermissionSelected(p.name)).length;
                     return (
-                      <div key={category} style={{ marginBottom: 16 }}>
+                      <div key={categoryKey} style={{ marginBottom: 16 }}>
                         <div
                           style={{
                             display: 'flex',
@@ -516,15 +520,15 @@ function Roles() {
                           }}
                         >
                           <Title level={5} style={{ margin: 0 }}>
-                            {category}
+                            {label}
                           </Title>
-                          <Tag color={selectedCount === perms.length ? 'green' : 'default'}>
-                            {selectedCount}/{perms.length} sélectionnée(s)
+                          <Tag color={selectedCount === items.length ? 'green' : 'default'}>
+                            {selectedCount}/{items.length} sélectionnée(s)
                           </Tag>
                         </div>
 
                         <Row gutter={[16, 16]}>
-                          {perms.map((permission) => {
+                          {items.map((permission) => {
                             const isSelected = isPermissionSelected(permission.name);
                             return (
                               <Col xs={24} md={12} lg={8} key={permission.id}>

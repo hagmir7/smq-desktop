@@ -15,6 +15,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import reclamationApi from "../utils/reclamationApi";
 import { api } from "../utils/api";
+import { useAuth } from "../contexts/AuthContext";
 
 const { TextArea } = Input;
 
@@ -28,7 +29,7 @@ export default function CorrectiveActions({ reclamationId }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-
+  const { permissions } = useAuth();
   const [services, setServices] = useState([]);
   const [responsables, setResponsables] = useState([]);
 
@@ -138,6 +139,7 @@ export default function CorrectiveActions({ reclamationId }) {
         <Button
           size="small"
           type="primary"
+          disabled={!permissions('creer.action_corrective')}
           icon={<PlusOutlined />}
           onClick={() => setModalOpen(true)}
         >
