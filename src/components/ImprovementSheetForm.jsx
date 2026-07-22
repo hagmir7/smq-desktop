@@ -21,6 +21,7 @@ import dayjs from "dayjs";
 import { api } from "../utils/api";
 import ImprovementEvaluationModal from "./ImprovementEvaluationModal";
 import { AuditOutlined } from "@ant-design/icons";
+import { useAuth } from "../contexts/AuthContext";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -38,6 +39,7 @@ export default function ImprovementSheetForm({ id, onSaved }) {
     const [services, setServices] = useState([]);
     const [responsables, setResponsables] = useState([]);
     const [evaluateOpen, setEvaluateOpen] = useState(false)
+    const { permissions } = useAuth();
 
     const [sheet, setSheet] = useState(null)
 
@@ -123,6 +125,7 @@ export default function ImprovementSheetForm({ id, onSaved }) {
                 <Tooltip title="Évaluer">
                     <Button
                         type="primary"
+                         disabled={!permissions('evaluer.fiche_amelioration')}
                         icon={<AuditOutlined />}
                         onClick={() => setEvaluateOpen(true)}
                     >Évaluer</Button>
@@ -302,7 +305,7 @@ export default function ImprovementSheetForm({ id, onSaved }) {
                 </div>
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" loading={saving}>
+                    <Button  disabled={!permissions('modifier.fiche_amelioration')} type="primary" htmlType="submit" loading={saving}>
                         Enregistrer
                     </Button>
                     <Button style={{ marginLeft: 8 }} onClick={loadData} disabled={saving}>

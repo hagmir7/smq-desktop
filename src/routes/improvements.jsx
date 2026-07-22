@@ -25,12 +25,14 @@ import {
   AuditOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { api } from "../utils/api";
 import { Link } from "react-router-dom";
 import ImprovementEvaluationModal from "../components/ImprovementEvaluationModal";
 import { Plus, Pyramid } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 const { Header, Content } = Layout;
 
 const { Title, Text, Paragraph } = Typography;
@@ -69,6 +71,8 @@ export default function Improvements() {
 
   // Per-row deleting state, so only the clicked row shows a loading spinner
   const [deletingId, setDeletingId] = useState(null);
+  const { permissions } = useAuth();
+  const [downloadSpin, setDownloadSpin] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -138,6 +142,31 @@ export default function Improvements() {
       return matchesSearch && matchesStatus && matchesImpact;
     });
   }, [improvements, search, statusFilter, impactFilter]);
+
+
+
+  const download = async (improvement_sheet) => {
+    setDownloadSpin(true);
+    try {
+      const res = await api.get(`improvements/${improvement_sheet}/download`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `improvements_sheet_${improvement_sheet}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      message.success('PDF téléchargé avec succès.');
+    } catch (error) {
+      console.log(error);
+      message.error('Erreur lors du téléchargement du PDF.');
+    } finally {
+      setDownloadSpin(false);
+    }
+  };
 
   const columns = [
     {
@@ -245,13 +274,14 @@ export default function Improvements() {
     {
       title: "",
       key: "actions",
-      width: 150,
+      width: 160,
       fixed: "right",
       render: (_, record) => (
-        <Space size="small">
+        <Space >
           <Tooltip title="Voir le détail">
             <Button
-              type="text"
+              size="small"
+              disabled={!permissions('voir.fiche_amelioration')}
               icon={<EyeOutlined />}
               onClick={() => showDetails(record)}
             />
@@ -259,15 +289,26 @@ export default function Improvements() {
 
           <Tooltip title="Modifier">
             <Link to={`/improvements/${record.id}`}>
-              <Button type="text" icon={<EditOutlined />} />
+             
+              <Button disabled={!permissions('modifier.fiche_amelioration')} size="small" icon={<EditOutlined />} />
             </Link>
           </Tooltip>
 
           <Tooltip title="Évaluer">
             <Button
-              type="text"
+              size="small"
+              disabled={!permissions('evaluer.fiche_amelioration')}
               icon={<AuditOutlined />}
               onClick={() => openEvaluateModal(record)}
+            />
+          </Tooltip>
+
+          <Tooltip title="Imprimer">
+            <Button
+              size="small"
+              disabled={!permissions('imprimer.fiche_amelioration')}
+              icon={<PrinterOutlined />}
+              onClick={() => download(record.id)}
             />
           </Tooltip>
 
@@ -281,7 +322,8 @@ export default function Improvements() {
           >
             <Tooltip title="Supprimer">
               <Button
-                type="text"
+                size="small"
+                 disabled={!permissions('supprimer.fiche_amelioration')}
                 danger
                 icon={<DeleteOutlined />}
                 loading={deletingId === record.id}

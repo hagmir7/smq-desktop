@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Form, Radio, Input, DatePicker, Switch, message } from "antd";
 import dayjs from "dayjs";
 import { api } from "../utils/api";
+import { useAuth } from "../contexts/AuthContext";
 
 const { TextArea } = Input;
 
@@ -30,8 +31,8 @@ const EFFECTIVENESS_OPTIONS = ["Efficace", "Non efficace"];
 export default function ImprovementEvaluationModal({ open, record, onClose, onSuccess }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-  // Controls whether closing_date is required/shown, mirrors the "closed" switch
   const [closed, setClosed] = useState(false);
+  const {permissions} = useAuth();
 
   useEffect(() => {
     if (!open) return;

@@ -21,6 +21,7 @@ import {
   EditOutlined,
   CheckCircleOutlined,
   CheckSquareOutlined,
+  PrinterOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import reclamationApi from '../utils/reclamationApi';
@@ -34,6 +35,7 @@ import ReclamationStep3Modal from '../components/ReclamationStep3Modal';
 import CloseReclamation from '../components/CloseReclamation';
 import ReclamationModalSeps from '../components/ReclamationModalSeps';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../utils/api';
 
 const { Title } = Typography;
 const { Header, Content } = Layout;
@@ -68,6 +70,7 @@ export default function Reclamations() {
   const [step3Open, setStep3Open] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const {permissions} = useAuth();
+  const [downloadSpin, setDownloadSpin] = useState(false);
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -162,6 +165,29 @@ export default function Reclamations() {
       page: paginationConfig.current,
       pageSize: paginationConfig.pageSize,
     });
+  };
+
+   const download = async (reclamation_id) => {
+    setDownloadSpin(true);
+    try {
+      const res = await api.get(`reclamations/${reclamation_id}/download`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `reclamation_${reclamation_id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      message.success('PDF téléchargé avec succès.');
+    } catch (error) {
+      console.log(error);
+      message.error('Erreur lors du téléchargement du PDF.');
+    } finally {
+      setDownloadSpin(false);
+    }
   };
 
 
@@ -278,6 +304,16 @@ export default function Reclamations() {
                 setSelectedId(record.id);
                 setIsModalOpen(true);
               }}
+            />
+          </Tooltip>
+
+
+           <Tooltip title="Imprimer">
+            <Button
+              disabled={!permissions('imprimer.reclamation')}
+              size="small"
+              icon={<PrinterOutlined />}
+              onClick={() => download(record.id)}
             />
           </Tooltip>
 

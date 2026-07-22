@@ -12,6 +12,7 @@ import dayjs from "dayjs";
 import { api } from "../utils/api";
 import ImprovementActionModal from "./ImprovementActionModal";
 import ImprovementActionCompleteModal from "./ImprovementActionCompleteModal";
+import { useAuth } from "../contexts/AuthContext";
 
 const EFFECTIVENESS_COLORS = {
   Efficace: "green",
@@ -48,6 +49,8 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
 
   // Per-row deleting state, so only the clicked row shows a loading spinner
   const [deletingId, setDeletingId] = useState(null);
+
+  const { permissions } = useAuth();
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -260,6 +263,7 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
         loading={loading}
         dataSource={data}
         columns={columns}
+        style={{display: permissions('voir.action_amelioration') ? 'table' : 'none'}}
         size="small"
         scroll={{ x: 1350 }}
         locale={{
@@ -274,7 +278,7 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
               <Button icon={<ReloadOutlined />} onClick={loadData} loading={loading}>
                 Actualiser
               </Button>
-              <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
+              <Button type="primary"  disabled={!permissions('creer.action_amelioration')} icon={<PlusOutlined />} onClick={openCreateModal}>
                 Nouvelle action
               </Button>
             </Space>
