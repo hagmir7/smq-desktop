@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Alert, Typography, Modal, AutoComplete } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, ShopOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../utils/api';
 import Connection from '../components/Connection';
 import { Link } from 'lucide-react';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const Login = () => {
   const [form] = Form.useForm();
@@ -18,19 +18,14 @@ const Login = () => {
   const [appVersion, setAppVersion] = useState('');
   const [errorType, setErrorType] = useState(null);
 
-
-
-   useEffect(() => {
-      window.electron?.getVersion().then(setAppVersion);
-    }, []);
-
+  useEffect(() => {
+    window.electron?.getVersion().then(setAppVersion);
+  }, []);
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('usernames') || '[]');
     setUsernames(saved);
   }, []);
-
-
 
   useEffect(() => {
     form.setFieldsValue({
@@ -40,7 +35,6 @@ const Login = () => {
     checkAuth();
   }, [form]);
 
-
   const handleSubmit = async (values) => {
     try {
       setErrorType(null);
@@ -48,8 +42,8 @@ const Login = () => {
 
       const token = localStorage.getItem('authToken');
       if (!token) {
-        setErrorType('auth'); 
-        return; 
+        setErrorType('auth');
+        return;
       }
 
       const updated = Array.from(new Set([values.email, ...usernames]));
@@ -66,7 +60,6 @@ const Login = () => {
 
   /* Auto navigation if already logged in */
   const checkAuth = async () => {
-    console.log(window.electron)
     const token = localStorage.getItem('authToken');
     if (!token) return;
 
@@ -74,7 +67,6 @@ const Login = () => {
       const response = await api.get('user', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log(response)
 
       if (window.electron) {
         await window.electron.user({ user: response.data, access_token: token });
@@ -92,9 +84,9 @@ const Login = () => {
     if (errorType === 'network') {
       return (
         <div>
-          <div className="font-semibold mb-2">Erreur de connexion réseau</div>
-          <div>
-            Impossible de se connecter au serveur. Veuillez vérifier votre connexion internet 
+          <div className="font-semibold mb-1">Erreur de connexion réseau</div>
+          <div className="text-sm opacity-90">
+            Impossible de se connecter au serveur. Veuillez vérifier votre connexion internet
             ou cliquez sur le bouton ci-dessous pour changer le type de connexion.
           </div>
         </div>
@@ -104,31 +96,52 @@ const Login = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-100 via-green-50 to-green-200 min-h-screen flex justify-center items-center p-6">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#0d3b2e] flex items-center justify-center">
+      {/* Decorative background layers */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(circle at 15% 20%, rgba(74, 222, 128, 0.18), transparent 45%), radial-gradient(circle at 85% 80%, rgba(16, 185, 129, 0.20), transparent 50%), linear-gradient(160deg, #0d3b2e 0%, #114b3a 45%, #1a5c46 100%)'
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(45deg, #ffffff 0px, #ffffff 1px, transparent 1px, transparent 22px)'
+        }}
+      />
 
-        <div className="text-center mb-8">
+      {/* Full width on mobile, capped width on larger screens — no card, no border, no shadow */}
+      <div className="relative w-full sm:max-w-md md:max-w-lg px-6 py-10 sm:px-10">
+        <div className="relative z-10 text-center mb-8">
           <img
-            className="h-20 mx-auto mb-4"
+            className="h-14 mx-auto mb-5"
             src="https://app.intercocina.com/assets/imgs/intercocina-logo.png"
             alt="Intercocina"
           />
-          <Title level={2} className="text-gray-800">Connectez-vous</Title>
+          <Title level={2} className="!mb-1 !text-white">
+            Connectez-vous
+          </Title>
+          <Text className="text-emerald-100">
+            Entrez vos identifiants pour accéder à votre compte.
+          </Text>
         </div>
 
         {(message || errorType === 'network') && (
-          <Alert 
-            message={getErrorMessage()} 
-            type={errorType === 'network' ? 'warning' : 'error'} 
-            showIcon 
-            className="mb-6"
+          <Alert
+            message={getErrorMessage()}
+            type={errorType === 'network' ? 'warning' : 'error'}
+            showIcon
+            className="relative z-10 mb-6 rounded-lg"
             action={
               errorType === 'network' && (
-                <Button 
-                  size="small" 
-                  type="link" 
+                <Button
+                  size="small"
+                  type="link"
                   onClick={() => setIsModalOpen(true)}
-                  className="text-green-600 hover:text-green-700"
+                  className="text-emerald-800 hover:text-emerald-900 whitespace-nowrap"
                 >
                   Changer la connexion
                 </Button>
@@ -137,64 +150,86 @@ const Login = () => {
           />
         )}
 
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
-
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          requiredMark={false}
+          className="relative z-10"
+        >
           <Form.Item
             name="email"
-            label="Nom d'utilisateur ou e-mail"
+            label={<span className="font-medium text-emerald-50">Nom d'utilisateur ou e-mail</span>}
             rules={[{ required: true, message: "Veuillez entrer votre identifiant" }]}
           >
             <AutoComplete
-              options={usernames.map(u => ({ value: u }))}
+              options={usernames.map((u) => ({ value: u }))}
               placeholder="Entrez votre identifiant"
-              // allowClear
               size="large"
-              className="rounded-lg w-full"
+              className="w-full"
             >
-              <Input prefix={<UserOutlined className="text-gray-400" />} size="large" />
+              <Input
+                prefix={<UserOutlined className="text-emerald-600" />}
+                size="large"
+                className="rounded-lg bg-white/95"
+              />
             </AutoComplete>
           </Form.Item>
 
           <Form.Item
             name="password"
-            label="Mot de passe"
+            label={<span className="font-medium text-emerald-50">Mot de passe</span>}
             rules={[{ required: true, message: "Veuillez entrer votre mot de passe" }]}
           >
             <Input.Password
-              prefix={<LockOutlined className="text-gray-400" />}
+              prefix={<LockOutlined className="text-emerald-600" />}
               placeholder="Entrez votre mot de passe"
               size="large"
-              className="rounded-lg"
+              className="rounded-lg bg-white/95"
             />
           </Form.Item>
 
-          <Form.Item className="mt-4">
+          <Form.Item className="mt-6 mb-2">
             <Button
               type="primary"
               htmlType="submit"
               loading={loading}
               block
               size="large"
-              className="bg-green-600 hover:bg-green-700 rounded-lg"
+              className="bg-white !text-emerald-800 hover:!bg-emerald-50 border-none rounded-lg h-11 font-semibold shadow-sm"
             >
-              {loading ? "Connexion..." : "Se connecter"}
+              {loading ? 'Connexion...' : 'Se connecter'}
             </Button>
           </Form.Item>
         </Form>
 
-        <Modal title="Type de connexion" open={isModalOpen} onCancel={() => setIsModalOpen(false)} footer={false}>
-          <Connection />
-        </Modal>
-
-        <div className="mt-6 text-center">
-          <Button onClick={() => setIsModalOpen(true)}>
-            <Link size={18} />
+        <div className="relative z-10 mt-6 flex items-center justify-center">
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 rounded-lg bg-white/10 border-white/20 text-emerald-50 hover:!text-white hover:!border-white/40 hover:!bg-white/15"
+          >
+            <Link size={16} />
+            <span className="text-sm">Configurer la connexion</span>
           </Button>
         </div>
 
-        {window.electron && <div className="text-center mt-5 text-gray-700">v{appVersion}</div>}
-
+        {window.electron && (
+          <div className="relative z-10 text-center mt-6 text-xs text-emerald-100/60">
+            v{appVersion}
+          </div>
+        )}
       </div>
+
+      <Modal
+        title="Type de connexion"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={false}
+        width="90%"
+        style={{ maxWidth: 480 }}
+      >
+        <Connection />
+      </Modal>
     </div>
   );
 };

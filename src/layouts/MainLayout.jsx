@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Layout, Menu } from 'antd';
+import { Badge, Layout, Menu } from 'antd';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import UpdateNotifier from '../components/UpdateNotifier.jsx';
 import DropMenu from '../components/DropMenu.jsx';
-import { Astroid, ClipboardCheck, Flag, Layers, LayoutDashboard, Logs, Pyramid, RefreshCcw, Settings, SquareMenu } from 'lucide-react';
+import { Astroid, ClipboardCheck, Flag, Layers, LayoutDashboard, Logs, Pyramid, RefreshCcw, Settings, SquareMenu, UserStar } from 'lucide-react';
 import MainHeader from '../components/MainHeader.jsx';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../utils/api.jsx';
 
 const { Header, Sider, Content } = Layout;
 
@@ -24,11 +25,34 @@ export default function MainLayout() {
   const [appVersion, setAppVersion] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const { permissions } = useAuth();
+  const { permissions, roles } = useAuth();
+  const [notifications, setNotifications] = useState({});
 
   useEffect(() => {
     window.electron?.getVersion().then(setAppVersion);
   }, []);
+
+
+
+  const getNotifications = async () => {
+    try {
+      const response = await api.get("dashboard/notifications");
+      setNotifications(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+
+    getNotifications();
+
+    const interval = setInterval(getNotifications, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+
 
   const menuItems = useMemo(
     () => [
@@ -36,7 +60,23 @@ export default function MainLayout() {
       {
         key: '/reclamations',
         icon: <Flag size={18} />,
-        label: 'Réclamations',
+        label: (
+          <>
+            Réclamations
+            <Badge
+              className="ml-2"
+              showZero={false}
+              count={
+                (roles('smq')
+                  ? notifications?.validated_reclamation_count
+                  : roles('dr_commercial')
+                    ? notifications?.new_recalmations_count
+                    : 0) ?? 0
+              }
+            />
+          </>
+        ),
+        title: 'Réclamations',
         disabled: !permissions('voir.reclamations'),
       },
       { key: '/correction-actions', icon: <Astroid size={18} />, label: 'Actions Corrective', disabled: !permissions('voir.actions_correctives') },
@@ -55,21 +95,29 @@ export default function MainLayout() {
             label: 'Utilisateurs',
           },
           {
+            key: '/services',
+            icon: <UserStar size={18} />,
+            disabled: !permissions('voir.processus'),
+            label: 'Processus ',
+          },
+          {
             key: '/roles',
             disabled: !permissions('voir.roles'),
             icon: <ClipboardCheck size={18} />,
             label: 'Rôles et permissions',
+
           },
           {
             key: '/connections',
             icon: <Layers size={18} />,
             disabled: !permissions('voir.connexions'),
             label: 'Connexions DB',
+
           },
         ],
       },
     ],
-    [permissions]
+    [permissions, roles, notifications]
   );
 
   const flatMenuItems = useMemo(() => flattenMenuItems(menuItems), [menuItems]);
@@ -77,9 +125,9 @@ export default function MainLayout() {
   useEffect(() => {
     const currentItem = flatMenuItems.find((item) => item.key === location.pathname);
     if (currentItem) {
-      document.title = currentItem.label;
+      document.title = currentItem.title || currentItem.label;
       const titleEl = document.getElementById('title');
-      if (titleEl) titleEl.innerHTML = currentItem.label;
+      if (titleEl) titleEl.innerHTML = currentItem.title || currentItem.label;
     }
   }, [location.pathname, flatMenuItems]);
 
