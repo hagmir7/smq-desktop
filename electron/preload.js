@@ -13,6 +13,11 @@ contextBridge.exposeInMainWorld('electron', {
   // onUpdateDownloaded: (cb) => ipcRenderer.on('update:downloaded', (_e, info) => cb(info)),
   // onUpdateError: (cb) => ipcRenderer.on('update:error', (_e, err) => cb(err)),
   // quitAndInstall: () => ipcRenderer.invoke('update:quit-and-install'),
+
+  windowMinimize: () => ipcRenderer.send('window-minimize'),
+  windowMaximize: () => ipcRenderer.send('window-maximize'),
+  windowClose: () => ipcRenderer.send('window-close'),
+  onWindowMaximized: (callback) => ipcRenderer.on('window-maximized', (_event, isMaximized) => callback(isMaximized)),
 });
 
 

@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { api } from '../utils/api';
 import Connection from '../components/Connection';
 import { Link } from 'lucide-react';
+import TitleBar from '../components/TitleBar';
 
 const { Title, Text } = Typography;
 
@@ -96,128 +97,134 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#0d3b2e] flex items-center justify-center">
-      {/* Decorative background layers */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(circle at 15% 20%, rgba(74, 222, 128, 0.18), transparent 45%), radial-gradient(circle at 85% 80%, rgba(16, 185, 129, 0.20), transparent 50%), linear-gradient(160deg, #0d3b2e 0%, #114b3a 45%, #1a5c46 100%)'
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.06]"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(45deg, #ffffff 0px, #ffffff 1px, transparent 1px, transparent 22px)'
-        }}
-      />
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#0d3b2e] flex flex-col">
+      {/* Title bar stays pinned to the top of the window */}
+      <TitleBar title="Intercocina — Connexion" />
 
-      {/* Full width on mobile, capped width on larger screens — no card, no border, no shadow */}
-      <div className="relative w-full sm:max-w-md md:max-w-lg px-6 py-10 sm:px-10">
-        <div className="relative z-10 text-center mb-8">
-          <img
-            className="h-14 mx-auto mb-5"
-            src="https://app.intercocina.com/assets/imgs/intercocina-logo.png"
-            alt="Intercocina"
-          />
-          <Title level={2} className="!mb-1 !text-white">
-            Connectez-vous
-          </Title>
-          <Text className="text-emerald-100">
-            Entrez vos identifiants pour accéder à votre compte.
-          </Text>
-        </div>
+      {/* Everything below fills the remaining space and centers the login card */}
+      <div className="relative flex-1 w-full flex items-center justify-center">
+        {/* Decorative background layers */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(circle at 15% 20%, rgba(74, 222, 128, 0.18), transparent 45%), radial-gradient(circle at 85% 80%, rgba(16, 185, 129, 0.20), transparent 50%), linear-gradient(160deg, #0d3b2e 0%, #114b3a 45%, #1a5c46 100%)'
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(45deg, #ffffff 0px, #ffffff 1px, transparent 1px, transparent 22px)'
+          }}
+        />
 
-        {(message || errorType === 'network') && (
-          <Alert
-            message={getErrorMessage()}
-            type={errorType === 'network' ? 'warning' : 'error'}
-            showIcon
-            className="relative z-10 mb-6 rounded-lg"
-            action={
-              errorType === 'network' && (
-                <Button
-                  size="small"
-                  type="link"
-                  onClick={() => setIsModalOpen(true)}
-                  className="text-emerald-800 hover:text-emerald-900 whitespace-nowrap"
-                >
-                  Changer la connexion
-                </Button>
-              )
-            }
-          />
-        )}
+        {/* Full width on mobile, capped width on larger screens — no card, no border, no shadow */}
+        <div className="relative w-full sm:max-w-md md:max-w-lg px-6 py-10 sm:px-10">
+          <div className="relative z-10 text-center mb-8">
+            <img
+              className="h-14 mx-auto mb-5"
+              src="https://app.intercocina.com/assets/imgs/intercocina-logo.png"
+              alt="Intercocina"
+            />
+            <Title level={4} className="!mb-1 !text-white mt-0 pt-0">
+              Connectez-vous
+            </Title>
+            <Text className="text-emerald-100">
+              Entrez vos identifiants pour accéder à votre compte.
+            </Text>
+          </div>
 
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          requiredMark={false}
-          className="relative z-10"
-        >
-          <Form.Item
-            name="email"
-            label={<span className="font-medium text-emerald-50">Nom d'utilisateur ou e-mail</span>}
-            rules={[{ required: true, message: "Veuillez entrer votre identifiant" }]}
+          {(message || errorType === 'network') && (
+            <Alert
+              message={getErrorMessage()}
+              type={errorType === 'network' ? 'warning' : 'error'}
+              showIcon
+              className="relative z-10 mb-6 rounded-lg"
+              action={
+                errorType === 'network' && (
+                  <Button
+                    size="small"
+                    type="link"
+                    onClick={() => setIsModalOpen(true)}
+                    className="text-emerald-800 hover:text-emerald-900 whitespace-nowrap"
+                  >
+                    Changer la connexion
+                  </Button>
+                )
+              }
+            />
+          )}
+
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            requiredMark={false}
+            className="relative z-10"
           >
-            <AutoComplete
-              options={usernames.map((u) => ({ value: u }))}
-              placeholder="Entrez votre identifiant"
-              size="large"
-              className="w-full"
+            <Form.Item
+              name="email"
+              label={<span className="font-medium text-emerald-50">E-mail</span>}
+              rules={[{ required: true, message: "Veuillez entrer votre identifiant" }]}
             >
-              <Input
-                prefix={<UserOutlined className="text-emerald-600" />}
+              <AutoComplete
+                options={usernames.map((u) => ({ value: u }))}
+                placeholder="Entrez votre identifiant"
+                size="large"
+                className="w-full"
+              >
+                <Input
+                  prefix={<UserOutlined className="text-emerald-600" />}
+                  size="large"
+                  className="rounded-lg bg-white/95"
+                />
+              </AutoComplete>
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              label={<span className="font-medium text-emerald-50">Mot de passe</span>}
+              rules={[{ required: true, message: "Veuillez entrer votre mot de passe" }]}
+            >
+              <Input.Password
+                prefix={<LockOutlined className="text-emerald-600" />}
+                placeholder="Entrez votre mot de passe"
                 size="large"
                 className="rounded-lg bg-white/95"
               />
-            </AutoComplete>
-          </Form.Item>
+            </Form.Item>
 
-          <Form.Item
-            name="password"
-            label={<span className="font-medium text-emerald-50">Mot de passe</span>}
-            rules={[{ required: true, message: "Veuillez entrer votre mot de passe" }]}
-          >
-            <Input.Password
-              prefix={<LockOutlined className="text-emerald-600" />}
-              placeholder="Entrez votre mot de passe"
-              size="large"
-              className="rounded-lg bg-white/95"
-            />
-          </Form.Item>
+            <Form.Item className="mt-6 mb-2">
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                block
+                size="middle"
+                className="bg-white !text-emerald-800 hover:!bg-emerald-50 border-none rounded-lg h-9 font-semibold shadow-sm"
+              >
+                {loading ? 'Connexion...' : 'Se connecter'}
+              </Button>
+            </Form.Item>
+          </Form>
 
-          <Form.Item className="mt-6 mb-2">
+          <div className="relative z-10 mt-6 flex items-center justify-center">
             <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              block
-              size="large"
-              className="bg-white !text-emerald-800 hover:!bg-emerald-50 border-none rounded-lg h-11 font-semibold shadow-sm"
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 rounded-lg bg-white/10 border-white/20 text-emerald-50 hover:!text-white hover:!border-white/40 hover:!bg-white/15"
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              <Link size={16} />
+              <span className="text-sm">Configurer la connexion</span>
             </Button>
-          </Form.Item>
-        </Form>
-
-        <div className="relative z-10 mt-6 flex items-center justify-center">
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 rounded-lg bg-white/10 border-white/20 text-emerald-50 hover:!text-white hover:!border-white/40 hover:!bg-white/15"
-          >
-            <Link size={16} />
-            <span className="text-sm">Configurer la connexion</span>
-          </Button>
-        </div>
-
-        {window.electron && (
-          <div className="relative z-10 text-center mt-6 text-xs text-emerald-100/60">
-            v{appVersion}
           </div>
-        )}
+
+          {window.electron && (
+            <div className="relative z-10 text-center font-bold mt-6 text-xs text-emerald-100/60">
+              v{appVersion}
+            </div>
+          )}
+        </div>
       </div>
 
       <Modal
