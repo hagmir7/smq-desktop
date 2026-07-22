@@ -11,7 +11,7 @@ import {
   Badge,
   message,
 } from "antd";
-import { Search, Loader2, RefreshCw } from "lucide-react";
+import { Search, Loader2, RefreshCw, SquareMenu } from "lucide-react";
 import dayjs from "dayjs";
 
 import { correctiveActionsApi } from "../utils/correctiveActionsApi";
@@ -43,7 +43,8 @@ export default function CorrectiveActionsRegister() {
   const refresh = useCallback(async (search = "") => {
     setLoading(true);
     try {
-      const res = await correctiveActionsApi.list(50, {
+      const res = await correctiveActionsApi.list({
+        per_page: 50,
         reclamation_code: search || undefined,
       });
 
@@ -56,10 +57,6 @@ export default function CorrectiveActionsRegister() {
       setLoading(false);
     }
   }, []);
-
-  useEffect(() => {
-    refresh("");
-  }, [refresh]);
 
   useEffect(() => {
     if (!didMountRef.current) {
@@ -188,10 +185,13 @@ export default function CorrectiveActionsRegister() {
         className="flex items-center justify-between !bg-white !px-6 border-b border-slate-200"
         style={{ height: 64, lineHeight: "64px" }}
       >
-        <div className="leading-tight">
-          <div className="text-base font-semibold text-slate-900">Registre des reclamations</div>
-          <div className="text-xs text-slate-500">
-            {topLevel.length} action(s) · {openCount} ouverte(s) · {overdueCount} en retard
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-teal-700 text-white">
+            <SquareMenu size={18} />
+          </div>
+          <div className="leading-tight">
+            <div className="text-base font-semibold text-slate-900">Journal d'amélioration</div>
+            <div className="text-xs text-slate-500">{topLevel.length} action(s) · {openCount} ouverte(s) · {overdueCount} en retard</div>
           </div>
         </div>
 

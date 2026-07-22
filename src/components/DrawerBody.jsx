@@ -5,11 +5,14 @@ import CorrectiveActionEditForm from "./CorrectiveActionEditForm";
 import CorrectionActionChildForm from "./CorrectiveActionChildForm";
 import CorrectiveActionCompleteForm from "./CorrectiveActionCompleteForm";
 import ShowCorrectiveAction from "./ShowCorrectiveAction";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function DrawerBody({
     item, parent, children, activeTab, setActiveTab,
     onOpenRelated, onUpdate, onComplete, onCreateChild, loading,
 }) {
+
+    const { permissions } = useAuth();
     return (
         <div>
             {parent && (
@@ -28,16 +31,38 @@ export default function DrawerBody({
                 items={[
                     {
                         key: "view", label: "Aperçu",
+                        disabled: !permissions('voir.action_corrective'),
                         children: (
                             <ShowCorrectiveAction item={item} children={children} />
                         ),
                     },
-                    { key: "edit", label: "Modifier", children: <CorrectiveActionEditForm item={item} onSubmit={onUpdate} loading={loading} /> },
                     {
-                        key: "complete", label: "Clôturer", disabled: item.status === "completed",
-                        children: <CorrectiveActionCompleteForm onSubmit={onComplete} loading={loading} item={item} />,
+                        key: "edit",
+                        label: "Modifier",
+                        disabled: !permissions('modifier.action_corrective'),
+                        children: <CorrectiveActionEditForm
+                            item={item}
+                            onSubmit={onUpdate}
+                            loading={loading} />
                     },
-                    { key: "child", label: "Sous-action", children: <CorrectionActionChildForm onSubmit={onCreateChild} loading={loading} /> },
+                    {
+                        key: "complete",
+                        label: "Clôturer",
+                        disabled: item.status === "completed" || !permissions('cloturer.action_corrective'),
+                        children: <CorrectiveActionCompleteForm
+                            onSubmit={onComplete}
+                            loading={loading}
+                            item={item}
+                        />,
+                    },
+                    {
+                        key: "child",
+                        label: "Sous-action",
+                        disabled: !permissions('creer.action_corrective'),
+                        children: <CorrectionActionChildForm onSubmit={onCreateChild}
+                            loading={loading}
+                        />
+                    },
                 ]}
             />
         </div>

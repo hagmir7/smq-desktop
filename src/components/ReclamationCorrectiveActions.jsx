@@ -399,7 +399,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
       >
         <Form form={form} layout="vertical" className="mt-4">
           <Form.Item label="Type" name="type" rules={[{ required: true, message: 'Le type est requis.' }]}>
-            <Select placeholder="Sélectionner un type" >
+            <Select placeholder="Sélectionner un type" defaultValue={'Action corrective'}>
               {ACTION_TYPES.map((t) => (
                 <Select.Option key={t} value={t}>
                   {t}

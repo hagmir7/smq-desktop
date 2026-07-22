@@ -306,7 +306,7 @@ export default function Reclamations() {
                 setStep2Open(true);
               }}
               size="small"
-              disabled={!permissions('valider.reclamation')}
+              disabled={!permissions('valider.reclamation')  }
               icon={<CheckCircleOutlined />}
             />
           </Tooltip>
@@ -318,7 +318,7 @@ export default function Reclamations() {
                 setStep3Open(true);
               }}
               size="small"
-              disabled={!permissions('analyse.reclamation')}
+              disabled={!permissions('analyse.reclamation') || !record.is_recevable}
               icon={<CheckSquareOutlined />}
             />
           </Tooltip>

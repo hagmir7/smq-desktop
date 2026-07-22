@@ -21,14 +21,7 @@ import { useAuth } from "../contexts/AuthContext";
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
 
-const ROW_MENU_ITEMS = [
-    { label: "Modifier", key: "edit" },
-    { label: "Marquer comme terminée", key: "complete" },
-    { label: "Ajouter une sous-action", key: "child" },
-    { label: "Fiche d'améliorationsn", key: "improvement" },
-    { type: "divider", key: "divider" },
-    { label: "Supprimer", key: "delete", danger: true },
-];
+
 
 
 const EFFECTIVENESS_OPTIONS = [
@@ -86,6 +79,17 @@ export default function CorrectiveActions() {
     // Debounce ref for the free-text search input so we don't fire a
     // request on every keystroke.
     const debounceRef = useRef(null);
+
+    const ROW_MENU_ITEMS = [
+        { label: "Modifier", key: "edit",disabled: !permissions('modifier.action_corrective') },
+        { label: "Marquer comme terminée", key: "complete", disabled: !permissions('cloturer.action_corrective')},
+        { label: "Ajouter une sous-action", key: "child", disabled: !permissions('creer.action_corrective')},
+        { label: "Fiche d'améliorationsn", key: "improvement", disabled: !permissions('creer.fiche_amelioration')},
+        { type: "divider", key: "divider",disabled: !permissions('creer.fiche_amelioration') },
+        { label: "Supprimer", key: "delete", danger: true, disabled: !permissions('supprimer.action_corrective')},
+    ];
+
+
 
     // Fetch the services list once for the filter Select.
     useEffect(() => {
