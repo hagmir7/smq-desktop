@@ -30,7 +30,7 @@ const Login = () => {
 
   useEffect(() => {
     form.setFieldsValue({
-      email: import.meta.env.MODE === 'development' ? 'admin' : '',
+      email: import.meta.env.MODE === 'development' ? 'admin@admin.com' : '',
       password: import.meta.env.MODE === 'development' ? 'password' : ''
     });
     checkAuth();
