@@ -14,6 +14,8 @@ import {
   Tooltip,
   message,
   Typography,
+  Layout,
+  Empty,
 } from "antd";
 import {
   PlusOutlined,
@@ -22,7 +24,11 @@ import {
   ThunderboltOutlined,
   DatabaseOutlined,
 } from "@ant-design/icons";
+import { Database } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 const { Title, Text } = Typography;
+const { Content, Header } = Layout
+
 
 const connectionsApi = {
   list: () => api.get("connections").then((res) => res.data),
@@ -41,6 +47,7 @@ export default function Connections() {
   const [editingConnection, setEditingConnection] = useState(null);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
+  const {permissions} = useAuth()
 
   const fetchConnections = async () => {
     setLoading(true);
@@ -83,8 +90,7 @@ export default function Connections() {
     try {
       const values = await form.validateFields();
 
-      // On edit, if the password field was left blank, don't send it -
-      // avoids overwriting the stored password with an empty string.
+  
       const payload = { ...values };
       if (editingConnection && !payload.password) {
         delete payload.password;
@@ -125,7 +131,7 @@ export default function Connections() {
       message.success(`Connexion à "${connection.server}" réussie`);
     } catch (error) {
       message.error(`Échec du test de connexion pour "${connection.server}"`);
-      
+
     } finally {
       setTestingId(null);
       fetchConnections();
@@ -185,13 +191,14 @@ export default function Connections() {
         <Space>
           <Tooltip title="Tester la connexion">
             <Button
+              disabled={!permissions('tester.connexion')}
               icon={<ThunderboltOutlined />}
               loading={testingId === connection.id}
               onClick={() => handleTest(connection)}
             />
           </Tooltip>
           <Tooltip title="Modifier">
-            <Button icon={<EditOutlined />} onClick={() => openEditModal(connection)} />
+            <Button  disabled={!permissions('modifier.connexion')} icon={<EditOutlined />} onClick={() => openEditModal(connection)} />
           </Tooltip>
           <Popconfirm
             title="Supprimer cette connexion ?"
@@ -201,8 +208,8 @@ export default function Connections() {
             cancelText="Annuler"
             onConfirm={() => handleDelete(connection.id)}
           >
-            <Tooltip title="Supprimer">
-              <Button icon={<DeleteOutlined />} danger />
+            <Tooltip title="Supprimer" >
+              <Button icon={<DeleteOutlined />} disabled={!permissions('supprimer.connexion')} danger />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -211,99 +218,124 @@ export default function Connections() {
   ];
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <Title level={4} className="!mb-1 p-0 m-0">
-            Connexions
-          </Title>
-          <Text type="secondary">Gérez les connexions aux bases de données de l'application</Text>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
-          Nouvelle
-        </Button>
-      </div>
-
-      <Table
-        columns={columns}
-        dataSource={connectionsList}
-        rowKey="id"
-        loading={loading}
-        size='small'
-        locale={{ emptyText: "Aucune connexion configurée" }}
-        pagination={{ pageSize: 10 }}
-      />
-
-      <Modal
-        title={editingConnection ? "Modifier la connexion" : "Nouvelle connexion"}
-        open={modalOpen}
-        onCancel={() => setModalOpen(false)}
-        onOk={handleSave}
-        confirmLoading={saving}
-        okText="Enregistrer"
-        cancelText="Annuler"
-        destroyOnClose
+    <Layout className="min-h-full bg-slate-100">
+      <Header
+        className="flex items-center justify-between !bg-white !px-6 border-b border-slate-200"
+        style={{ height: 64, lineHeight: '64px' }}
       >
-        <Form form={form} layout="vertical" className="mt-4">
-          <Form.Item
-            name="name"
-            label="Nom de la connexion"
-            rules={[{ required: true, message: "Le nom est requis" }]}
+
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-teal-700 text-white">
+            <Database size={18} />
+          </div>
+          <div className="leading-tight">
+            <div className="text-base font-semibold text-slate-900">Connexions</div>
+            <div className="text-xs text-slate-500">Process(us) au total</div>
+          </div>
+        </div>
+
+        <Space>
+          <Button type="primary" disabled={!permissions('creer.connexion')} icon={<PlusOutlined />} onClick={openCreateModal}>
+            Nouvelle
+          </Button>
+        </Space>
+      </Header>
+
+      <Content>
+        <div className='p-4'>
+
+
+
+          <Table
+            columns={columns}
+            dataSource={connectionsList}
+            rowKey="id"
+            loading={loading}
+            size="small"
+            locale={{
+              emptyText: (
+                <Empty
+                  image={<Database size={30} />}
+                  description="Aucune connexion configurée"
+                />
+              ),
+            }}
+            pagination={{ pageSize: 10 }}
+          />
+
+          <Modal
+            title={editingConnection ? "Modifier la connexion" : "Nouvelle connexion"}
+            open={modalOpen}
+            onCancel={() => setModalOpen(false)}
+            onOk={handleSave}
+            confirmLoading={saving}
+            okText="Enregistrer"
+            cancelText="Annuler"
+            destroyOnClose
           >
-            <Input placeholder="Ex : STILEMOBILI" />
-          </Form.Item>
+            <Form form={form} layout="vertical" className="mt-4">
+              <Form.Item
+                name="name"
+                label="Nom de la connexion"
+                rules={[{ required: true, message: "Le nom est requis" }]}
+              >
+                <Input placeholder="Ex : STILEMOBILI" />
+              </Form.Item>
 
-          <Form.Item
-            name="server"
-            label="Serveur"
-            rules={[{ required: true, message: "Le serveur est requis" }]}
-          >
-            <Input placeholder="Ex : intercocinasvr" />
-          </Form.Item>
+              <Form.Item
+                name="server"
+                label="Serveur"
+                rules={[{ required: true, message: "Le serveur est requis" }]}
+              >
+                <Input placeholder="Ex : intercocinasvr" />
+              </Form.Item>
 
-          <Form.Item name="auth_win" label="Authentification Windows" valuePropName="checked">
-            <Switch />
-          </Form.Item>
+              <Form.Item name="auth_win" label="Authentification Windows" valuePropName="checked">
+                <Switch />
+              </Form.Item>
 
-          <Form.Item
-            noStyle
-            shouldUpdate={(prev, curr) => prev.auth_win !== curr.auth_win}
-          >
-            {({ getFieldValue }) =>
-              !getFieldValue("auth_win") && (
-                <>
-                  <Form.Item
-                    name="username"
-                    label="Nom d'utilisateur"
-                    rules={[{ required: true, message: "Le nom d'utilisateur est requis" }]}
-                  >
-                    <Input placeholder="Ex : sa" />
-                  </Form.Item>
+              <Form.Item
+                noStyle
+                shouldUpdate={(prev, curr) => prev.auth_win !== curr.auth_win}
+              >
+                {({ getFieldValue }) =>
+                  !getFieldValue("auth_win") && (
+                    <>
+                      <Form.Item
+                        name="username"
+                        label="Nom d'utilisateur"
+                        rules={[{ required: true, message: "Le nom d'utilisateur est requis" }]}
+                      >
+                        <Input placeholder="Ex : sa" />
+                      </Form.Item>
 
-                  <Form.Item
-                    name="password"
-                    label="Mot de passe"
-                    rules={[
-                      {
-                        required: !editingConnection,
-                        message: "Le mot de passe est requis",
-                      },
-                    ]}
-                  >
-                    <Input.Password
-                      placeholder={
-                        editingConnection
-                          ? "Laisser vide pour conserver le mot de passe actuel"
-                          : "••••••••"
-                      }
-                    />
-                  </Form.Item>
-                </>
-              )
-            }
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
+                      <Form.Item
+                        name="password"
+                        label="Mot de passe"
+                        rules={[
+                          {
+                            required: !editingConnection,
+                            message: "Le mot de passe est requis",
+                          },
+                        ]}
+                      >
+                        <Input.Password
+                          placeholder={
+                            editingConnection
+                              ? "Laisser vide pour conserver le mot de passe actuel"
+                              : "••••••••"
+                          }
+                        />
+                      </Form.Item>
+                    </>
+                  )
+                }
+              </Form.Item>
+            </Form>
+          </Modal>
+        </div>
+      </Content>
+
+    </Layout>
   );
 }

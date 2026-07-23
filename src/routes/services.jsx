@@ -41,7 +41,7 @@ export default function Services() {
           total: payload.total ?? 0,
         })
       } catch (err) {
-        message.error('Impossible de charger la liste des services')
+        message.error('Impossible de charger la liste des processus.')
       } finally {
         setLoading(false)
       }
@@ -114,11 +114,11 @@ export default function Services() {
       if (editingService) {
         // PUT /api/services/{id}
         await api.put(`services/${editingService.id}`, values)
-        message.success('Service mis à jour avec succès')
+        message.success('Process mis à jour avec succès')
       } else {
         // POST /api/services
         await api.post('services', values)
-        message.success('Service créé avec succès')
+        message.success('Process créé avec succès')
       }
 
       closeModal()
@@ -135,7 +135,7 @@ export default function Services() {
   const handleDelete = async (id) => {
     try {
       await api.delete(`services/${id}`)
-      message.success('Service supprimé avec succès')
+      message.success('Process supprimé avec succès')
       // If we just deleted the last row on a page beyond page 1, step back a page
       const isLastRowOnPage = services.length === 1 && pagination.current > 1
       loadData(isLastRowOnPage ? pagination.current - 1 : pagination.current, pagination.pageSize, search)
@@ -178,7 +178,7 @@ export default function Services() {
             <Button disabled={!permissions("modifier.processus")} size="small" icon={<EditOutlined />} onClick={() => openEditModal(record)} />
           </Tooltip>
           <Popconfirm
-            title="Supprimer ce service ?"
+            title="Supprimer ce process ?"
             description="Cette action est irréversible."
             okText="Supprimer"
             okButtonProps={{ danger: true }}
@@ -243,7 +243,7 @@ export default function Services() {
               total: pagination.total,
               showSizeChanger: true,
               pageSizeOptions: [10, 20, 50, 100],
-              showTotal: (total) => `${total} service(s)`,
+              showTotal: (total) => `${total} process(us)`,
             }}
             className="bg-white rounded-md"
           />
@@ -251,7 +251,7 @@ export default function Services() {
       </Content>
 
       <Modal
-        title={editingService ? 'Modifier le service' : 'Nouveau service'}
+        title={editingService ? 'Modifier le process' : 'Nouveau process'}
         open={modalOpen}
         onOk={handleSubmit}
         confirmLoading={saving}
@@ -261,9 +261,18 @@ export default function Services() {
         destroyOnClose
       >
         <Form form={form} layout="vertical" className="mt-4">
+
+           <Form.Item
+            name="code"
+            label="Matricule"
+            rules={[{ required: true, message: 'la process est requis' }]}
+          >
+            <Input placeholder="Matricule" />
+          </Form.Item>
+
           <Form.Item
             name="name"
-            label="Nom du service"
+            label="Nom du process"
             rules={[{ required: true, message: 'Le nom est requis' }]}
           >
             <Input placeholder="Ex: Production" />

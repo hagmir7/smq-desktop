@@ -177,7 +177,7 @@ export default function Users() {
   return (
     <div className='relative overflow-x-auto'>
       <div className='flex flex-col sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between p-2 bg-gray-200'>
-        <UserCreateModal fetchData={getUsers} />
+        <UserCreateModal fetchData={getUsers} permissions={permissions} />
         <div className='relative' />
         
 

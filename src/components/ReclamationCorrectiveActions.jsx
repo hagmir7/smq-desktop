@@ -60,6 +60,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
   const [submitting, setSubmitting] = useState(false);
   const [showChildren, setShowChildren] = useState(false);
   const { permissions } = useAuth();
+  const [reclamation, setReclamation] = useState(null);
 
   // null => creating a new top-level action; object => editing that action
   const [editingAction, setEditingAction] = useState(null);
@@ -90,6 +91,17 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
       setLoading(false);
     }
   };
+
+  const fetchReclamation = useCallback(async () => {
+    if (!reclamationId) return;
+    try {
+      const res = await reclamationApi.show(reclamationId);
+      setReclamation(res.data);
+    } catch (err) {
+      console.error(err);
+      message.error("Impossible de charger la réclamation.");
+    }
+  }, [reclamationId]);
 
   const fetchServices = useCallback(async () => {
     try {
@@ -126,7 +138,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
     fetchServices();
     fetchResponsibles();
     fetchActions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchReclamation();    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reclamationId]);
 
   const openCreateModal = (forParentId = null) => {
@@ -306,7 +318,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
   };
 
   return (
-    <div>
+    <div style={{ display: permissions('voir.actions_correctives') ? 'block' : 'none' }}>
       {/* Distinct background for child (sub-action) rows */}
       <style>{`
         .reclamation-actions-table .child-action-row > td {
@@ -335,7 +347,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
           <Button
             size="small"
             type="primary"
-            disabled={!permissions('creer.action_corrective')}
+            disabled={!permissions('creer.action_corrective') || reclamation?.closing_date || !reclamation}
             icon={<PlusOutlined />}
             onClick={() => openCreateModal(null)}>
             Ajouter
@@ -398,7 +410,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
         destroyOnClose
       >
         <Form form={form} layout="vertical" className="mt-4">
-          <Form.Item label="Type" name="type" rules={[{ required: true, message: 'Le type est requis.' }]}>
+          <Form.Item label="Type" name="type">
             <Select placeholder="Sélectionner un type" defaultValue={'Action corrective'}>
               {ACTION_TYPES.map((t) => (
                 <Select.Option key={t} value={t}>

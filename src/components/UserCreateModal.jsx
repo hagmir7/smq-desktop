@@ -24,7 +24,7 @@ import {
 } from "antd";
 import { api } from "../utils/api";
 
-export default function UserCreateModal({ fetchData }) {
+export default function UserCreateModal({ fetchData, permissions }) {
     const [form] = Form.useForm();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -121,6 +121,7 @@ export default function UserCreateModal({ fetchData }) {
                 onClick={() => setOpen(true)}
                 icon={<Plus size={16} className="text-gray-500" />}
                 className="ms-3 inline-flex items-center"
+                disabled={!permissions('creer.utilisateur')}
             >
                 Ajouter
             </Button>

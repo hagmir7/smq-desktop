@@ -130,7 +130,6 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
 
   useEffect(() => {
     if (data) setActiveTab(STEPS[resolveStepState(data).currentIndex].tab);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.id]);
 
   const { currentIndex } = resolveStepState(data);
@@ -315,7 +314,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                   key: "affectation",
                   label: "Affectation",
                   disabled: !permissions('voir.action_corrective'),
-                  children: <ReclamationCorrectiveActions reclamationId={reclamationId} />,
+                  children: <ReclamationCorrectiveActions reclamationId={reclamationId}  />,
                 },
                 {
                   key: "cloture",

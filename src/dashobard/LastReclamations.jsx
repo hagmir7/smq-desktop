@@ -1,5 +1,6 @@
 import React from "react";
 import { Row, Col, Card, Typography, Tag, Table } from "antd";
+import { dateFormat } from "../utils/config";
 
 const { Text } = Typography;
 
@@ -62,6 +63,21 @@ const columns = [
         key: "claimant_name",
         render: (text) => <Text className="text-gray-500">{text || "—"}</Text>,
     },
+
+    {
+        title: "Créé par",
+        dataIndex: "user",
+        key: "user",
+        render: (user) => <Text className="text-gray-500">{user.full_name || "—"}</Text>,
+    },
+
+     {
+        title: "Créé le",
+        dataIndex: "created_at",
+        key: "created_at",
+        render: (created_at) => <Text className="text-gray-500">{dateFormat(created_at) || "—"}</Text>,
+    },
+
     {
         title: "Statut",
         key: "status",

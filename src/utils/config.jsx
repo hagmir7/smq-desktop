@@ -161,3 +161,22 @@ export const WORKFLOW_STEPS = {
   4: "Affectation",
   5: "Clôturé",
 };
+
+
+export const MONTH_LABELS = [
+  "Jan", "Fév", "Mar", "Avr", "Mai", "Jun",
+  "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc",
+];
+
+export const STATUS_COLORS = {
+  "Clôturées": "#0f5c4f",
+  "Critique": "#ef4444",
+  "En cours": "#f59e0b",
+};
+
+export const CURRENT_YEAR = new Date().getFullYear();
+
+// Adjust the range as needed, or fetch available years from the backend
+export const YEAR_OPTIONS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - i).map(
+  (year) => ({ label: String(year), value: year })
+);

@@ -17,6 +17,7 @@ import CreateForm from "../components/CorrectionActionCreateForm";
 import RightClickMenu from "../components/ui/RightClickMenu";
 import ImprovementSheetModal from "../components/ImprovementSheetModal";
 import { useAuth } from "../contexts/AuthContext";
+import reclamationApi from "../utils/reclamationApi";
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -201,7 +202,7 @@ export default function CorrectiveActions() {
     async function handleCreate(payload) {
         setLoading(true);
         try {
-            await correctiveActionsApi.create(payload);
+            await reclamationApi.createCorrectiveAction(payload.reclamation_id, payload);
             setPagination(prev => (prev.current === 1 ? prev : { ...prev, current: 1 }));
             await refresh();
             setCreateOpen(false);

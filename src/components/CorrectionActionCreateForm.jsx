@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     Form,
     Input,
@@ -8,6 +8,7 @@ import {
     Button,
     Space,
     Select,
+    Spin,
     message,
 } from "antd";
 import { api } from "../utils/api";
@@ -19,6 +20,11 @@ export default function CreateForm({ onSubmit, onCancel, loading }) {
 
     const [services, setServices] = useState([]);
     const [responsables, setResponsables] = useState([]);
+
+    // --- Live search state for reclamations ---
+    const [reclamations, setReclamations] = useState([]);
+    const [reclamationsLoading, setReclamationsLoading] = useState(false);
+    const fetchIdRef = useRef(0); // guards against out-of-order responses
 
     const getServices = async () => {
         try {
@@ -60,9 +66,68 @@ export default function CreateForm({ onSubmit, onCancel, loading }) {
         }
     };
 
+    // Fetches reclamations from the backend, optionally filtered by a search term.
+    const fetchReclamations = useCallback(async (search = "") => {
+        const currentFetchId = ++fetchIdRef.current;
+        setReclamationsLoading(true);
+
+        try {
+            const { data } = await api.get("reclamations", {
+                params: {
+                    search: search || undefined,
+                    per_page: 20,
+                },
+            });
+
+            // Ignore stale responses (e.g. a fast typer firing several requests)
+            if (currentFetchId !== fetchIdRef.current) return;
+
+            const rows = Array.isArray(data) ? data : data?.data ?? [];
+
+            setReclamations(
+                rows.map((item) => ({
+                    label: `${item.code} - ${item.client_code}`,
+                    value: Number(item.id),
+                }))
+            );
+        } catch (error) {
+            if (currentFetchId !== fetchIdRef.current) return;
+
+            message.error(
+                error?.response?.data?.message ||
+                    "Erreur lors du chargement des Reclamations."
+            );
+        } finally {
+            if (currentFetchId === fetchIdRef.current) {
+                setReclamationsLoading(false);
+            }
+        }
+    }, []);
+
+    // Debounce the search so we don't fire a request on every keystroke
+    const debouncedFetchReclamations = useMemo(() => {
+        let timeoutId;
+
+        const debounced = (search) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                fetchReclamations(search);
+            }, 400);
+        };
+
+        debounced.cancel = () => clearTimeout(timeoutId);
+
+        return debounced;
+    }, [fetchReclamations]);
+
+    useEffect(() => {
+        return () => debouncedFetchReclamations.cancel();
+    }, [debouncedFetchReclamations]);
+
     useEffect(() => {
         getServices();
         getResponsables();
+        fetchReclamations(); // initial page (no search term)
     }, []);
 
     return (
@@ -77,9 +142,30 @@ export default function CreateForm({ onSubmit, onCancel, loading }) {
                     type: vals.type,
                     service_id: Number(vals.service_id),
                     responsable_id: Number(vals.responsable_id),
+                    reclamation_id: vals.reclamation_id
+                        ? Number(vals.reclamation_id)
+                        : undefined,
                 })
             }
         >
+            <Form.Item
+                name="reclamation_id"
+                label="Réclamation"
+            >
+                <Select
+                    placeholder="Rechercher une réclamation (code, client...)"
+                    options={reclamations}
+                    showSearch
+                    filterOption={false}
+                    onSearch={debouncedFetchReclamations}
+                    notFoundContent={
+                        reclamationsLoading ? <Spin size="small" /> : null
+                    }
+                    loading={reclamationsLoading}
+                    allowClear
+                />
+            </Form.Item>
+
             <Form.Item
                 name="description"
                 label="Description"

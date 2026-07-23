@@ -99,7 +99,7 @@ const Login = () => {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#0d3b2e] flex flex-col">
       {/* Title bar stays pinned to the top of the window */}
-      <TitleBar title="Intercocina — Connexion" />
+      <TitleBar title="SMQ Pro — Connexion" />
 
       {/* Everything below fills the remaining space and centers the login card */}
       <div className="relative flex-1 w-full flex items-center justify-center">

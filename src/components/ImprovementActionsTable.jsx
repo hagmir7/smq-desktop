@@ -219,6 +219,7 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
           <Tooltip title="Modifier">
             <Button
               type="text"
+              disabled={record.completion_date || !permissions('modifier.action_amelioration')}
               icon={<EditOutlined />}
               onClick={() => openEditModal(record)}
             />
@@ -229,6 +230,7 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
               <Button
                 type="text"
                 icon={<CheckCircleOutlined />}
+                disabled={record.completion_date || !permissions('cloturer.action_amelioration')}
                 onClick={() => openCompleteModal(record)}
               />
             </Tooltip>
@@ -246,6 +248,7 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
               <Button
                 type="text"
                 danger
+                disabled={record.completion_date || !permissions('supprimer.action_amelioration')}
                 icon={<DeleteOutlined />}
                 loading={deletingId === record.id}
               />

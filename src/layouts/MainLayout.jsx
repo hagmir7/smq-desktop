@@ -3,7 +3,7 @@ import { Badge, Layout, Menu } from 'antd';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import UpdateNotifier from '../components/UpdateNotifier.jsx';
 import DropMenu from '../components/DropMenu.jsx';
-import { Astroid, ClipboardCheck, Flag, Layers, LayoutDashboard, Logs, Pyramid, RefreshCcw, Settings, SquareMenu, UserStar } from 'lucide-react';
+import { Astroid, ClipboardCheck, Database, Flag, LayoutDashboard, Logs, Pyramid, RefreshCcw, Settings, SquareMenu, UserStar } from 'lucide-react';
 import MainHeader from '../components/MainHeader.jsx';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../utils/api.jsx';
@@ -109,7 +109,7 @@ export default function MainLayout() {
           },
           {
             key: '/connections',
-            icon: <Layers size={18} />,
+            icon: <Database size={18} />,
             disabled: !permissions('voir.connexions'),
             label: 'Connexions DB',
 

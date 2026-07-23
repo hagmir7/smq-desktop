@@ -21,6 +21,7 @@ import { SearchOutlined, SafetyCertificateOutlined, LockOutlined, PlusOutlined }
 import { Edit, ShieldCheck, Trash } from 'lucide-react';
 import { api } from '../utils/api';
 import RightClickMenu from '../components/ui/RightClickMenu';
+import { useAuth } from '../contexts/AuthContext';
 
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -51,6 +52,7 @@ function Roles() {
   const [permsLoading, setPermsLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState({ text: '', type: '' });
+  const { permissions: userPermissions } = useAuth();
 
   // ----- Rename modal state -----
   const [renameModalOpen, setRenameModalOpen] = useState(false);
@@ -68,17 +70,33 @@ function Roles() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
 
+  const canEditRoles = userPermissions('modifier.role');
+  const canCreateRoles = userPermissions('creer.role');
+
   const capitalizeFirst = useCallback((str) => {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }, []);
+
+  // Prefer the human-readable label seeded on the backend; fall back to a
+  // capitalized slug if a role/permission was created without one.
+  const displayLabel = useCallback(
+    (item) => item?.label || capitalizeFirst(item?.name),
+    [capitalizeFirst]
+  );
 
   // Fetch the list of roles once, on mount (and whenever we need a refresh)
   const fetchRoles = useCallback(async (preferredSelection) => {
     setRolesLoading(true);
     try {
       const res = await api.get('roles');
-      const list = res.data || [];
+      // Backend wraps list responses as { status, data: [...] }.
+      // Fall back to res.data in case an endpoint ever returns a bare array.
+      const list = Array.isArray(res.data?.data)
+        ? res.data.data
+        : Array.isArray(res.data)
+        ? res.data
+        : [];
       setRoles(list);
 
       setSelectedRoleId((prevSelected) => {
@@ -114,13 +132,23 @@ function Roles() {
         api.get(`roles/${name}`),
       ]);
 
-      setPermissions(permissionsResponse.data || []);
+      // Backend wraps both responses as { status, data: ... }.
+      const permissionsList = Array.isArray(permissionsResponse.data?.data)
+        ? permissionsResponse.data.data
+        : Array.isArray(permissionsResponse.data)
+        ? permissionsResponse.data
+        : [];
+      setPermissions(permissionsList);
 
-      if (roleResponse.data) {
-        setRole(roleResponse.data);
-        const rolePerms =
-          roleResponse.data.permissions?.map((p) => p.name || p) || [];
+      const roleData = roleResponse.data?.data ?? roleResponse.data ?? null;
+
+      if (roleData) {
+        setRole(roleData);
+        const rolePerms = roleData.permissions?.map((p) => p.name || p) || [];
         setSelectedPermissions(rolePerms);
+      } else {
+        setRole(null);
+        setSelectedPermissions([]);
       }
     } catch (error) {
       console.error('Error fetching role data:', error);
@@ -166,21 +194,26 @@ function Roles() {
     [selectedPermissions]
   );
 
-  const togglePermission = useCallback((permissionName) => {
-    setSelectedPermissions((prev) =>
-      prev.includes(permissionName)
-        ? prev.filter((p) => p !== permissionName)
-        : [...prev, permissionName]
-    );
-  }, []);
+  const togglePermission = useCallback(
+    (permissionName) => {
+      if (!canEditRoles) return;
+      setSelectedPermissions((prev) =>
+        prev.includes(permissionName)
+          ? prev.filter((p) => p !== permissionName)
+          : [...prev, permissionName]
+      );
+    },
+    [canEditRoles]
+  );
 
   const toggleAllPermissions = useCallback(() => {
+    if (!canEditRoles) return;
     const allPerms = Object.values(groupedPermissions).flatMap((g) => g.items.map((p) => p.name));
     setSelectedPermissions((prev) => (prev.length === allPerms.length ? [] : allPerms));
-  }, [groupedPermissions]);
+  }, [groupedPermissions, canEditRoles]);
 
   const savePermissions = useCallback(async () => {
-    if (!selectedRoleId) return;
+    if (!selectedRoleId || !canEditRoles) return;
     setSaving(true);
     setSaveMessage({ text: '', type: '' });
 
@@ -200,12 +233,14 @@ function Roles() {
     } finally {
       setSaving(false);
     }
-  }, [selectedRoleId, selectedPermissions, fetchRoleData]);
+  }, [selectedRoleId, selectedPermissions, fetchRoleData, canEditRoles]);
 
   const filteredRoles = useMemo(() => {
     if (!roleSearch.trim()) return roles;
     const q = roleSearch.trim().toLowerCase();
-    return roles.filter((r) => (r.name || '').toLowerCase().includes(q));
+    return roles.filter(
+      (r) => (r.name || '').toLowerCase().includes(q) || (r.label || '').toLowerCase().includes(q)
+    );
   }, [roles, roleSearch]);
 
   // ----- Rename (update) handlers -----
@@ -257,7 +292,7 @@ function Roles() {
   const confirmDeleteRole = useCallback(
     (id) => {
       const target = roles.find((r) => r.name === id);
-      const displayName = capitalizeFirst(target ? target.name : id);
+      const displayName = displayLabel(target) || id;
 
       Modal.confirm({
         title: `Supprimer le rôle « ${displayName} » ?`,
@@ -283,7 +318,7 @@ function Roles() {
         },
       });
     },
-    [roles, selectedRoleId, fetchRoles, capitalizeFirst]
+    [roles, selectedRoleId, fetchRoles, displayLabel]
   );
 
   // ----- Create (add) handlers -----
@@ -358,6 +393,7 @@ function Roles() {
             />
             <Button
               icon={<PlusOutlined />}
+              disabled={!canCreateRoles}
               onClick={openCreateModal}
               title="Ajouter un rôle"
               aria-label="Ajouter un rôle"
@@ -400,7 +436,7 @@ function Roles() {
                     >
                       <Space style={{ width: '100%', justifyContent: 'space-between' }}>
                         <Text style={{ fontWeight: 500, color: active ? '#389e0d' : undefined }}>
-                          {capitalizeFirst(r.name)}
+                          {displayLabel(r)}
                         </Text>
                         {typeof r.permissions?.length === 'number' && (
                           <Tag color={active ? 'green' : 'default'} style={{ margin: 0 }}>
@@ -453,14 +489,19 @@ function Roles() {
               <div>
                 <Title level={5} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
                   <ShieldCheck size={20} />
-                  Autorisations : {capitalizeFirst(role.role)}
+                  Autorisations : {role.label || capitalizeFirst(role.role)}
                 </Title>
                 <Text type="secondary" style={{ fontSize: 13 }}>
                   Gérer les contrôles d'accès pour ce rôle
                 </Text>
               </div>
 
-              <Button type="primary" loading={saving} disabled={saving || permsLoading} onClick={savePermissions}>
+              <Button
+                type="primary"
+                loading={saving}
+                disabled={saving || permsLoading || !canEditRoles}
+                onClick={savePermissions}
+              >
                 {saving ? 'Enregistrement…' : 'Enregistrer'}
               </Button>
             </div>
@@ -481,7 +522,7 @@ function Roles() {
               <Card size="small" style={{ background: '#fafafa' }} bodyStyle={{ padding: 12 }}>
                 <Space wrap size={12}>
                   <Tag color="default" style={{ padding: '4px 10px', fontSize: 13, fontWeight: 500 }}>
-                    {capitalizeFirst(role.role)}
+                    {role.label || capitalizeFirst(role.role)}
                   </Tag>
                   <Text type="secondary" style={{ fontSize: 13 }}>
                     <Text strong>{selectedPermissions.length}</Text> autorisation(s) sur{' '}
@@ -494,7 +535,12 @@ function Roles() {
               <div>
                 {Object.keys(groupedPermissions).length > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-                    <Button type="link" onClick={toggleAllPermissions} disabled={permsLoading} style={{ paddingRight: 0 }}>
+                    <Button
+                      type="link"
+                      onClick={toggleAllPermissions}
+                      disabled={permsLoading || !canEditRoles}
+                      style={{ paddingRight: 0 }}
+                    >
                       {allPermissionsSelected ? 'Tout désélectionner' : 'Tout sélectionner'}
                     </Button>
                   </div>
@@ -533,24 +579,27 @@ function Roles() {
                             return (
                               <Col xs={24} md={12} lg={8} key={permission.id}>
                                 <Card
-                                  hoverable
+                                  hoverable={canEditRoles}
                                   size="small"
                                   onClick={() => togglePermission(permission.name)}
                                   role="checkbox"
                                   aria-checked={isSelected}
-                                  tabIndex={0}
+                                  aria-disabled={!canEditRoles}
+                                  tabIndex={canEditRoles ? 0 : -1}
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter') togglePermission(permission.name);
                                   }}
                                   style={{
                                     borderColor: isSelected ? '#b7eb8f' : undefined,
                                     backgroundColor: isSelected ? '#f6ffed' : undefined,
-                                    cursor: 'pointer',
+                                    cursor: canEditRoles ? 'pointer' : 'not-allowed',
+                                    opacity: canEditRoles ? 1 : 0.7,
                                   }}
                                   bodyStyle={{ padding: 12 }}
                                 >
                                   <Space align="start" size={12}>
                                     <Checkbox
+                                      disabled={!canEditRoles}
                                       checked={isSelected}
                                       onChange={() => togglePermission(permission.name)}
                                       onClick={(e) => e.stopPropagation()}

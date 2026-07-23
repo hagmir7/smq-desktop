@@ -23,6 +23,7 @@ import dayjs from "dayjs";
 import { api } from "../utils/api";
 import { Link } from "react-router-dom";
 import { Loader2, Logs, RefreshCcw, Search } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 const { Title, Text } = Typography;
 const { Header, Content } = Layout;
@@ -59,6 +60,7 @@ export default function ImprovementsJournal() {
   const [search, setSearch] = useState("");
   const [effectivenessFilter, setEffectivenessFilter] = useState(null);
   const [serviceFilter, setServiceFilter] = useState(null);
+  const {permissions} = useAuth()
 
   useEffect(() => {
     loadData();
@@ -137,7 +139,7 @@ export default function ImprovementsJournal() {
       width: 170,
       render: (_, record) =>
         record.improvement_sheet?.code ? (
-          <Link to={`/improvements/${record.improvement_sheet_id}`}>
+          <Link to={permissions('voir.fiches_amelioration') ? `/improvements/${record.improvement_sheet_id}` : '#'}>
             <Space size={4}>
               <FileTextOutlined className="text-gray-400" />
               {record.improvement_sheet.code}

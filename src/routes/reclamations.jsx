@@ -484,6 +484,7 @@ export default function Reclamations() {
 
           <ReclamationModalSeps
             reclamationId={selectedId}
+            
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
           />
