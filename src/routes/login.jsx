@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Form, Input, Button, Alert, Typography, Modal, AutoComplete } from 'antd';
+import { Form, Input, Button, Alert, Typography, Modal, AutoComplete, Badge } from 'antd';
 import { UserOutlined, LockOutlined, ShopOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../utils/api';
@@ -220,9 +220,11 @@ const Login = () => {
           </div>
 
           {window.electron && (
-            <div className="relative z-10 text-center font-bold mt-6 text-xs text-emerald-100/60">
+           <div className='flex w-full justify-center'>
+             <Badge className="relative z-10 text-center font-bold mt-6 text-xs text-white leading-4">
               v{appVersion}
-            </div>
+            </Badge>
+           </div>
           )}
         </div>
       </div>

@@ -2,8 +2,8 @@
   "name": "smq-pro",
   "private": true,
   "version": "1.0.0",
-  "description": "Electron + React + Tailwind CSS + Ant Design starter with auto-update",
-  "author": "Hassan",
+  "description": "SMQ Pro - SYSTEME DE MANAGEMENT DE LA QUALITE",
+  "author": "Intercocina",
   "main": "electron/main.js",
   "scripts": {
     "dev": "concurrently -k -n VITE,ELECTRON -c blue,green \"npm:dev:vite\" \"npm:dev:electron\"",
@@ -57,9 +57,10 @@
     },
     "publish": [
       {
-        "provider": "generic",
-        "url": "https://your-update-server.com/updates",
-        "channel": "latest"
+        "provider": "github",
+        "channel": "latest",
+        "repo": "smq-desktop",
+        "owner": "hagmir7"
       }
     ],
     "win": {

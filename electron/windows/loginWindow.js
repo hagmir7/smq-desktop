@@ -43,28 +43,64 @@ export default function createLoginWindow() {
     }
 
     loginWindow.on("maximize", () => {
-        loginWindow.unmaximize();
-    });
-
-    ipcMain.on("window-minimize", () => loginWindow.minimize());
-
-    ipcMain.on("window-maximize", () => {
-        if (loginWindow.isMaximized()) {
+        if (!loginWindow.isDestroyed()) {
             loginWindow.unmaximize();
-        } else {
-            loginWindow.maximize();
         }
     });
 
-    ipcMain.on("window-close", () => loginWindow.close());
+    // Resolve the target window from the IPC event itself rather than
+    // closing over `loginWindow`. This avoids acting on a stale/destroyed
+    // window reference if these handlers ever end up registered more than
+    // once (e.g. createLoginWindow() called again after logout).
+    const minimizeHandler = (event) => {
+        const win = BrowserWindow.fromWebContents(event.sender);
+        if (win && !win.isDestroyed()) {
+            win.minimize();
+        }
+    };
 
-    loginWindow.on("maximize", () =>
-        loginWindow.webContents.send("window-maximized", true)
-    );
+    const maximizeHandler = (event) => {
+        const win = BrowserWindow.fromWebContents(event.sender);
+        if (!win || win.isDestroyed()) return;
+        if (win.isMaximized()) {
+            win.unmaximize();
+        } else {
+            win.maximize();
+        }
+    };
 
-    loginWindow.on("unmaximize", () =>
-        loginWindow.webContents.send("window-maximized", false)
-    );
+    const closeHandler = (event) => {
+        const win = BrowserWindow.fromWebContents(event.sender);
+        if (win && !win.isDestroyed()) {
+            win.close();
+        }
+    };
+
+    ipcMain.on("window-minimize", minimizeHandler);
+    ipcMain.on("window-maximize", maximizeHandler);
+    ipcMain.on("window-close", closeHandler);
+
+    loginWindow.on("maximize", () => {
+        if (!loginWindow.isDestroyed()) {
+            loginWindow.webContents.send("window-maximized", true);
+        }
+    });
+
+    loginWindow.on("unmaximize", () => {
+        if (!loginWindow.isDestroyed()) {
+            loginWindow.webContents.send("window-maximized", false);
+        }
+    });
+
+    // Critical: remove these listeners when the window closes so they don't
+    // stack up (and fire against a destroyed window) if a new login window
+    // is created later in the same app session.
+    loginWindow.on("closed", () => {
+        ipcMain.removeListener("window-minimize", minimizeHandler);
+        ipcMain.removeListener("window-maximize", maximizeHandler);
+        ipcMain.removeListener("window-close", closeHandler);
+        loginWindow = null;
+    });
 
     return loginWindow;
 }
