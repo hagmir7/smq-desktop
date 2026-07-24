@@ -7,6 +7,7 @@ import { Astroid, ClipboardCheck, Database, Flag, LayoutDashboard, Logs, Pyramid
 import MainHeader from '../components/MainHeader.jsx';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../utils/api.jsx';
+import NotificationBell from '../components/NotificationBell.jsx';
 
 const { Header, Sider, Content } = Layout;
 
@@ -79,8 +80,20 @@ export default function MainLayout() {
         title: 'Réclamations',
         disabled: !permissions('voir.reclamations'),
       },
-      { key: '/correction-actions', icon: <Astroid size={18} />, label: 'Actions Corrective', disabled: !permissions('voir.actions_correctives') },
-      { key: '/improvements', icon: <Pyramid size={18} />, label: 'Améliorations', disabled: !permissions('voir.fiches_amelioration') },
+      {
+        key: '/correction-actions',
+        icon: <Astroid size={18} />,
+        label: <>Actions Corrective <Badge className="ml-2" showZero={false} count={notifications?.new_corrective_action}></Badge></>,
+        title: 'Actions Corrective',
+        disabled: !permissions('voir.actions_correctives')
+      },
+      {
+        key: '/improvements',
+        icon: <Pyramid size={18} />,
+        label: <>Améliorations</>,
+        title: 'Améliorations',
+        disabled: !permissions('voir.fiches_amelioration')
+      },
       { key: '/improvements-journal', icon: <Logs size={18} />, label: 'Journal Améliorations', disabled: !permissions('voir.journal_amelioration') },
       { key: '/register', icon: <SquareMenu size={18} />, label: 'Register ENR-06 ', disabled: !permissions('voir.registre_reclamations') },
       {
@@ -112,7 +125,7 @@ export default function MainLayout() {
             icon: <Database size={18} />,
             disabled: !permissions('voir.connexions'),
             label: 'Connexions DB',
-
+            title: 'Connexions à la base de données'
           },
         ],
       },
@@ -178,7 +191,10 @@ export default function MainLayout() {
       </Sider>
 
       <Layout>
-        <MainHeader appVersion={appVersion} />
+          <MainHeader appVersion={appVersion} />
+         
+  
+
         <Content className="bg-gray-100 overflow-auto">
           <div className='m-2 rounded-lg bg-white shadow-sm overflow-hidden'>
             <Outlet context={{ appVersion }} />

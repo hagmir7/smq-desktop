@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import {Layout, Table, Tag, Button, Drawer, Modal, Input,
+import {
+    Layout, Table, Tag, Button, Drawer, Modal, Input,
     Row, Col, Statistic, Space, Segmented, message, Empty, Card,
     Badge, Select, DatePicker,
+    Tooltip,
 } from "antd";
 import {
     Plus, GitBranch, Search, Loader2, RefreshCw, X,
+    Astroid,
 } from "lucide-react";
 import dayjs from "dayjs";
 
@@ -51,6 +54,55 @@ function flattenTree(list) {
     return out;
 }
 
+// Cell renderer for the "Réalisation" (completion_date) column.
+// - If the row already has a completion_date, it's shown as plain text.
+// - If it doesn't, a small "+ Ajouter" trigger is shown; clicking it
+//   opens an inline DatePicker so the user can set the date without
+//   leaving the table. Selecting a date calls `onSave(id, date)`.
+function RealisationCell({ record, onSave, saving }) {
+    const [editing, setEditing] = useState(false);
+
+    if (record.completion_date) {
+        return <span>{dateFormat(record.completion_date)}</span>;
+    }
+
+    if (editing) {
+        return (
+            <DatePicker
+                size="small"
+                autoFocus
+                open
+                format="DD MMM YYYY"
+                disabled={saving}
+                onChange={(date) => {
+                    setEditing(false);
+                    if (date) onSave(record.id, date.format("YYYY-MM-DD"));
+                }}
+                onOpenChange={(open) => {
+                    if (!open) setEditing(false);
+                }}
+                // Prevent the row's contextmenu/click handlers from
+                // interfering with picker interactions.
+                onClick={(e) => e.stopPropagation()}
+            />
+        );
+    }
+
+    return (
+        <Button
+            type="link"
+            size="small"
+            className="!px-0"
+            onClick={(e) => {
+                e.stopPropagation();
+                setEditing(true);
+            }}
+        >
+            + Ajouter
+        </Button>
+    );
+}
+
 
 /* ------------------------------ App ------------------------------- */
 
@@ -82,12 +134,13 @@ export default function CorrectiveActions() {
     const debounceRef = useRef(null);
 
     const ROW_MENU_ITEMS = [
-        { label: "Modifier", key: "edit",disabled: !permissions('modifier.action_corrective') },
-        { label: "Marquer comme terminée", key: "complete", disabled: !permissions('cloturer.action_corrective')},
-        { label: "Ajouter une sous-action", key: "child", disabled: !permissions('creer.action_corrective')},
-        { label: "Fiche d'améliorationsn", key: "improvement", disabled: !permissions('creer.fiche_amelioration')},
-        { type: "divider", key: "divider",disabled: !permissions('creer.fiche_amelioration') },
-        { label: "Supprimer", key: "delete", danger: true, disabled: !permissions('supprimer.action_corrective')},
+        { label: "Voir", key: "voir", disabled: !permissions('voir.action_corrective') },
+        { label: "Modifier", key: "edit", disabled: !permissions('modifier.action_corrective') },
+        { label: "Clôturer", key: "complete", disabled: !permissions('cloturer.action_corrective') },
+        { label: "Ajouter une sous-action", key: "child", disabled: !permissions('creer.sous-action_corrective') },
+        { label: "Fiche d'améliorationsn", key: "improvement", disabled: !permissions('creer.fiche_amelioration') },
+        { type: "divider", key: "divider", disabled: !permissions('creer.fiche_amelioration') },
+        { label: "Supprimer", key: "delete", danger: true, disabled: !permissions('supprimer.action_corrective') },
     ];
 
 
@@ -219,6 +272,18 @@ export default function CorrectiveActions() {
         } catch (e) { message.error(extractErrorMessage(e)); } finally { setLoading(false); }
     }
 
+    // Dedicated handler for the inline "Réalisation" date picker so it
+    // doesn't trigger the generic "Modifications enregistrées" toast
+    // wording used by the full edit form — keeps the feedback focused.
+    async function handleSetCompletionDate(id, completionDate) {
+        setLoading(true);
+        try {
+            await correctiveActionsApi.update(id, { completion_date: completionDate });
+            await refresh();
+            message.success("Date de réalisation ajoutée.");
+        } catch (e) { message.error(extractErrorMessage(e)); } finally { setLoading(false); }
+    }
+
     async function handleDelete(id) {
         setLoading(true);
         try {
@@ -234,7 +299,7 @@ export default function CorrectiveActions() {
         try {
             await correctiveActionsApi.complete(id, payload);
             await refresh();
-            message.success("Marquée comme terminée.");
+            message.success("Marquée comme clôture.");
             setDrawerTab("view");
         } catch (e) { message.error(extractErrorMessage(e)); } finally { setLoading(false); }
     }
@@ -277,6 +342,10 @@ export default function CorrectiveActions() {
                 setOpen(true)
                 setSelectedId(row.id)
                 break;
+            case "voir":
+                openDrawer(row.id, "view");
+                break;
+
             case "delete":
                 Modal.confirm({
                     title: "Supprimer cette action corrective ?",
@@ -302,8 +371,13 @@ export default function CorrectiveActions() {
         const row = flatItems.find(i => String(i.id) === String(rowId));
 
         const menuItems = ROW_MENU_ITEMS
-            .filter(item => item.key !== "complete" || row?.status !== "completed")
-            .map(item => ({ ...item, id: rowId }));
+            .map(item => ({
+                ...item,
+                id: rowId,
+                disabled: item.key === "complete"
+                    ? item.disabled || row?.status === "completed" || !row?.completion_date
+                    : item.disabled,
+            }));
 
         return (
             <RightClickMenu menuItems={menuItems} onItemClick={handleRowMenuClick}>
@@ -327,12 +401,22 @@ export default function CorrectiveActions() {
             ),
         },
         {
-            title: "Type", dataIndex: "type", width: 90,
-            render: (type) => (
-                <Badge className="flex items-center gap-1 whitespace-nowrap">
-                    {type ?? "—"}
-                </Badge>
-            ),
+            title: "Action",
+            dataIndex: "description",
+            width: 90,
+            render: (description) => {
+                if (!description) return "—";
+
+                return (
+                    <Tooltip title={description}>
+                        <span>
+                            {description.length > 50
+                                ? `${description.slice(0, 50)}...`
+                                : description}
+                        </span>
+                    </Tooltip>
+                );
+            },
         },
         {
             title: "Client", dataIndex: "reclamation", width: 90,
@@ -350,13 +434,26 @@ export default function CorrectiveActions() {
             title: "Statut", dataIndex: "status", width: 130,
             render: (s) => <Tag color={STATUS_AC[s]?.color}>{STATUS_AC[s]?.label || s}</Tag>,
         },
+
+        {
+            title: "Réalisation", dataIndex: "completion_date", width: 130,
+            render: (completion_date, record) => (
+                <RealisationCell
+                    record={record}
+                    saving={loading}
+                    onSave={handleSetCompletionDate}
+                />
+            ),
+        },
+
         {
             title: "Efficacité", dataIndex: "effectiveness", width: 90,
             render: (effectiveness) => <span className="whitespace-nowrap">{effectiveness}</span> ?? "",
         },
+
         {
-            title: "Réalisation", dataIndex: "completion_date", width: 90,
-            render: (completion_date) => completion_date ? dateFormat(completion_date) : "",
+            title: "Clôture", dataIndex: "closing_date", width: 90,
+            render: (closing_date) => <span className="whitespace-nowrap">{dateFormat(closing_date)}</span> ?? "",
         },
         {
             title: "Échéance", dataIndex: "due_date", width: 130,
@@ -373,7 +470,7 @@ export default function CorrectiveActions() {
             <Header className="flex items-center justify-between !bg-white !px-6 border-b border-slate-200" style={{ height: 64, lineHeight: "64px" }}>
                 <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-md bg-teal-700 text-white">
-                        <GitBranch size={18} />
+                        <Astroid size={18} />
                     </div>
                     <div className="leading-tight">
                         <div className="text-base font-semibold text-slate-900">Actions correctives</div>
@@ -411,7 +508,7 @@ export default function CorrectiveActions() {
                             />
                         </Col>
 
-                         <Col flex="200px">
+                        <Col flex="200px">
                             <Select
                                 allowClear
                                 showSearch
@@ -425,8 +522,8 @@ export default function CorrectiveActions() {
                                 }
                             />
                         </Col>
-                        
-                         <Col flex="180px">
+
+                        <Col flex="180px">
                             <Select
                                 allowClear
                                 placeholder="Efficacité"
@@ -441,7 +538,7 @@ export default function CorrectiveActions() {
                         <Col flex="180px">
 
 
-                             <Select
+                            <Select
                                 allowClear
                                 placeholder="Efficacité"
                                 className="w-full"
@@ -450,9 +547,6 @@ export default function CorrectiveActions() {
                                 onChange={setStatusFilter}
                             />
                         </Col>
-                       
-                       
-                        
                         {hasActiveFilters && (
                             <Col>
                                 <Button icon={<X size={14} />} onClick={resetFilters}>

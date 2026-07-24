@@ -1,7 +1,7 @@
 {
   "name": "smq-pro",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "SMQ Pro - SYSTEME DE MANAGEMENT DE LA QUALITE",
   "author": "Intercocina",
   "main": "electron/main.js",
@@ -14,7 +14,7 @@
     "dist:mac": "npm run build && electron-builder --mac",
     "dist:linux": "npm run build && electron-builder --linux",
     "dist": "npm run build && electron-builder",
-    "publish": "npm run build && electron-builder --publish=always"
+    "publish": "npm run build && electron-builder --win --x64 --publish always"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
@@ -58,7 +58,6 @@
     "publish": [
       {
         "provider": "github",
-        "channel": "latest",
         "repo": "smq-desktop",
         "owner": "hagmir7"
       }

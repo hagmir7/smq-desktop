@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Form, Input, Radio, Select, message, DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import reclamationApi from '../utils/reclamationApi';
 
 const { TextArea } = Input;
 
-const PRIORITIES = ['Basse', 'Normale', 'Haute', 'Urgente'];
+const PRIORITIES = ['Normale', 'Critique', 'Urgente'];
 
 export default function ReclamationStep3Modal({
   reclamationId,
@@ -14,7 +14,13 @@ export default function ReclamationStep3Modal({
   onUpdated,
 }) {
   const [form] = Form.useForm();
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+
+  // Watch the selected value
+  const isJustifiee = Form.useWatch('is_justifiee', form);
+
+  // Disable only when "Non" is selected
+  const disabled = isJustifiee === 0;
 
   useEffect(() => {
     if (!open || !reclamationId) return;
@@ -43,7 +49,6 @@ export default function ReclamationStep3Modal({
       setSubmitting(true);
 
       const response = await reclamationApi.show(reclamationId);
-
       populateForm(response.data);
     } catch (err) {
       console.error(err);
@@ -69,7 +74,7 @@ export default function ReclamationStep3Modal({
           : null,
       });
 
-      message.success('Étape 3 enregistrée.');
+      message.success("L'analyse a été enregistrée avec succès.");
 
       onUpdated?.();
       onClose();
@@ -89,7 +94,7 @@ export default function ReclamationStep3Modal({
 
   return (
     <Modal
-      title="Traitement et Analyse"
+      title="Analyse et Traitement"
       open={open}
       onCancel={onClose}
       onOk={handleSubmit}
@@ -116,8 +121,7 @@ export default function ReclamationStep3Modal({
           rules={[
             {
               required: true,
-              message:
-                'Veuillez indiquer si la réclamation est justifiée.',
+              message: 'Veuillez indiquer si la réclamation est justifiée.',
             },
           ]}
         >
@@ -130,11 +134,12 @@ export default function ReclamationStep3Modal({
         <Form.Item
           label="Analyse de la cause"
           name="cause_analysis"
-          rules={[{ required: true, message: 'Ce champ est requis.' }]}
+          rules={[{ required: !disabled, message: 'Ce champ est requis.' }]}
         >
           <TextArea
             rows={3}
             placeholder="Cause racine identifiée"
+            disabled={disabled}
           />
         </Form.Item>
 
@@ -145,17 +150,17 @@ export default function ReclamationStep3Modal({
             className="w-full"
             rules={[
               {
-                required: true,
+                required: !disabled,
                 message: 'La priorité est requise.',
               },
             ]}
           >
-            <Select placeholder="Sélectionner une priorité">
+            <Select
+              placeholder="Sélectionner une priorité"
+              disabled={disabled}
+            >
               {PRIORITIES.map((priority) => (
-                <Select.Option
-                  key={priority}
-                  value={priority}
-                >
+                <Select.Option key={priority} value={priority}>
                   {priority}
                 </Select.Option>
               ))}
@@ -170,6 +175,7 @@ export default function ReclamationStep3Modal({
             <DatePicker
               className="w-full"
               format="YYYY-MM-DD"
+              disabled={disabled}
             />
           </Form.Item>
         </div>

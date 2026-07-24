@@ -58,7 +58,7 @@ export default function DrawerBody({
                     {
                         key: "child",
                         label: "Sous-action",
-                        disabled: !permissions('creer.action_corrective'),
+                        disabled: !permissions('creer.sous-action_corrective'),
                         children: <CorrectionActionChildForm onSubmit={onCreateChild}
                             loading={loading}
                         />

@@ -59,7 +59,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [showChildren, setShowChildren] = useState(false);
-  const { permissions } = useAuth();
+  const { permissions, user } = useAuth();
   const [reclamation, setReclamation] = useState(null);
 
   // null => creating a new top-level action; object => editing that action
@@ -241,36 +241,43 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
   };
 
   const rowMenuItems = (record) => [
-    { label: 'Modifier', key: 'edit', id: record?.id },
-    { label: 'Ajouter une sous-action', key: 'addSub', id: record?.id },
-    { label: 'Supprimer', key: 'delete', id: record?.id },
+    { label: 'Modifier', key: 'edit', id: record?.id, disabled: !permissions('modifier.action_corrective') },
+    {
+      label: 'Ajouter une sous-action',
+      key: 'addSub',
+      id: record?.id,
+      disabled:
+        !permissions('creer.sous-action_corrective') ||
+        Number(record?.responsable_id) !== Number(user?.id),
+    },
+    { label: 'Supprimer', key: 'delete', id: record?.id, disabled: !permissions('supprimer.action_corrective') },
   ];
 
   const columns = [
-{
-  title: 'Responsable',
-  dataIndex: 'responsable',
-  key: 'responsable',
-  width: 180,
-  render: (responsable, record) => {
-    const name =
-      responsable?.full_name ||
-      responsibles.find((r) => r.value === Number(record.responsable_id))?.label ||
-      '-';
-    return (
-      <Tag color="geekblue" style={{ verticalAlign: 'middle', marginRight: 0 }}>
-        {name}
-      </Tag>
-    );
-  },
-},
+    {
+      title: 'Responsable',
+      dataIndex: 'responsable',
+      key: 'responsable',
+      width: 180,
+      render: (responsable, record) => {
+        const name =
+          responsable?.full_name ||
+          responsibles.find((r) => r.value === Number(record.responsable_id))?.label ||
+          '-';
+        return (
+          <Tag color="geekblue" style={{ verticalAlign: 'middle', marginRight: 0 }}>
+            {name}
+          </Tag>
+        );
+      },
+    },
     {
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
     },
     {
-      title: "Critère d'efficacité",
+      title: <div className='whitespace-nowrap'>Critère d'efficacité</div>,
       dataIndex: 'effectiveness_criteria',
       key: 'effectiveness_criteria',
       render: (value) => value || '-',
@@ -292,6 +299,14 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
     },
 
      {
+      title: 'Clôture',
+      dataIndex: 'closing_date',
+      key: 'closing_date',
+      width: 110,
+      render: (date) => (date ? dayjs(date).format('DD/MM/YYYY') : '-'),
+    },
+
+    {
       title: 'Efficacité',
       dataIndex: 'effectiveness',
       key: 'effectiveness',
@@ -428,13 +443,17 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
             <TextArea rows={3} placeholder="Détails de l'action corrective" />
           </Form.Item>
 
-          <Form.Item
-            label="Critère d'efficacité"
-            name="effectiveness_criteria"
-            rules={[{ required: true, message: 'Ce champ est requis.' }]}
-          >
-            <TextArea rows={2} placeholder="Comment le succès sera-t-il évalué ?" />
-          </Form.Item>
+
+          {
+            parentId ? "" : (<Form.Item
+              label="Critère d'efficacité"
+              name="effectiveness_criteria"
+              rules={[{ required: true, message: 'Ce champ est requis.' }]}
+            >
+              <TextArea rows={2} placeholder="Comment le succès sera-t-il évalué ?" />
+            </Form.Item>)
+          }
+
 
           <div className="grid grid-cols-3 gap-x-4">
             <Form.Item

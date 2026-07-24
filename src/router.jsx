@@ -10,6 +10,7 @@ import UpdateUser from "./routes/update-user";
 import ShowReclamation from "./routes/show-reclamation";
 import ShowImprovement from "./routes/show-improvement";
 import Services from "./routes/services";
+import Notifications from "./routes/notifications";
 
 // Lazy-load route components for code-splitting
 const Home = lazy(() => import("./routes/home"));
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
       { path: "users", element: <Users /> },
       { path: "services", element: <Services /> },
       { path: "connections", element: <Connections /> },
+      { path: 'notifications', element: <Notifications />},
       { path: "layout/update-user/:id", element: <UpdateUser /> },
 
        { path: "improvements/:id", element: <ShowImprovement /> },

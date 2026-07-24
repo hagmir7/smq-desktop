@@ -23,12 +23,13 @@ import {
   CheckSquareOutlined,
   PrinterOutlined,
 } from '@ant-design/icons';
+
 import dayjs from 'dayjs';
 import reclamationApi from '../utils/reclamationApi';
 import ReclamationDetailDrawer from '../components/ReclamationDetailDrawer';
 import ReclamationCreateModal from '../components/ReclamationCreateModal';
 import { dateFormat } from '../utils/config';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Flag, Plus } from 'lucide-react';
 import ReclamationStep2Modal from '../components/ReclamationStep2Modal';
 import ReclamationStep3Modal from '../components/ReclamationStep3Modal';
@@ -72,11 +73,22 @@ export default function Reclamations() {
   const {permissions} = useAuth();
   const [downloadSpin, setDownloadSpin] = useState(false);
 
+  const [searchParams] = useSearchParams();
+
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
     total: 0,
   });
+
+  useEffect(() => {
+  const reclamationId = searchParams.get("reclamation_id");
+
+  if (reclamationId) {
+    setSelectedId(Number(reclamationId));
+    setIsModalOpen(true);
+  }
+}, [searchParams]);
 
   // Keep a ref to the latest pagination/filters so the debounced search
   // handler always fires with fresh values without re-creating itself.

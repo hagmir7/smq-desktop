@@ -262,7 +262,7 @@ export default function Services() {
       >
         <Form form={form} layout="vertical" className="mt-4">
 
-           <Form.Item
+          <Form.Item
             name="code"
             label="Matricule"
             rules={[{ required: true, message: 'la process est requis' }]}

@@ -58,7 +58,7 @@ export default function ShowCorrectiveAction({ item, children }) {
             )}
             {children.length > 0 && (
                 <div>
-                    <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Actions de suivi</div>
+                    <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Sous-actions</div>
                     <Space direction="vertical" className="w-full">
                         {children.map(c => (
                             <Button key={c.id} block className="!flex !items-center !justify-between" onClick={() => onOpenRelated(c.id)}>
