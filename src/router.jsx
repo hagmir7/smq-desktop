@@ -1,5 +1,5 @@
 
-import { createBrowserRouter } from "react-router-dom";
+import { createHashRouter  } from "react-router-dom";
 import { lazy } from "react";
 import Root from "./routes/root";
 import ErrorPage from "./routes/error-page";
@@ -24,7 +24,7 @@ const Improvements = lazy(() => import("./routes/improvements"));
 const Register = lazy(() => import("./routes/register"));
 
 const ImprovementsJournal = lazy(() => import("./routes/improvements-journal"));
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   {
     path: "/",
     element: (<ProtectedRoute><MainLayout /></ProtectedRoute>),

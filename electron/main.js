@@ -15,7 +15,7 @@ autoUpdater.logger = log;
 let mainWindow = null;
 let loginWindow = null;
 let showWindow;
-let currentSession = null; // { access_token, user } — single source of truth for auth
+let currentSession = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({

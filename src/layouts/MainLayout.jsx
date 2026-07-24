@@ -148,7 +148,7 @@ export default function MainLayout() {
 
 
     <Layout style={{ height: '100vh' }}>
-      <UpdateNotifier />
+      {/* <UpdateNotifier /> */}
 
       <Sider
         width={220}

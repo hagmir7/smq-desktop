@@ -13,6 +13,7 @@ const { Content, Header } = Layout
 
 const NOTIFICATION_ROUTES = {
     'App\\Notifications\\CorrectiveActionCreated': (data) => `/reclamations?reclamation_id=${data.reclamation_id}`,
+    'App\Notifications\ReclamationCreated': (data) => `/reclamations?reclamation_id=${data.reclamation_id}`,
 };
 
 export default function Notifications() {
@@ -48,6 +49,7 @@ export default function Notifications() {
             await markAsRead(notification.id);
         }
         const resolveRoute = NOTIFICATION_ROUTES[notification.type];
+        // console.log( NOTIFICATION_ROUTES[notification.type])
         if (resolveRoute) {
             navigate(resolveRoute(notification.data));
         }

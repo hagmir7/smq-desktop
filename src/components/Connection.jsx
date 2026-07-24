@@ -10,10 +10,9 @@ export default function Connection() {
     const [selectedValue, setSelectedValue] = useState(null);
 
     const connections = [
-        { label: 'Local', value: 'http://192.168.1.38/api/' },
-        { label: 'Online', value: 'https://intercocina.online/api/' },
+        { label: 'Local', value: 'http://192.168.1.38:30/api/' },
+        { label: 'Online', value: 'https://smq.intercocina.online/api/' },
         { label: 'Développement', value: 'http://localhost:8000/api/' },
-        { label: 'Développement online', value: 'https://dev.intercocina.online/api/' },
         { label: 'Personnalisée', value: 'custom' },
     ];
 

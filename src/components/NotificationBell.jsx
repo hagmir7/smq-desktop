@@ -15,6 +15,7 @@ const { Text } = Typography;
 // Map notification "type" (FQCN from Laravel) to a click destination
 const NOTIFICATION_ROUTES = {
   'App\\Notifications\\CorrectiveActionCreated': (data) => `/reclamations?reclamation_id=${data.reclamation_id}`,
+  'App\\Notifications\\ReclamationCreated': (data) => `/reclamations?reclamation_id=${data.id}`,
 };
 
 export default function NotificationBell() {

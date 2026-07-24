@@ -31,9 +31,9 @@ export default function createLoginWindow() {
     } else {
         loginWindow.setMenu(null);
 
-        const indexPath = path.join(app.getAppPath(), "react-dist", "index.html");
+        const indexPath = path.join(app.getAppPath(), "dist", "index.html");
+        loginWindow.loadFile(indexPath, { hash: "login" })
 
-        loginWindow.loadURL(`file://${indexPath}/login`);
 
         if (process.platform === "win32" || process.env.APPIMAGE) {
             autoUpdater.checkForUpdatesAndNotify();
