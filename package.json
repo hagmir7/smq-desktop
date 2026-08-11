@@ -1,7 +1,7 @@
 {
   "name": "smq-pro",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "SMQ Pro - SYSTEME DE MANAGEMENT DE LA QUALITE",
   "author": "Intercocina",
   "main": "electron/main.js",

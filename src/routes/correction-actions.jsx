@@ -409,7 +409,7 @@ export default function CorrectiveActions() {
 
                 return (
                     <Tooltip title={description}>
-                        <span>
+                        <span className="whitespace-nowrap">
                             {description.length > 50
                                 ? `${description.slice(0, 50)}...`
                                 : description}
@@ -458,7 +458,7 @@ export default function CorrectiveActions() {
         {
             title: "Échéance", dataIndex: "due_date", width: 130,
             render: (d, row) => (
-                <span className={isOverdue(row) ? "font-medium text-red-600" : "text-slate-600"}>
+                <span className={isOverdue(row) ? "font-medium text-red-600 whitespace-nowrap" : "text-slate-600 whitespace-nowrap"}>
                     {d ? dayjs(d).format("DD MMM YYYY") : ""}
                 </span>
             ),
@@ -564,6 +564,7 @@ export default function CorrectiveActions() {
                         columns={columns}
                         dataSource={items}
                         loading={loading}
+                        scroll={{ x: "max-content" }}
                         pagination={{
                             current: pagination.current,
                             pageSize: pagination.pageSize,
@@ -572,8 +573,12 @@ export default function CorrectiveActions() {
                             showTotal: (total) => `${total} action(s) corrective(s)`,
                         }}
                         onChange={handleTableChange}
-                        locale={{ emptyText: <Empty description="Aucune action corrective trouvée" /> }}
-                        rowClassName={(record) => (record.parent_id ? "bg-slate-50/70" : "")}
+                        locale={{
+                            emptyText: <Empty description="Aucune action corrective trouvée" />,
+                        }}
+                        rowClassName={(record) =>
+                            record.parent_id ? "bg-slate-50/70" : ""
+                        }
                         components={{
                             body: {
                                 row: RowWithContextMenu,

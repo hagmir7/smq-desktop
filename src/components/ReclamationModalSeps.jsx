@@ -262,7 +262,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                       <Descriptions.Item label={<span><BankOutlined className="mr-1.5" />Entreprise</span>}>
                         {data.client_company_name ?? "—"}
                       </Descriptions.Item>
-                      <Descriptions.Item label="Code client">{data.client_code ?? "—"}</Descriptions.Item>
+                      <Descriptions.Item label="Ref client">{data.client_code ?? "—"}</Descriptions.Item>
                       <Descriptions.Item label={<span><PhoneOutlined className="mr-1.5" />Téléphone</span>}>
                         {data.client_phone ?? "—"}
                       </Descriptions.Item>

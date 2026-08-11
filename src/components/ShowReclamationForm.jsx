@@ -115,7 +115,7 @@ export default function ShowReclamation({ reclamationId, reclamation }) {
             </h2>
             <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
               <CreditCard size={13} className="text-gray-400" />
-              {data.client_code ? `Client ${data.client_code}` : 'Code client non renseigné'}
+              {data.client_code ? `Client ${data.client_code}` : 'Ref client non renseigné'}
             </p>
           </div>
         </div>
@@ -141,7 +141,7 @@ export default function ShowReclamation({ reclamationId, reclamation }) {
             {formattedDate}
           </Field>
 
-          <Field icon={CreditCard} label="Code client">
+          <Field icon={CreditCard} label="Ref client">
             {data.client_code || '-'}
           </Field>
 

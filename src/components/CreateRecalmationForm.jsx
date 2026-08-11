@@ -151,9 +151,9 @@ export default function CreateRecalmationForm({ reclamationId, reclamation, onCr
         </Form.Item>
 
         <Form.Item
-          label="Code client"
+          label="Ref client"
           name="client_code"
-          rules={[{ required: true, message: 'Le code client est requis.' }]}
+          rules={[{ required: true, message: 'Le ref client est requis.' }]}
         >
           <Input placeholder="CL150" />
         </Form.Item>

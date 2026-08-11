@@ -148,7 +148,7 @@ export default function Improvements() {
   const download = async (improvement_sheet) => {
     setDownloadSpin(true);
     try {
-      const res = await api.get(`improvements/${improvement_sheet}/download`, {
+      const res = await api.get(`improvement-sheets/${improvement_sheet}/download`, {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([res.data]));
@@ -233,7 +233,7 @@ export default function Improvements() {
         record.responsable?.full_name ? (
           <Space size="small">
             <Avatar size="small" icon={<UserOutlined />} />
-            <span>{record?.responsable?.full_name}</span>
+            <span className="whitespace-nowrap">{record?.responsable?.full_name}</span>
           </Space>
         ) : (
           <Text type="secondary">-</Text>

@@ -27,7 +27,7 @@ export default function createLoginWindow() {
     });
 
     if (isDev) {
-        loginWindow.loadURL("http://localhost:5173/login");
+        loginWindow.loadURL("http://localhost:5173/#login");
     } else {
         loginWindow.setMenu(null);
 
