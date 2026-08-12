@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Modal,
   Form,
@@ -8,6 +8,7 @@ import {
   Col,
   Button,
   message,
+  Spin,
 } from "antd";
 import { api } from "../utils/api";
 
@@ -24,6 +25,11 @@ export default function ImprovementSheetModal({
   const [users, setUsers] = useState([]);
   const [services, setServices] = useState([]);
 
+  // --- Corrective action live-search state ---
+  const [caOptions, setCaOptions] = useState([]);
+  const [caFetching, setCaFetching] = useState(false);
+  const caFetchIdRef = useRef(0); // guards against out-of-order responses
+
   useEffect(() => {
     if (open) {
       loadData();
@@ -33,6 +39,7 @@ export default function ImprovementSheetModal({
       });
     } else {
       form.resetFields();
+      setCaOptions([]);
     }
   }, [open, corrective_action_id]);
 
@@ -49,6 +56,48 @@ export default function ImprovementSheetModal({
       message.error("Erreur lors du chargement des données.");
     }
   };
+
+  const searchCorrectiveActions = async (value) => {
+    const fetchId = ++caFetchIdRef.current;
+    setCaFetching(true);
+
+    try {
+      const res = await api.get("corrective-actions/list", {
+        params: { search: value },
+      });
+
+      // ignore stale responses (e.g. user typed again before this resolved)
+      if (fetchId !== caFetchIdRef.current) return;
+
+      const data = res.data.data || res.data;
+
+      setCaOptions(
+        data.map((ca) => ({
+          value: ca.id,
+          label: ca.code ? `${ca.code} - ${ca.description}` : ca.description,
+        }))
+      );
+    } catch (err) {
+      if (fetchId === caFetchIdRef.current) {
+        message.error("Erreur lors de la recherche des actions correctives.");
+      }
+    } finally {
+      if (fetchId === caFetchIdRef.current) setCaFetching(false);
+    }
+  };
+
+  // debounce the search calls (300ms)
+  const debouncedSearch = useMemo(() => {
+    let timeout;
+    return (value) => {
+      clearTimeout(timeout);
+      if (!value) {
+        setCaOptions([]);
+        return;
+      }
+      timeout = setTimeout(() => searchCorrectiveActions(value), 300);
+    };
+  }, []);
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -89,9 +138,40 @@ export default function ImprovementSheetModal({
           corrective_action_id,
         }}
       >
-        <Form.Item name="corrective_action_id" hidden>
-          <Input />
-        </Form.Item>
+        {corrective_action_id ? (
+          <Form.Item name="corrective_action_id" hidden>
+            <Input />
+          </Form.Item>
+        ) : (
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                label="Action corrective"
+                name="corrective_action_id"
+                rules={[
+                  {
+                    required: true,
+                    message: "Sélectionnez une action corrective.",
+                  },
+                ]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Rechercher une action corrective..."
+                  filterOption={false}
+                  notFoundContent={
+                    caFetching ? <Spin size="small" /> : "Aucun résultat"
+                  }
+                  onSearch={debouncedSearch}
+                  onFocus={() => {
+                    if (caOptions.length === 0) searchCorrectiveActions("");
+                  }}
+                  options={caOptions}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+        )}
 
         <Row gutter={16}>
           <Col span={24}>

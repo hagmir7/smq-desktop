@@ -33,6 +33,7 @@ import { Link } from "react-router-dom";
 import ImprovementEvaluationModal from "../components/ImprovementEvaluationModal";
 import { Plus, Pyramid } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import ImprovementSheetModal from "../components/ImprovementSheetModal";
 const { Header, Content } = Layout;
 
 const { Title, Text, Paragraph } = Typography;
@@ -59,7 +60,7 @@ export default function Improvements() {
   });
 
   const [selected, setSelected] = useState(null);
-  const [open, setOpen] = useState(false);
+  const [open, ImprovementSheet] = useState(false);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
@@ -68,6 +69,8 @@ export default function Improvements() {
   // Evaluation modal state
   const [evaluateOpen, setEvaluateOpen] = useState(false);
   const [evaluatingRecord, setEvaluatingRecord] = useState(null);
+
+  const [openImprovementSheet, setOpenImprovementSheet] = useState(false);
 
   // Per-row deleting state, so only the clicked row shows a loading spinner
   const [deletingId, setDeletingId] = useState(null);
@@ -100,7 +103,7 @@ export default function Improvements() {
 
   const showDetails = (record) => {
     setSelected(record);
-    setOpen(true);
+    ImprovementSheet(true);
   };
 
   const openEvaluateModal = (record) => {
@@ -373,7 +376,7 @@ export default function Improvements() {
           <Tooltip title="Actualiser">
             <Button icon={<ReloadOutlined />} onClick={loadData} />
           </Tooltip>
-          <Button type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
+          <Button type="primary" icon={<Plus size={16} />} onClick={() => setOpenImprovementSheet(true)}>
             Nouvelle
           </Button>
         </Space>
@@ -411,9 +414,9 @@ export default function Improvements() {
 
       <Modal
         open={open}
-        onCancel={() => setOpen(false)}
+        onCancel={() => ImprovementSheet(false)}
         footer={[
-          <Button key="close" onClick={() => setOpen(false)}>
+          <Button key="close" onClick={() => ImprovementSheet(false)}>
             Fermer
           </Button>,
         ]}
@@ -517,6 +520,11 @@ export default function Improvements() {
         record={evaluatingRecord}
         onClose={() => setEvaluateOpen(false)}
         onSuccess={handleEvaluateSuccess}
+      />
+
+      <ImprovementSheetModal
+        open={openImprovementSheet}
+        onClose={() => setOpenImprovementSheet(false)}
       />
 
     </Layout>

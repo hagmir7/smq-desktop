@@ -77,13 +77,14 @@ export default function Reclamations() {
 
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 15,
     total: 0,
   });
 
   useEffect(() => {
   const reclamationId = searchParams.get("reclamation_id");
 
+  console.log("Search params changed:", searchParams.toString());
   if (reclamationId) {
     setSelectedId(Number(reclamationId));
     setIsModalOpen(true);

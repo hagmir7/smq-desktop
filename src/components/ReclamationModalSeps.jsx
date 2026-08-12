@@ -17,13 +17,6 @@ import { api } from "../utils/api";
 import ReclamationCorrectiveActions from "./ReclamationCorrectiveActions";
 import { useAuth } from "../contexts/AuthContext";
 
-// ---------------------------------------------------------------------------
-// Adjust this import to point at your own axios/fetch instance.
-// Expected usage in this file: api.get(`reclamations/${id}`) -> { data }
-// ReclamationCorrectiveActions fetches its own data from
-// GET /reclamations/{id}/corrective-actions internally.
-// ---------------------------------------------------------------------------
-// import api from "../services/api";
 
 const STEPS = [
   { key: "creation", label: "Création", tab: "general" },
@@ -69,13 +62,13 @@ function initials(name) {
 
 function resolveStepState(data) {
   if (!data) return { currentIndex: 0, isClosed: false };
-  const isClosed = data.statut === "Clôturée";
-  if (isClosed) return { currentIndex: STEPS.length - 1, isClosed: true };
   const raw = Number(data.workflow_step);
   const currentIndex = Number.isFinite(raw)
     ? Math.min(Math.max(raw, 0), STEPS.length - 1)
     : 0;
-  return { currentIndex, isClosed: false };
+  // "Clôturé" only applies once the workflow has actually reached step 4
+  const isClosed = data.statut === "Clôturée" && raw === 4;
+  return { currentIndex, isClosed };
 }
 
 function SummaryStat({ icon: Icon, label, value, accent }) {
