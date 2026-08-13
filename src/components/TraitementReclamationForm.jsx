@@ -87,7 +87,7 @@ export default function TraitementReclamationForm({ reclamationId, reclamation }
                     </Form.Item>
 
                     <Form.Item
-                        label="Analyse de la cause"
+                        label="Causes identifiées"
                         name="cause_analysis"
                         className='w-full'
                         rules={[{ required: true, message: 'Ce champ est requis.' }]}

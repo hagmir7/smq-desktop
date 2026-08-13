@@ -145,7 +145,7 @@ export default function Services() {
   }
 
   const columns = [
-    { title: 'Matricule', dataIndex: 'code', key: 'code', width: 80 },
+    { title: 'Ref.PRS', dataIndex: 'code', key: 'code', width: 80 },
     { title: 'Nom', dataIndex: 'name', key: 'name', width: 200 },
     {
       title: 'Description',
@@ -264,10 +264,10 @@ export default function Services() {
 
           <Form.Item
             name="code"
-            label="Matricule"
+            label="Ref.PRS"
             rules={[{ required: true, message: 'la process est requis' }]}
           >
-            <Input placeholder="Matricule" />
+            <Input placeholder="Ref.PRS" />
           </Form.Item>
 
           <Form.Item

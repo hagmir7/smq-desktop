@@ -153,7 +153,7 @@ export default function ImprovementSheetForm({ id, onSaved }) {
                             <Col span={12}>
                                 <Form.Item
                                     name="finding_source"
-                                    label="Source du constat"
+                                    label="Nature de d'action"
                                     rules={[{ required: true, message: "Champ requis" }]}
                                 >
                                     <Input placeholder="Ex: Action corrective" />
@@ -215,8 +215,8 @@ export default function ImprovementSheetForm({ id, onSaved }) {
                             <TextArea rows={3} placeholder="Description de la fiche d'amélioration" />
                         </Form.Item>
 
-                        <Form.Item name="cause_analysis" label="Analyse des causes">
-                            <TextArea rows={3} placeholder="Analyse des causes" />
+                        <Form.Item name="cause_analysis" label="Causes identifiées">
+                            <TextArea rows={3} placeholder="Causes identifiées" />
                         </Form.Item>
                     </div>
 
@@ -260,7 +260,7 @@ export default function ImprovementSheetForm({ id, onSaved }) {
 
                         <Row gutter={16}>
                             <Col span={12}>
-                                <Form.Item name="evaluation_date" label="Date d'observation">
+                                <Form.Item name="evaluation_date" label="Date d'evaluation">
                                     <DatePicker
                                         disabled
                                         style={{ width: "100%" }}

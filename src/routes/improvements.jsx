@@ -446,7 +446,7 @@ export default function Improvements() {
               {selected.description}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Analyse des causes" span={2}>
+            <Descriptions.Item label="Causes identifiées" span={2}>
               {selected.cause_analysis}
             </Descriptions.Item>
 

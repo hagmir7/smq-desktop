@@ -74,7 +74,7 @@ export default function AnalyseReclamationForm({ reclamationId, reclamation }) {
                         label="Analyse (post-analysis)"
                         name="post_analysis"
                         className='w-full'
-                        rules={[{ required: true, message: "Le champ post analysis est requis." }]}
+                        // rules={[{ required: true, message: "Le champ post analysis est requis." }]}
                     >
                         <TextArea rows={3} placeholder="Analyse effectuée après réception" />
                     </Form.Item>

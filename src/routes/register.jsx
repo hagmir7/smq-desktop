@@ -140,7 +140,7 @@ export default function CorrectiveActionsRegister() {
         ),
     },
     {
-      title: "Procusse",
+      title: "Processus",
       dataIndex: "service",
       width: 90,
       render: (service) => <div className="whitespace-nowrap">{service?.name ?? "—"}</div>,
@@ -190,7 +190,7 @@ export default function CorrectiveActionsRegister() {
             <SquareMenu size={18} />
           </div>
           <div className="leading-tight">
-            <div className="text-base font-semibold text-slate-900">Journal d'amélioration</div>
+            <div className="text-base font-semibold text-slate-900">Registre de réclamation</div>
             <div className="text-xs text-slate-500">{topLevel.length} action(s) · {openCount} ouverte(s) · {overdueCount} en retard</div>
           </div>
         </div>

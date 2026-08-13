@@ -208,12 +208,12 @@ export default function ImprovementSheetModal({
 
           <Col span={24}>
             <Form.Item
-              label="Analyse des causes"
+              label="Causes identifiées"
               name="cause_analysis"
               rules={[
                 {
                   required: true,
-                  message: "L'analyse des causes est obligatoire.",
+                  message: "L'Causes identifiées est obligatoire.",
                 },
               ]}
             >

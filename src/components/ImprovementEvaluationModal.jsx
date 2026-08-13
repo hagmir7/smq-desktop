@@ -231,7 +231,7 @@ export default function ImprovementEvaluationModal({ open, record, onClose, onSu
         <Form.Item
           name="observation_description"
           label="Observation"
-          rules={[{ required: true, message: "La description de l'observation est requise" }]}
+          // rules={[{ required: true, message: "La description de l'observation est requise" }]}
         >
           <TextArea
             rows={3}

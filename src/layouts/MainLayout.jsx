@@ -94,8 +94,15 @@ export default function MainLayout() {
         title: 'Améliorations',
         disabled: !permissions('voir.fiches_amelioration')
       },
-      { key: '/improvements-journal', icon: <Logs size={18} />, label: 'Journal Améliorations', disabled: !permissions('voir.journal_amelioration') },
-      { key: '/register', icon: <SquareMenu size={18} />, label: 'Register ENR-06 ', disabled: !permissions('voir.registre_reclamations') },
+      {
+        key: '/improvements-journal',
+        icon: <Logs size={18} />,
+        label: "Registre d'amélioration",
+        disabled: !permissions('voir.journal_amelioration'),
+        title: "Registre fiches d'amélioration",
+      }
+           ,
+      { key: '/register', icon: <SquareMenu size={18} />, label: 'Registre de réclamation', disabled: !permissions('voir.registre_reclamations') },
       {
         key: '/settings',
         icon: <Settings size={18} />,

@@ -423,7 +423,7 @@ export default function CorrectiveActions() {
             render: (reclamation) => <div>{reclamation?.client_code ?? ""}</div>,
         },
         {
-            title: "Procusse", dataIndex: "service", width: 90,
+            title: "Processus", dataIndex: "service", width: 90,
             render: (service) => <div className="whitespace-nowrap">{service?.name ?? ""}</div>,
         },
         {

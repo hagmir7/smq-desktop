@@ -132,7 +132,7 @@ export default function ReclamationStep3Modal({
         </Form.Item>
 
         <Form.Item
-          label="Analyse de la cause"
+          label="Causes identifiées"
           name="cause_analysis"
           rules={[{ required: !disabled, message: 'Ce champ est requis.' }]}
         >

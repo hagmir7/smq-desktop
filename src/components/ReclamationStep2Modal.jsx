@@ -86,12 +86,12 @@ export default function ReclamationStep2Modal({
         <Form.Item
           label="Analyse (post-analysis)"
           name="post_analysis"
-          rules={[
-            {
-              required: true,
-              message: "Le champ post analysis est requis.",
-            },
-          ]}
+          // rules={[
+          //   {
+          //     required: true,
+          //     message: "Le champ post analysis est requis.",
+          //   },
+          // ]}
         >
           <TextArea
             rows={3}

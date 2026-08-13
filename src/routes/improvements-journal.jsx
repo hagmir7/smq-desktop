@@ -240,7 +240,7 @@ export default function ImprovementsJournal() {
             <Logs size={18} />
           </div>
           <div className="leading-tight">
-            <div className="text-base font-semibold text-slate-900">Journal d'amélioration</div>
+            <div className="text-base font-semibold text-slate-900">Registre fiches d'amélioration</div>
             <div className="text-xs text-slate-500">Action(s) au total.</div>
           </div>
         </div>
