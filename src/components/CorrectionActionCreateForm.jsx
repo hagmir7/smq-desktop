@@ -199,11 +199,11 @@ export default function CreateForm({ onSubmit, onCancel, loading }) {
                 <Col span={12}>
                     <Form.Item
                         name="service_id"
-                        label="Service"
+                        label="Processus"
                         rules={[{ required: true }]}
                     >
                         <Select
-                            placeholder="Sélectionner un service"
+                            placeholder="Sélectionner un processus"
                             options={services}
                             showSearch
                             optionFilterProp="label"

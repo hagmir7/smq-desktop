@@ -8,15 +8,38 @@ const { TextArea } = Input;
 
 const RECEPTION_METHODS = ['Whatsapp', 'Email', 'Téléphone', 'Courrier', 'Visite'];
 
+const OBJECTS = [
+  "Produit non conforme à la commande (dimensions, modèle, référence, spécifications techniques)",
+  "Défaut ou problème de fabrication (perçage, finition, rayures, peinture, qualité des matériaux)",
+  "Produit endommagé à la réception",
+  "Commande ou accessoires incomplets (produit, accessoires ou éléments manquants)",
+  "Problème de montage / assemblage",
+  "Problème d’emballage",
+  "Non-conformité esthétique (couleur, aspect, finition, etc.)",
+  "Retard ou problème de livraison",
+  "Étiquetage / identification du produit",
+  "Service client insatisfaisant",
+  "Autre"
+];
+
 export default function ReclamationCreateModal({ open, onClose, onCreated }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [fileList, setFileList] = useState([]);
+  const [isOtherObject, setIsOtherObject] = useState(false);
 
   const resetAndClose = () => {
     form.resetFields();
     setFileList([]);
+    setIsOtherObject(false);
     onClose();
+  };
+
+  const handleObjectChange = (value) => {
+    setIsOtherObject(value === 'Autre');
+    if (value !== 'Autre') {
+      form.setFieldValue('object_other', undefined);
+    }
   };
 
   const handleSubmit = async () => {
@@ -34,7 +57,7 @@ export default function ReclamationCreateModal({ open, onClose, onCreated }) {
         client_phone: values.client_phone,
         client_email: values.client_email,
         reception_method: values.reception_method,
-        object: values.object,
+        object: values.object === 'Autre' ? values.object_other : values.object,
         description: values.description,
       };
 
@@ -133,8 +156,27 @@ export default function ReclamationCreateModal({ open, onClose, onCreated }) {
           name="object"
           rules={[{ required: true, message: "Le champ objet est requis." }]}
         >
-          <Input placeholder="Sujet de la réclamation" />
+          <Select
+            placeholder="Sélectionner un objet"
+            onChange={handleObjectChange}
+          >
+            {OBJECTS.map((o) => (
+              <Select.Option key={o} value={o}>
+                {o}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
+
+        {isOtherObject && (
+          <Form.Item
+            label="Précisez l'objet"
+            name="object_other"
+            rules={[{ required: true, message: "Veuillez préciser l'objet." }]}
+          >
+            <Input placeholder="Précisez l'objet de la réclamation" />
+          </Form.Item>
+        )}
 
         <Form.Item
           label="Description"
@@ -143,8 +185,6 @@ export default function ReclamationCreateModal({ open, onClose, onCreated }) {
         >
           <TextArea rows={4} placeholder="Détails de la réclamation" />
         </Form.Item>
-
-
 
          <Upload
             multiple

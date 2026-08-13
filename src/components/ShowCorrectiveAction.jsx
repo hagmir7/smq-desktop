@@ -28,7 +28,7 @@ export default function ShowCorrectiveAction({ item, children }) {
                 <Col span={12}><InfoRow label="Nom de client/ Société" value={item?.reclamation?.client_company_name} /></Col>
                 <Col span={12}><InfoRow label="Date d'échéance" value={item.due_date ? dayjs(item.due_date).format("DD MMM YYYY") : "—"} /></Col>
                 <Col span={12}><InfoRow label="Responsable" value={item?.responsable?.full_name} /></Col>
-                <Col span={12}><InfoRow label="Service" value={`${item?.service?.name} (${item?.service?.code || ''})`} /></Col>
+                <Col span={12}><InfoRow label="Processus" value={`${item?.service?.name} (${item?.service?.code || ''})`} /></Col>
                 <Col span={12}><InfoRow label="Type" value={item.type} /></Col>
                 <Col span={12}><InfoRow label="Efficacité" value={item.effectiveness} /></Col>
                 <Col span={12}><InfoRow label="Date de réalisation" value={item.completion_date ? dayjs(item.due_date).format("DD MMM YYYY") : "—"} /></Col>

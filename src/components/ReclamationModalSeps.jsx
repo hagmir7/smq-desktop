@@ -16,6 +16,7 @@ import {
 import { api } from "../utils/api";
 import ReclamationCorrectiveActions from "./ReclamationCorrectiveActions";
 import { useAuth } from "../contexts/AuthContext";
+import { Calendar, CalendarCheck2, CalendarClock, CalendarPlus } from "lucide-react";
 
 
 const STEPS = [
@@ -95,7 +96,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("general");
-  const {permissions} = useAuth();
+  const {permissions, roles} = useAuth();
 
   const fetchReclamation = useCallback(async (id) => {
     setLoading(true);
@@ -168,8 +169,8 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
           <div className="px-7 pt-6 pb-5 bg-gradient-to-br from-indigo-50 via-white to-white border-b border-slate-100">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-xl font-semibold text-slate-800 tracking-tight">
+                <div className="flex items-center gap-2 p-0 m-0">
+                  <h2 className="text-xl font-semibold text-slate-800 tracking-tight p-0 m-0">
                     {data.code || "Réclamation"}
                   </h2>
                   {data.statut && (
@@ -183,7 +184,18 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                     </Tag>
                   )}
                 </div>
-                <p className="text-sm text-slate-500 mt-1.5 max-w-2xl">{data.object || "—"}</p>
+                {
+                  data.object && (<div>
+                    <strong>Objet:</strong>
+                    <p className="text-sm text-slate-500 max-w-2xl p-0 m-0 pb-1">{data.object || "—"}</p>
+                  </div>)
+                }
+                {
+                  data.description && (<div>
+                    <strong>Description:</strong>
+                    <p className="text-sm text-slate-500 max-w-2xl">{data.description || "—"}</p>
+                  </div>)
+                }
               </div>
               {data.responsable?.full_name && (
                 <div className="flex items-center gap-2 shrink-0 bg-white border border-slate-200 rounded-full pl-1 pr-3 py-1">
@@ -215,12 +227,23 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
           </div>
 
           {/* Quick facts strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 px-7 py-4 bg-slate-50/70 border-b border-slate-100">
+
+          {
+            roles('pilote') ? ( <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 px-7 py-4 bg-slate-50/70 border-b border-slate-100">
+            <SummaryStat icon={Calendar} label="Date de réclamation" value={formatDate(data.claimant_date)} accent="#4F46E5" />
+            <SummaryStat icon={CalendarPlus} label="Enregistré le" value={formatDate(data.registration_date)} accent="#F59E0B" />
+            <SummaryStat icon={CalendarClock} label="Clôture prévue" value={formatDate(data.planned_closing_date)} accent="#10B981" />
+            <SummaryStat icon={CalendarCheck2} label="Clôture effective" value={formatDate(data.closing_date)} accent="#0EA5E9" />
+          </div>) :  <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 px-7 py-4 bg-slate-50/70 border-b border-slate-100">
             <SummaryStat icon={UserOutlined} label="Réclamant" value={data.claimant_name} accent="#4F46E5" />
             <SummaryStat icon={BankOutlined} label="Client" value={data.client_company_name} accent="#0EA5E9" />
             <SummaryStat icon={CalendarOutlined} label="Enregistré le" value={formatDate(data.registration_date)} accent="#F59E0B" />
             <SummaryStat icon={CalendarOutlined} label="Clôture prévue" value={formatDate(data.planned_closing_date)} accent="#10B981" />
           </div>
+          }
+         
+
+          
 
           {/* Tabbed detail */}
           <div className="px-7 py-5 max-h-[52vh] overflow-y-auto">
@@ -231,6 +254,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                 {
                   key: "general",
                   label: "Général",
+                  disabled: roles('pilote'),
                   children: (
                     <Descriptions column={2} size="small" bordered>
                       <Descriptions.Item label="Réclamant">{data.claimant_name ?? "—"}</Descriptions.Item>
@@ -250,6 +274,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                 {
                   key: "client",
                   label: "Client",
+                  disabled: roles('pilote'),
                   children: (
                     <Descriptions column={2} size="small" bordered>
                       <Descriptions.Item label={<span><BankOutlined className="mr-1.5" />Entreprise</span>}>
@@ -270,6 +295,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                   label: "Analyse & Traitement",
                   children: (
                     <Descriptions column={1} size="small" bordered>
+
                       <Descriptions.Item
                         label={
                           <span>
@@ -282,6 +308,12 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                       >
                         {data.post_analysis ?? "—"}
                       </Descriptions.Item>
+                      
+                      <Descriptions.Item label="Action de correction">
+                        {data.corrective_action ?? "—"}
+                      </Descriptions.Item>
+                      <div></div>
+
                       <Descriptions.Item
                         label={
                           <span>
@@ -294,12 +326,11 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                       >
                         {data.processing_analysis ?? "—"}
                       </Descriptions.Item>
+
                       <Descriptions.Item label="Analyse de cause">
                         {data.cause_analysis ?? "—"}
                       </Descriptions.Item>
-                      <Descriptions.Item label="Action corrective">
-                        {data.corrective_action ?? "—"}
-                      </Descriptions.Item>
+                   
                     </Descriptions>
                   ),
                 },
@@ -312,6 +343,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                 {
                   key: "cloture",
                   label: "Clôture",
+                  disabled: roles('pilote'),
                   children: (
                     <Descriptions column={2} size="small" bordered>
                       <Descriptions.Item label="Responsable">

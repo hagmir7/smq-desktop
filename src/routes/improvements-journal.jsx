@@ -165,7 +165,7 @@ export default function ImprovementsJournal() {
         ),
     },
     {
-      title: "Service",
+      title: "Processus",
       dataIndex: ["service", "name"],
       key: "service",
       width: 160,
@@ -260,7 +260,7 @@ export default function ImprovementsJournal() {
 
             <Select
               allowClear
-              placeholder="Service"
+              placeholder="Processus"
               style={{ width: 170 }}
               value={serviceFilter}
               onChange={setServiceFilter}

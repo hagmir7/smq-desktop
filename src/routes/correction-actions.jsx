@@ -512,7 +512,7 @@ export default function CorrectiveActions() {
                             <Select
                                 allowClear
                                 showSearch
-                                placeholder="Service"
+                                placeholder="Processus"
                                 className="w-full"
                                 options={services}
                                 value={serviceId}

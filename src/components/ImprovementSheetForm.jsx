@@ -26,11 +26,10 @@ import { useAuth } from "../contexts/AuthContext";
 const { TextArea } = Input;
 const { Option } = Select;
 
-const IMPACT_OPTIONS = ["Faible", "Moyen", "Élevé"];
 const STATUT_OPTIONS = ["Planifié", "En cours", "Terminé", "Annulé"];
 const EFFECTIVENESS_OPTIONS = ["Efficace", "Partiellement efficace", "Non efficace"];
 
-const DATE_FIELDS = ["observation_date", "closing_date"];
+const DATE_FIELDS = ["evaluation_date", "closing_date"];
 
 export default function ImprovementSheetForm({ id, onSaved }) {
     const [form] = Form.useForm();
@@ -160,17 +159,7 @@ export default function ImprovementSheetForm({ id, onSaved }) {
                                     <Input placeholder="Ex: Action corrective" />
                                 </Form.Item>
                             </Col>
-                            <Col span={12}>
-                                <Form.Item name="impact" label="Impact" rules={[{ required: true }]}>
-                                    <Select placeholder="Sélectionner l'impact">
-                                        {IMPACT_OPTIONS.map((opt) => (
-                                            <Option key={opt} value={opt}>
-                                                {opt}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </Form.Item>
-                            </Col>
+
                         </Row>
 
                         <Row gutter={16}>
@@ -178,12 +167,12 @@ export default function ImprovementSheetForm({ id, onSaved }) {
                                 {/* Select populated from GET /services */}
                                 <Form.Item
                                     name="service_id"
-                                    label="Service"
-                                    rules={[{ required: true, message: "Le service est requis" }]}
+                                    label="Processus"
+                                    rules={[{ required: true, message: "Le processus est requis" }]}
                                 >
                                     <Select
                                         showSearch
-                                        placeholder="Sélectionner un service"
+                                        placeholder="Sélectionner un processus"
                                         optionFilterProp="children"
                                         filterOption={(input, option) =>
                                             (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
@@ -271,7 +260,7 @@ export default function ImprovementSheetForm({ id, onSaved }) {
 
                         <Row gutter={16}>
                             <Col span={12}>
-                                <Form.Item name="observation_date" label="Date d'observation">
+                                <Form.Item name="evaluation_date" label="Date d'observation">
                                     <DatePicker
                                         disabled
                                         style={{ width: "100%" }}

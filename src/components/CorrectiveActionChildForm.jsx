@@ -119,17 +119,17 @@ export default function CorrectiveActionChildForm({ onSubmit, loading }) {
                 <Col span={12}>
                     <Form.Item
                         name="service_id"
-                        label="Service"
+                        label="Processus"
                         rules={[
                             {
                                 required: true,
-                                message: "Veuillez sélectionner un service.",
+                                message: "Veuillez sélectionner un processus.",
                             },
                         ]}
                     >
                         <Select
                             options={services}
-                            placeholder="Sélectionner un service"
+                            placeholder="Sélectionner un processus"
                             loading={!services.length}
                         />
                     </Form.Item>

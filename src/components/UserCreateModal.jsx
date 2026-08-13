@@ -245,10 +245,10 @@ export default function UserCreateModal({ fetchData, permissions }) {
                         </Col>
 
                         <Col xs={24} md={12}>
-                            <Form.Item label="Service" name="service_id">
+                            <Form.Item label="Processus" name="service_id">
                                 <Select
                                     options={services}
-                                    placeholder="Sélectionnez une service"
+                                    placeholder="Sélectionnez une processus"
                                     suffixIcon={<Building size={16} />}
                                 />
                             </Form.Item>

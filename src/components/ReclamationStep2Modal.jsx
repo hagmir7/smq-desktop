@@ -117,7 +117,7 @@ export default function ReclamationStep2Modal({
 
         {isRecevable && (
           <Form.Item
-            label="Action corrective proposée"
+            label="Action de correction"
             name="corrective_action"
             rules={[
               {

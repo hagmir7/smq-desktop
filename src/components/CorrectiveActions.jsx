@@ -123,7 +123,7 @@ export default function CorrectiveActions({ reclamationId }) {
 
       console.error(err);
 
-      message.error("Échec de la création de l'action corrective.");
+      message.error(err?.response?.data?.message || "Échec de la création de l'action corrective.");
     } finally {
       setSubmitting(false);
     }
@@ -168,13 +168,6 @@ export default function CorrectiveActions({ reclamationId }) {
               </div>
 
               <p className="mt-2 mb-1">{item.description}</p>
-
-              {item.effectiveness_criteria && (
-                <p className="text-xs text-gray-500 mb-0">
-                  Critère d'efficacité :{" "}
-                  {item.effectiveness_criteria}
-                </p>
-              )}
             </div>
           </List.Item>
         )}
@@ -227,22 +220,6 @@ export default function CorrectiveActions({ reclamationId }) {
             />
           </Form.Item>
 
-          <Form.Item
-            label="Critère d'efficacité"
-            name="effectiveness_criteria"
-            rules={[
-              {
-                required: true,
-                message: "Ce champ est requis.",
-              },
-            ]}
-          >
-            <TextArea
-              rows={2}
-              placeholder="Comment le succès sera-t-il évalué ?"
-            />
-          </Form.Item>
-
           <div className="grid grid-cols-3 gap-x-4">
             <Form.Item
               label="Échéance"
@@ -261,7 +238,7 @@ export default function CorrectiveActions({ reclamationId }) {
             </Form.Item>
 
             <Form.Item
-              label="Service"
+              label="Processus"
               name="service_id"
               rules={[
                 {
@@ -271,7 +248,7 @@ export default function CorrectiveActions({ reclamationId }) {
               ]}
             >
               <Select
-                placeholder="Sélectionner un service"
+                placeholder="Sélectionner un processus"
                 options={services}
                 showSearch
                 optionFilterProp="label"

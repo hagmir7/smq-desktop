@@ -79,7 +79,7 @@ export default function AnalyseReclamationForm({ reclamationId, reclamation }) {
                         <TextArea rows={3} placeholder="Analyse effectuée après réception" />
                     </Form.Item>
                     <Form.Item
-                        label="Action corrective proposée"
+                        label="Action de correction"
                         name="corrective_action"
                         className='w-full'
                         rules={[{ required: true, message: 'Ce champ est requis.' }]}

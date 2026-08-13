@@ -60,7 +60,7 @@ export default function Users() {
       return
     }
     try {
-      const url = `update-user/${id}`
+      const url = `#/update-user/${id}`
       if (window.electron && typeof window.electron.openShow === 'function') {
         await window.electron.openShow({
           width: 900,
@@ -104,7 +104,7 @@ export default function Users() {
       key: 'email',
     },
     {
-      title: 'Service',
+      title: 'Processus',
       dataIndex: 'service',
       key: 'service',
       render: (service) => <Tag>{service.name}</Tag>,

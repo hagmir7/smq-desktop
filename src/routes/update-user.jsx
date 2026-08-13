@@ -208,7 +208,7 @@ export default function UpdateUser() {
                                     />
                                 </Form.Item>
 
-                                <Form.Item label="Service">
+                                <Form.Item label="Processus">
                                     <Select
                                         options={services}
                                         value={userData.service_id}

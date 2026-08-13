@@ -44,11 +44,6 @@ const statusColors = {
   Clôturée: "success",
 };
 
-const impactColors = {
-  Faible: "green",
-  Moyen: "orange",
-  Élevé: "red",
-};
 
 export default function Improvements() {
   const [loading, setLoading] = useState(true);
@@ -64,7 +59,7 @@ export default function Improvements() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
-  const [impactFilter, setImpactFilter] = useState(null);
+
 
   // Evaluation modal state
   const [evaluateOpen, setEvaluateOpen] = useState(false);
@@ -140,11 +135,9 @@ export default function Improvements() {
           .includes(search.toLowerCase());
 
       const matchesStatus = !statusFilter || item.statut === statusFilter;
-      const matchesImpact = !impactFilter || item.impact === impactFilter;
-
-      return matchesSearch && matchesStatus && matchesImpact;
+      return matchesSearch && matchesStatus ;
     });
-  }, [improvements, search, statusFilter, impactFilter]);
+  }, [improvements, search, statusFilter]);
 
 
 
@@ -214,20 +207,6 @@ export default function Improvements() {
       ),
     },
     {
-      title: "Impact",
-      dataIndex: "impact",
-      key: "impact",
-      width: 110,
-      filters: Object.keys(impactColors).map((i) => ({
-        text: i,
-        value: i,
-      })),
-      onFilter: (value, record) => record.impact === value,
-      render: (impact) => (
-        <Tag color={impactColors[impact]}>{impact}</Tag>
-      ),
-    },
-    {
       title: "Responsable",
       dataIndex: ["responsable", "full_name"],
       key: "responsable",
@@ -243,7 +222,7 @@ export default function Improvements() {
         ),
     },
     {
-      title: "Service",
+      title: "Processus",
       dataIndex: ["service", "name"],
       key: "service",
       width: 160,
@@ -447,18 +426,11 @@ export default function Improvements() {
             <Descriptions.Item label="Source">
               {selected.finding_source}
             </Descriptions.Item>
-
-            <Descriptions.Item label="Impact">
-              <Tag color={impactColors[selected.impact]}>
-                {selected.impact}
-              </Tag>
-            </Descriptions.Item>
-
             <Descriptions.Item label="Responsable">
               {selected.responsable?.full_name || "-"}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Service">
+            <Descriptions.Item label="Processus">
               {selected.service?.name || "-"}
             </Descriptions.Item>
 
@@ -483,8 +455,8 @@ export default function Improvements() {
             </Descriptions.Item>
 
             <Descriptions.Item label="Date d'observation">
-              {selected.observation_date
-                ? dayjs(selected.observation_date).format("DD/MM/YYYY")
+              {selected.evaluation_date
+                ? dayjs(selected.evaluation_date).format("DD/MM/YYYY")
                 : "-"}
             </Descriptions.Item>
 

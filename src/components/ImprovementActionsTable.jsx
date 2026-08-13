@@ -144,7 +144,7 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
       render: (_, record) => record.responsable?.full_name || "-",
     },
     {
-      title: "Service",
+      title: "Processus",
       dataIndex: ["service", "name"],
       key: "service",
       width: 140,

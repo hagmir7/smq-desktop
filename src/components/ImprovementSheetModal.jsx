@@ -243,34 +243,18 @@ export default function ImprovementSheetModal({
 
           <Col span={12}>
             <Form.Item
-              label="Service"
+              label="Processus"
               name="service_id"
               rules={[
-                { required: true, message: "Sélectionnez un service." },
+                { required: true, message: "Sélectionnez un processus." },
               ]}
             >
               <Select
-                placeholder="Choisir un service"
+                placeholder="Choisir un processus"
                 options={services.map((s) => ({
                   value: s.id,
                   label: s.name,
                 }))}
-              />
-            </Form.Item>
-          </Col>
-
-          <Col span={12}>
-            <Form.Item
-              label="Impact"
-              name="impact"
-              rules={[{ required: true, message: "Sélectionnez un impact." }]}
-            >
-              <Select
-                options={[
-                  { value: "Faible", label: "Faible" },
-                  { value: "Moyen", label: "Moyen" },
-                  { value: "Élevé", label: "Élevé" },
-                ]}
               />
             </Form.Item>
           </Col>

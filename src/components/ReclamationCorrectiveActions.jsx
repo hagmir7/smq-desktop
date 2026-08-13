@@ -58,7 +58,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
   const [responsibles, setResponsibles] = useState([]);
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-  const [showChildren, setShowChildren] = useState(false);
+  const [showChildren, setShowChildren] = useState(true);
   const { permissions, user } = useAuth();
   const [reclamation, setReclamation] = useState(null);
 
@@ -192,10 +192,8 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
     } catch (err) {
       console.error(err);
       if (err?.errorFields) return;
-      message.error(
-        editingAction
-          ? "Échec de la mise à jour de l'action corrective."
-          : "Échec de la création de l'action corrective."
+        message.error(err?.response?.data?.message || 
+          (editingAction ? "Échec de la mise à jour de l'action corrective." : "Échec de la création de l'action corrective.")
       );
     } finally {
       setSubmitting(false);
@@ -275,12 +273,6 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
-    },
-    {
-      title: <div className='whitespace-nowrap'>Critère d'efficacité</div>,
-      dataIndex: 'effectiveness_criteria',
-      key: 'effectiveness_criteria',
-      render: (value) => value || '-',
     },
     {
       title: 'Échéance',
@@ -444,17 +436,6 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
           </Form.Item>
 
 
-          {
-            parentId ? "" : (<Form.Item
-              label="Critère d'efficacité"
-              name="effectiveness_criteria"
-              rules={[{ required: true, message: 'Ce champ est requis.' }]}
-            >
-              <TextArea rows={2} placeholder="Comment le succès sera-t-il évalué ?" />
-            </Form.Item>)
-          }
-
-
           <div className="grid grid-cols-3 gap-x-4">
             <Form.Item
               label="Échéance"
@@ -464,7 +445,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
               <DatePicker className="w-full" format="DD/MM/YYYY" />
             </Form.Item>
 
-            <Form.Item name="service_id" label="Service">
+            <Form.Item name="service_id" label="Processus">
               <Select
                 options={services}
                 placeholder="Sélectionnez un service"

@@ -165,8 +165,8 @@ export default function ImprovementActionModal({
         {/* service_id is required on create; kept editable on update too, remove if not needed */}
         <Form.Item
           name="service_id"
-          label="Service"
-          rules={[{ required: !isUpdate, message: "Le service est requis" }]}
+          label="Processus"
+          rules={[{ required: !isUpdate, message: "Le processus est requis" }]}
         >
           <Select
             showSearch
