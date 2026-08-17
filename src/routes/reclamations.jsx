@@ -11,6 +11,7 @@ import {
   Tooltip,
   Layout,
   DatePicker,
+  Select,
 } from 'antd';
 import {
   SearchOutlined,
@@ -49,7 +50,7 @@ const priorityColor = {
   Basse: 'default',
 };
 
-const workflowStepConfig = {
+const WORKFLOW_STEPS = {
   1: { label: 'Création', color: 'default' },
   2: { label: 'Validation', color: 'blue' },
   3: { label: 'Analyse et Traitement', color: 'orange' },
@@ -63,15 +64,16 @@ export default function Reclamations() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
-  const [dateRange, setDateRange] = useState(null); // [dayjs, dayjs] | null
+  const [dateRange, setDateRange] = useState(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [step2Open, setStep2Open] = useState(false);
   const [drowerOpen, setDrowerOpn] = useState(false);
   const [step3Open, setStep3Open] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const {permissions} = useAuth();
+  const { permissions } = useAuth();
   const [downloadSpin, setDownloadSpin] = useState(false);
+  const [workflowStep, setWorkflowStep] = useState(null);
 
   const [searchParams] = useSearchParams();
 
@@ -82,14 +84,14 @@ export default function Reclamations() {
   });
 
   useEffect(() => {
-  const reclamationId = searchParams.get("reclamation_id");
+    const reclamationId = searchParams.get("reclamation_id");
 
-  console.log("Search params changed:", searchParams.toString());
-  if (reclamationId) {
-    setSelectedId(Number(reclamationId));
-    setIsModalOpen(true);
-  }
-}, [searchParams]);
+    console.log("Search params changed:", searchParams.toString());
+    if (reclamationId) {
+      setSelectedId(Number(reclamationId));
+      setIsModalOpen(true);
+    }
+  }, [searchParams]);
 
   // Keep a ref to the latest pagination/filters so the debounced search
   // handler always fires with fresh values without re-creating itself.
@@ -106,6 +108,11 @@ export default function Reclamations() {
       const currentSearch = overrides.search ?? search;
       if (currentSearch?.trim()) {
         params.search = currentSearch.trim();
+      }
+
+      const currentWorkflowStep = overrides.workflowStep !== undefined ? overrides.workflowStep : workflowStep;
+      if (currentWorkflowStep) {
+        params.workflow_step = currentWorkflowStep;
       }
 
       const currentRange = overrides.dateRange ?? dateRange;
@@ -140,6 +147,11 @@ export default function Reclamations() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleWorkflowStepChange = (value) => {
+    setWorkflowStep(value);
+    fetchData({ page: 1, workflowStep: value });
   };
 
   // Initial load
@@ -180,7 +192,7 @@ export default function Reclamations() {
     });
   };
 
-   const download = async (reclamation_id) => {
+  const download = async (reclamation_id) => {
     setDownloadSpin(true);
     try {
       const res = await api.get(`reclamations/${reclamation_id}/download`, {
@@ -207,7 +219,7 @@ export default function Reclamations() {
   const handleCloseReclamation = async (id, { closing_date }) => {
     try {
       await reclamationApi.close(id, {
-        closing_date:closing_date,
+        closing_date: closing_date,
       });
 
       message.success('Action clôturée avec succès.');
@@ -221,9 +233,9 @@ export default function Reclamations() {
 
   const getEtat = (record) => {
     if (record.statut === 'cloturee' || record.closing_date) {
-      return workflowStepConfig[5];
+      return WORKFLOW_STEPS[5];
     }
-    return workflowStepConfig[record.workflow_step] ?? { label: 'Inconnu', color: 'default' };
+    return WORKFLOW_STEPS[record.workflow_step] ?? { label: 'Inconnu', color: 'default' };
   };
 
   const columns = [
@@ -265,7 +277,7 @@ export default function Reclamations() {
       title: 'Etat',
       dataIndex: 'workflow_step',
       render: (val, record) => {
-        const etat = workflowStepConfig[val] ?? { label: 'Inconnu', color: 'default' };
+        const etat = WORKFLOW_STEPS[val] ?? { label: 'Inconnu', color: 'default' };
         // If using the separate statut/closing_date approach instead, use:
         // const etat = getEtat(record);
         return <Tag color={etat.color}>{etat.label}</Tag>;
@@ -321,7 +333,7 @@ export default function Reclamations() {
           </Tooltip>
 
 
-           <Tooltip title="Imprimer">
+          <Tooltip title="Imprimer">
             <Button
               disabled={!permissions('imprimer.reclamation')}
               size="small"
@@ -346,7 +358,7 @@ export default function Reclamations() {
           </Tooltip> */}
 
 
- 
+
 
           <Tooltip title="Validation et recevabilité">
             <Button
@@ -355,7 +367,7 @@ export default function Reclamations() {
                 setStep2Open(true);
               }}
               size="small"
-              disabled={!permissions('valider.reclamation')  }
+              disabled={!permissions('valider.reclamation')}
               icon={<CheckCircleOutlined />}
             />
           </Tooltip>
@@ -390,7 +402,7 @@ export default function Reclamations() {
             </Tooltip>
           </Popconfirm>
 
-          
+
 
 
         </Space>
@@ -431,6 +443,18 @@ export default function Reclamations() {
             onChange={handleDateRangeChange}
             format="DD/MM/YYYY"
             placeholder={['Date début', 'Date fin']}
+          />
+
+          <Select
+            allowClear
+            placeholder="Filtrer par état"
+            value={workflowStep}
+            onChange={handleWorkflowStepChange}
+            className="w-48"
+            options={Object.entries(WORKFLOW_STEPS).map(([key, val]) => ({
+              value: Number(key),
+              label: val.label,
+            }))}
           />
 
           <Tooltip title="Actualiser">
@@ -497,7 +521,7 @@ export default function Reclamations() {
 
           <ReclamationModalSeps
             reclamationId={selectedId}
-            
+
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
           />

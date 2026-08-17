@@ -268,24 +268,12 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                         {formatDate(data.registration_date)}
                       </Descriptions.Item>
                       <Descriptions.Item label="Créé par">{data.user?.full_name ?? "—"}</Descriptions.Item>
-                    </Descriptions>
-                  ),
-                },
-                {
-                  key: "client",
-                  label: "Client",
-                  disabled: roles('pilote'),
-                  children: (
-                    <Descriptions column={2} size="small" bordered>
-                      <Descriptions.Item label={<span><BankOutlined className="mr-1.5" />Entreprise</span>}>
+                       <Descriptions.Item label={<span><BankOutlined className="mr-1.5" />Entreprise</span>}>
                         {data.client_company_name ?? "—"}
                       </Descriptions.Item>
                       <Descriptions.Item label="Ref client">{data.client_code ?? "—"}</Descriptions.Item>
                       <Descriptions.Item label={<span><PhoneOutlined className="mr-1.5" />Téléphone</span>}>
                         {data.client_phone ?? "—"}
-                      </Descriptions.Item>
-                      <Descriptions.Item label={<span><MailOutlined className="mr-1.5" />Email</span>}>
-                        {data.client_email ?? "—"}
                       </Descriptions.Item>
                     </Descriptions>
                   ),

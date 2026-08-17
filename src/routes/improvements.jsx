@@ -60,6 +60,8 @@ export default function Improvements() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(null);
 
+  const [editingRecord, setEditingRecord] = useState(null);
+
 
   // Evaluation modal state
   const [evaluateOpen, setEvaluateOpen] = useState(false);
@@ -126,16 +128,20 @@ export default function Improvements() {
 
   const filteredData = useMemo(() => {
     return improvements.filter((item) => {
+      const responsibleNames =
+        item.responsibles
+          ?.map((r) => r.responsable?.full_name)
+          .filter(Boolean)
+          .join(" ") || "";
+
       const matchesSearch =
         !search ||
         item.code?.toLowerCase().includes(search.toLowerCase()) ||
         item.title?.toLowerCase().includes(search.toLowerCase()) ||
-        item.responsable?.full_name
-          ?.toLowerCase()
-          .includes(search.toLowerCase());
+        responsibleNames.toLowerCase().includes(search.toLowerCase());
 
       const matchesStatus = !statusFilter || item.statut === statusFilter;
-      return matchesSearch && matchesStatus ;
+      return matchesSearch && matchesStatus;
     });
   }, [improvements, search, statusFilter]);
 
@@ -207,28 +213,41 @@ export default function Improvements() {
       ),
     },
     {
-      title: "Responsable",
-      dataIndex: ["responsable", "full_name"],
-      key: "responsable",
-      width: 200,
+      title: "Responsables",
+      key: "responsibles",
+      width: 220,
       render: (_, record) =>
-        record.responsable?.full_name ? (
-          <Space size="small">
-            <Avatar size="small" icon={<UserOutlined />} />
-            <span className="whitespace-nowrap">{record?.responsable?.full_name}</span>
+        record.responsibles?.length ? (
+          <Space direction="vertical" size={2}>
+            {record.responsibles.slice(0, 2).map((r) => (
+              <Space key={r.id} size="small">
+                <Avatar size="small" icon={<UserOutlined />} />
+                <span className="whitespace-nowrap text-xs">
+                  {r.responsable?.full_name || "-"}
+                  {r.service?.name ? ` (${r.service.name})` : ""}
+                </span>
+              </Space>
+            ))}
+            {record.responsibles.length > 2 && (
+              <Tooltip
+                title={record.responsibles
+                  .slice(2)
+                  .map(
+                    (r) =>
+                      `${r.responsable?.full_name || "-"}${r.service?.name ? ` (${r.service.name})` : ""
+                      }`
+                  )
+                  .join(", ")}
+              >
+                <Text type="secondary" className="text-xs cursor-pointer">
+                  +{record.responsibles.length - 2} autre(s)
+                </Text>
+              </Tooltip>
+            )}
           </Space>
         ) : (
           <Text type="secondary">-</Text>
         ),
-    },
-    {
-      title: "Processus",
-      dataIndex: ["service", "name"],
-      key: "service",
-      width: 160,
-      render: (_, record) => record.service?.name || (
-        <Text type="secondary">-</Text>
-      ),
     },
     {
       title: "Action corrective",
@@ -271,7 +290,7 @@ export default function Improvements() {
 
           <Tooltip title="Modifier">
             <Link to={`/improvements/${record.id}`}>
-             
+
               <Button disabled={!permissions('modifier.fiche_amelioration')} size="small" icon={<EditOutlined />} />
             </Link>
           </Tooltip>
@@ -294,6 +313,19 @@ export default function Improvements() {
             />
           </Tooltip>
 
+          <Tooltip title="Modifier">
+            <Button
+              disabled={!permissions('modifier.fiche_amelioration')}
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => {
+                setEditingRecord(record);
+                setOpenImprovementSheet(true);
+              }}
+            />
+          </Tooltip>
+
+
           <Popconfirm
             title="Supprimer cette fiche ?"
             description="Cette action est irréversible."
@@ -305,7 +337,7 @@ export default function Improvements() {
             <Tooltip title="Supprimer">
               <Button
                 size="small"
-                 disabled={!permissions('supprimer.fiche_amelioration')}
+                disabled={!permissions('supprimer.fiche_amelioration')}
                 danger
                 icon={<DeleteOutlined />}
                 loading={deletingId === record.id}
@@ -361,32 +393,32 @@ export default function Improvements() {
         </Space>
       </Header>
       <Content >
-        <div className="p-4"> 
+        <div className="p-4">
           <div className="border border-solid border-gray-200 rounded-lg overflow-hidden bg-white">
-          <Table
-            rowKey="id"
-            loading={loading}
-            columns={columns}
-            dataSource={filteredData}
-            scroll={{ x: 1450 }}
-            size="small"
-            bordered={false}
-            className="rounded-xl overflow-hidden shadow-sm"
-            locale={{
-              emptyText: (
-                <Empty description="Aucune fiche d'amélioration." />
-              ),
-            }}
-            pagination={{
-              current: pagination.current,
-              total: pagination.total,
-              pageSize: pagination.perPage,
-              showSizeChanger: false,
-              showTotal: (total) => `${total} fiche(s)`,
-              onChange: loadData,
-            }}
-          />
-        </div>
+            <Table
+              rowKey="id"
+              loading={loading}
+              columns={columns}
+              dataSource={filteredData}
+              scroll={{ x: 1450 }}
+              size="small"
+              bordered={false}
+              className="rounded-xl overflow-hidden shadow-sm"
+              locale={{
+                emptyText: (
+                  <Empty description="Aucune fiche d'amélioration." />
+                ),
+              }}
+              pagination={{
+                current: pagination.current,
+                total: pagination.total,
+                pageSize: pagination.perPage,
+                showSizeChanger: false,
+                showTotal: (total) => `${total} fiche(s)`,
+                onChange: loadData,
+              }}
+            />
+          </div>
         </div>
       </Content>
 
@@ -426,16 +458,27 @@ export default function Improvements() {
             <Descriptions.Item label="Source">
               {selected.finding_source}
             </Descriptions.Item>
-            <Descriptions.Item label="Responsable">
-              {selected.responsable?.full_name || "-"}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Processus">
-              {selected.service?.name || "-"}
-            </Descriptions.Item>
 
             <Descriptions.Item label="Action corrective">
               {selected.corrective_action?.code || "-"}
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Responsables" span={2}>
+              {selected.responsibles?.length ? (
+                <Space direction="vertical" size={4}>
+                  {selected.responsibles.map((r) => (
+                    <Space key={r.id} size="small">
+                      <Avatar size="small" icon={<UserOutlined />} />
+                      <span>{r.responsable?.full_name || "-"}</span>
+                      {r.service?.name && (
+                        <Tag color="default">{r.service.name}</Tag>
+                      )}
+                    </Space>
+                  ))}
+                </Space>
+              ) : (
+                "-"
+              )}
             </Descriptions.Item>
 
             <Descriptions.Item label="Date de création">
@@ -496,7 +539,12 @@ export default function Improvements() {
 
       <ImprovementSheetModal
         open={openImprovementSheet}
-        onClose={() => setOpenImprovementSheet(false)}
+        record={editingRecord}
+        onClose={() => {
+          setOpenImprovementSheet(false);
+          setEditingRecord(null);
+        }}
+        onSaved={() => loadData(pagination.current)}
       />
 
     </Layout>

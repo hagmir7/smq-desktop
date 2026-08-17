@@ -1,13 +1,7 @@
 import React from "react";
 import { Modal, Steps } from "antd";
+import { WORKFLOW_STEPS } from "../utils/config";
 
-export const WORKFLOW_STEPS = {
-  1: "Création",
-  2: "Validation",
-  3: "Analyse et Traitement",
-  4: "Affectation",
-  5: "Clôturé",
-};
 
 export default function WorkflowModal({
   open,

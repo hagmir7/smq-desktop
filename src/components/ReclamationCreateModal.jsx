@@ -55,7 +55,6 @@ export default function ReclamationCreateModal({ open, onClose, onCreated }) {
         client_code: values.client_code,
         client_company_name: values.client_company_name,
         client_phone: values.client_phone,
-        client_email: values.client_email,
         reception_method: values.reception_method,
         object: values.object === 'Autre' ? values.object_other : values.object,
         description: values.description,
@@ -123,17 +122,8 @@ export default function ReclamationCreateModal({ open, onClose, onCreated }) {
           <Form.Item
             label="Téléphone"
             name="client_phone"
-            rules={[{ required: true, message: 'Le téléphone est requis.' }]}
           >
             <Input placeholder="0654751457" />
-          </Form.Item>
-
-          <Form.Item
-            label="Email"
-            name="client_email"
-            rules={[{ type: 'email', message: "Format d'email invalide." }]}
-          >
-            <Input placeholder="contact@client.com" />
           </Form.Item>
 
           <Form.Item

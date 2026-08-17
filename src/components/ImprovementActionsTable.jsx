@@ -266,6 +266,7 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
         loading={loading}
         dataSource={data}
         columns={columns}
+       
         style={{display: permissions('voir.action_amelioration') ? 'table' : 'none'}}
         size="small"
         scroll={{ x: 1350 }}
@@ -275,7 +276,7 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
           ),
         }}
         title={() => (
-          <Space style={{ width: "100%", justifyContent: "space-between", display: "flex" }}>
+          <Space style={{ width: "100%", justifyContent: "space-between", display: "flex" }} >
             <strong>Actions d'amélioration</strong>
             <Space>
               <Button icon={<ReloadOutlined />} onClick={loadData} loading={loading}>

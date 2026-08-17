@@ -94,6 +94,7 @@ export default function Services() {
     form.setFieldsValue({
       name: record.name,
       description: record.description,
+      code: record.code,
       responsible_id: record.responsible_id ? Number(record.responsible_id) : undefined,
     })
     setModalOpen(true)

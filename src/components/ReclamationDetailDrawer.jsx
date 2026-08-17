@@ -68,7 +68,6 @@ export default function ReclamationDetailDrawer({ reclamationId, open, onClose, 
                 {record.client_company_name || record.claimant_name} ({record.client_code})
               </Descriptions.Item>
               <Descriptions.Item label="Téléphone">{record.client_phone}</Descriptions.Item>
-              <Descriptions.Item label="Email">{record.client_email}</Descriptions.Item>
               <Descriptions.Item label="Canal">
                 {record.reception_method ? <Tag>{record.reception_method}</Tag> : '—'}
               </Descriptions.Item>

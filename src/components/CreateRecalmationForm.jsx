@@ -25,7 +25,6 @@ export default function CreateRecalmationForm({ reclamationId, reclamation, onCr
       client_code: data.client_code,
       client_company_name: data.client_company_name,
       client_phone: data.client_phone,
-      client_email: data.client_email,
       reception_method: data.reception_method,
       object: data.object,
       description: data.description,
@@ -77,7 +76,6 @@ export default function CreateRecalmationForm({ reclamationId, reclamation, onCr
         client_code: values.client_code,
         client_company_name: values.client_company_name,
         client_phone: values.client_phone,
-        client_email: values.client_email,
         reception_method: values.reception_method,
         object: values.object,
         description: values.description,
@@ -165,18 +163,10 @@ export default function CreateRecalmationForm({ reclamationId, reclamation, onCr
         <Form.Item
           label="Téléphone"
           name="client_phone"
-          rules={[{ required: true, message: 'Le téléphone est requis.' }]}
         >
           <Input placeholder="0654751457" />
         </Form.Item>
 
-        <Form.Item
-          label="Email"
-          name="client_email"
-          rules={[{ type: 'email', message: "Format d'email invalide." }]}
-        >
-          <Input placeholder="contact@client.com" />
-        </Form.Item>
 
         <Form.Item
           label="Canal de réception"

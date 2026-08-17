@@ -230,7 +230,7 @@ export default function Connections() {
           </div>
           <div className="leading-tight">
             <div className="text-base font-semibold text-slate-900">Connexions</div>
-            <div className="text-xs text-slate-500">Process(us) au total</div>
+            <div className="text-xs text-slate-500">Connection(s) au total</div>
           </div>
         </div>
 

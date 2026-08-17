@@ -169,7 +169,7 @@ export default function ImprovementsJournal() {
       dataIndex: ["service", "name"],
       key: "service",
       width: 160,
-      render: (_, record) => record.service?.name || <Text type="secondary">-</Text>,
+      render: (_, record) => <span className="whitespace-nowrap">{record.service?.name}</span> || <Text type="secondary">-</Text>,
     },
     {
       title: "Critères d'efficacité",

@@ -152,20 +152,6 @@ export default function ShowReclamation({ reclamationId, reclamation }) {
           <Field icon={Phone} label="Téléphone">
             {data.client_phone || '-'}
           </Field>
-
-          <Field icon={Mail} label="Email">
-            {data.client_email ? (
-              <a
-                href={`mailto:${data.client_email}`}
-                className="text-green-600 hover:text-green-700 hover:underline underline-offset-2"
-              >
-                {data.client_email}
-              </a>
-            ) : (
-              '-'
-            )}
-          </Field>
-
           <Field icon={Radio} label="Canal de réception">
             {data.reception_method || '-'}
           </Field>
