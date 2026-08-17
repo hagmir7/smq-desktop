@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
-import { MONTH_LABELS, STATUS_COLORS } from "../utils/config";
+import { MONTH_LABELS } from "../utils/config";
 import { api } from "../utils/api";
+
+// Keep in sync with the WORKFLOW_STEPS used across the reclamations UI
+// (e.g. LastReclamations.jsx) so status labels/colors stay consistent.
+const WORKFLOW_STEPS = {
+  1: { label: "Création", color: "#8c8c8c" },
+  2: { label: "Validation", color: "#1677ff" },
+  3: { label: "Analyse et Traitement", color: "#fa8c16" },
+  4: { label: "Affectation", color: "#722ed1" },
+  5: { label: "Clôturé", color: "#52c41a" },
+};
 
 export function useDashboardData(selectedYear) {
   const [loading, setLoading] = useState(true);
@@ -48,14 +58,21 @@ export function useDashboardData(selectedYear) {
           }))
         );
 
-        // ---- status breakdown: { "Clôturées": 75, "Critique": 8, "En cours": 17 } ----
-        const statusData = statusRes.data || {};
+        // ---- status breakdown, keyed by workflow_step: { "1": 4, "2": 9, "5": 75, ... } ----
+        const statusData = statusRes.data?.data || statusRes.data || {};
         setStatuses(
-          Object.entries(statusData).map(([label, value]) => ({
-            label,
-            value,
-            color: STATUS_COLORS[label] || "#0f5c4f",
-          }))
+          Object.entries(statusData).map(([step, value]) => {
+            const meta = WORKFLOW_STEPS[step] || {
+              label: `Étape ${step}`,
+              color: "#0f5c4f",
+            };
+            return {
+              step: Number(step),
+              label: meta.label,
+              value,
+              color: meta.color,
+            };
+          })
         );
 
         // ---- last 10 reclamations ----

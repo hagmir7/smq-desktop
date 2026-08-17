@@ -191,7 +191,7 @@ export default function CorrectiveActionsRegister() {
           </div>
           <div className="leading-tight">
             <div className="text-base font-semibold text-slate-900">Registre de réclamation</div>
-            <div className="text-xs text-slate-500">{topLevel.length} action(s) · {openCount} ouverte(s) · {overdueCount} en retard</div>
+            <div className="text-xs text-slate-500">{topLevel.length} action(s)  · {overdueCount} en retard</div>
           </div>
         </div>
 

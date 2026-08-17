@@ -279,19 +279,19 @@ export default function Improvements() {
       fixed: "right",
       render: (_, record) => (
         <Space >
-          <Tooltip title="Voir le détail">
+          {/* <Tooltip title="Voir le détail">
             <Button
               size="small"
               disabled={!permissions('voir.fiche_amelioration')}
               icon={<EyeOutlined />}
               onClick={() => showDetails(record)}
             />
-          </Tooltip>
+          </Tooltip> */}
 
-          <Tooltip title="Modifier">
+          <Tooltip title="Voir le détail">
             <Link to={`/improvements/${record.id}`}>
 
-              <Button disabled={!permissions('modifier.fiche_amelioration')} size="small" icon={<EditOutlined />} />
+              <Button disabled={!permissions('modifier.fiche_amelioration')} size="small" icon={<EyeOutlined />} />
             </Link>
           </Tooltip>
 

@@ -273,6 +273,14 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
+      ellipsis: {
+        showTitle: false, // prevent native browser title tooltip, we use antd's Tooltip instead
+      },
+      render: (description) => (
+        <Tooltip title={description} placement="topLeft">
+          <span>{description}</span>
+        </Tooltip>
+      ),
     },
     {
       title: 'Échéance',

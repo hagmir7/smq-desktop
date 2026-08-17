@@ -11,25 +11,11 @@ import { useDashboardData } from "../hooks/useDashboardData";
 
 const { Title } = Typography;
 
-/**
- * Réclamations Dashboard
- * Stack: React + Ant Design + Tailwind CSS + ApexCharts + Axios
- *
- * Install:
- *   npm install antd react-apexcharts apexcharts axios
- *
- * Expects these API endpoints (adjust API_BASE below to match your app):
- *   GET /api/dashboard/states
- *   GET /api/dashboard/reclamations-per-month?year=YYYY
- *   GET /api/dashboard/reclamation-states
- *   GET /api/dashboard/last-reclamations
- */
 
 export default function Dashboard() {
   const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
 
-  const { loading, error, states, monthlyClaims, statuses, recentClaims } =
-    useDashboardData(selectedYear);
+  const { loading, error, states, monthlyClaims, statuses, recentClaims } = useDashboardData(selectedYear);
 
   if (loading) {
     return (
@@ -70,6 +56,7 @@ export default function Dashboard() {
 
         <Col xs={24} lg={8}>
           <StatusBreakdown statuses={statuses} cloturePct={cloturePct} />
+  
         </Col>
       </Row>
 

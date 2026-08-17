@@ -1,9 +1,9 @@
-
-import { createHashRouter  } from "react-router-dom";
+import { createHashRouter } from "react-router-dom";
 import { lazy } from "react";
 import Root from "./routes/root";
 import ErrorPage from "./routes/error-page";
 import ProtectedRoute from "./routes/protected-route";
+import RoleRoute from "./routes/role-route";
 import Login from "./routes/login";
 import MainLayout from "./layouts/MainLayout";
 import UpdateUser from "./routes/update-user";
@@ -12,7 +12,6 @@ import ShowImprovement from "./routes/show-improvement";
 import Services from "./routes/services";
 import Notifications from "./routes/notifications";
 
-// Lazy-load route components for code-splitting
 const Home = lazy(() => import("./routes/home"));
 const Dashboard = lazy(() => import("./routes/dashboard"));
 const Users = lazy(() => import("./routes/users"));
@@ -22,26 +21,31 @@ const Reclamations = lazy(() => import("./routes/reclamations"));
 const CorrectionActions = lazy(() => import("./routes/correction-actions"));
 const Improvements = lazy(() => import("./routes/improvements"));
 const Register = lazy(() => import("./routes/register"));
-
 const ImprovementsJournal = lazy(() => import("./routes/improvements-journal"));
+
 export const router = createHashRouter([
   {
     path: "/",
     element: (<ProtectedRoute><MainLayout /></ProtectedRoute>),
-    // errorElement: <ErrorPage />,
+    errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <Home /> },
+      {
+        index: true,
+        element: (<RoleRoute><Home /></RoleRoute>),
+      },
       {
         path: "dashboard",
-        element: <Dashboard />,
-        // loader runs before render — great for fetching data
+        element: (
+          <RoleRoute>
+            <Dashboard />
+          </RoleRoute>
+        ),
         loader: async () => {
           const res = await fetch("/api/dashboard-data");
           if (!res.ok) throw new Response("Failed to load", { status: 500 });
           return res.json();
         },
       },
-
 
       { path: "reclamations", element: <Reclamations /> },
       { path: "reclamations/show/:id", element: <ShowReclamation /> },
@@ -50,16 +54,31 @@ export const router = createHashRouter([
       { path: "improvements-journal", element: <ImprovementsJournal /> },
       { path: "register", element: <Register /> },
 
-      { path: "roles", element: <Roles /> },
-      { path: "users", element: <Users /> },
+      {
+        path: "roles",
+        element: (
+          <RoleRoute>
+            <Roles />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "users",
+        element: (
+          <RoleRoute>
+            <Users />
+          </RoleRoute>
+        ),
+      },
       { path: "services", element: <Services /> },
-      { path: "connections", element: <Connections /> },
-      { path: 'notifications', element: <Notifications />},
+      {
+        path: "connections",
+        element: (<RoleRoute><Connections /></RoleRoute>),
+      },
+      { path: "notifications", element: <Notifications /> },
       { path: "layout/update-user/:id", element: <UpdateUser /> },
+      { path: "improvements/:id", element: <ShowImprovement /> },
 
-       { path: "improvements/:id", element: <ShowImprovement /> },
-
-      
       { path: "*", element: <ErrorPage /> },
     ],
   },
