@@ -164,8 +164,8 @@ const Login = () => {
             className="relative z-10"
           >
             <Form.Item
-              name="email"
-              label={<span className="font-medium text-emerald-50">E-mail</span>}
+              name="login"
+              label={<span className="font-medium text-emerald-50">E-mail ou Matricule</span>}
               rules={[{ required: true, message: "Veuillez entrer votre identifiant" }]}
             >
               <AutoComplete

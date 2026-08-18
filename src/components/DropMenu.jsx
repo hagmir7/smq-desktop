@@ -74,8 +74,12 @@ const DropMenu = ({ appVersion }) => {
                 <Avatar icon={<UserOutlined />} size={40} />
                 <div className="flex flex-col leading-tight">
                     <span>{user?.full_name ?? 'Guest'}</span>
-                    <span className="text-xs text-gray-500">{user?.service?.name}</span>
-                    {/* <span className="text-xs text-gray-500">{formatDateTime(now)}</span> */}
+                    {
+                        user?.service ? (<span className="text-xs text-gray-500">{user?.service?.name}</span>)
+                        : <span className="text-xs text-gray-500">{formatDateTime(now)}</span>
+                    }
+                    
+                    
                 </div>
             </a>
         </Dropdown>
