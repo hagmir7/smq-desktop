@@ -12,6 +12,8 @@ import {
 } from "antd";
 import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { api } from "../utils/api";
+import { useAuth } from "../contexts/AuthContext";
+
 
 const { TextArea } = Input;
 
@@ -41,6 +43,7 @@ export default function ImprovementSheetModal({
 
   const [users, setUsers] = useState([]);
   const [services, setServices] = useState([]);
+  const {user} = useAuth()
 
   // --- Corrective action live-search state ---
   const [caOptions, setCaOptions] = useState([]);
@@ -115,6 +118,8 @@ export default function ImprovementSheetModal({
         finding_source: sheet.finding_source,
         title: sheet.title,
         description: sheet.description,
+        service_id: Number(sheet.service_id),
+        responsable_id: 3,
         cause_analysis: sheet.cause_analysis,
         responsibles:
           sheet.responsibles?.length > 0
@@ -208,7 +213,7 @@ export default function ImprovementSheetModal({
       onCancel={onClose}
       footer={null}
       width={900}
-      destroyOnClose
+      destroyOnHidden
       title={
         isEdit
           ? "Modifier la fiche d'amélioration"
@@ -224,6 +229,8 @@ export default function ImprovementSheetModal({
           initialValues={{
             finding_source: "Action corrective",
             corrective_action_id,
+            responsable_id: 3,
+            service_id: Number(user?.service_id),
             responsibles: [{ responsable_id: undefined, service_id: undefined }],
           }}
         >
@@ -283,6 +290,48 @@ export default function ImprovementSheetModal({
               </Form.Item>
             </Col>
 
+            <Col span={12}>
+              <Form.Item
+                label="Emetteur"
+                name="responsable_id"
+            
+                rules={[
+                  { required: true, message: "Sélectionnez un emetteur." },
+                ]}
+              >
+                <Select
+                  defaultValue={2}
+                  placeholder="Choisir un emetteur"
+                  showSearch
+                  disabled
+                  optionFilterProp="label"
+                  options={users.map((u) => ({
+                    value: u.id,
+                    label: u.full_name,
+                  }))}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                label="Processus"
+                name="service_id"
+                rules={[
+                  { required: true, message: "Sélectionnez un processus." },
+                ]}
+              >
+                <Select
+                  placeholder="Choisir un processus"
+                  disabled
+                  options={services.map((s) => ({
+                    value: s.id,
+                    label: s.name,
+                  }))}
+                />
+              </Form.Item>
+            </Col>
+
             <Col span={24}>
               <Form.Item
                 label="Description"
@@ -310,99 +359,6 @@ export default function ImprovementSheetModal({
               </Form.Item>
             </Col>
           </Row>
-
-          <Form.List
-            name="responsibles"
-            rules={[
-              {
-                validator: async (_, responsibles) => {
-                  if (!responsibles || responsibles.length < 1) {
-                    return Promise.reject(
-                      new Error("Ajoutez au moins un responsable.")
-                    );
-                  }
-                },
-              },
-            ]}
-          >
-            {(fields, { add, remove }, { errors }) => (
-              <>
-                {fields.map((field) => (
-                  <Row gutter={16} key={field.key} align="middle">
-                    <Col span={11}>
-                      <Form.Item
-                        {...field}
-                        label="Responsable"
-                        name={[field.name, "responsable_id"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: "Sélectionnez un responsable.",
-                          },
-                        ]}
-                      >
-                        <Select
-                          placeholder="Choisir un responsable"
-                          showSearch
-                          optionFilterProp="label"
-                          options={users.map((u) => ({
-                            value: u.id,
-                            label: u.full_name,
-                          }))}
-                        />
-                      </Form.Item>
-                    </Col>
-
-                    <Col span={11}>
-                      <Form.Item
-                        {...field}
-                        label="Processus"
-                        name={[field.name, "service_id"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: "Sélectionnez un processus.",
-                          },
-                        ]}
-                      >
-                        <Select
-                          placeholder="Choisir un processus"
-                          showSearch
-                          optionFilterProp="label"
-                          options={services.map((s) => ({
-                            value: s.id,
-                            label: s.name,
-                          }))}
-                        />
-                      </Form.Item>
-                    </Col>
-
-                    <Col span={2}>
-                      {fields.length > 1 && (
-                        <MinusCircleOutlined
-                          onClick={() => remove(field.name)}
-                          style={{ fontSize: 18, marginTop: 6, color: "#ff4d4f" }}
-                        />
-                      )}
-                    </Col>
-                  </Row>
-                ))}
-
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Ajouter un responsable
-                  </Button>
-                  <Form.ErrorList errors={errors} />
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
-
           <Row justify="end" gutter={8}>
             <Col>
               <Button onClick={onClose}>Annuler</Button>

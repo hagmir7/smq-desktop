@@ -187,7 +187,7 @@ export default function ImprovementEvaluationModal({ open, record, onClose, onSu
       cancelText="Annuler"
       // No need for two buttons that both close the modal.
       cancelButtonProps={{ style: { display: isEvaluated ? "none" : undefined } }}
-      destroyOnClose
+      destroyOnHidden
       maskClosable={false}
     >
       <Form form={form} layout="vertical" disabled={isEvaluated}>

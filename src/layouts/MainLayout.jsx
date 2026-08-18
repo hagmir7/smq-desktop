@@ -198,12 +198,13 @@ export default function MainLayout() {
       </Sider>
 
       <Layout>
-          <MainHeader appVersion={appVersion} />
-         
-  
+        <MainHeader appVersion={appVersion} />
 
-        <Content className="bg-gray-100 overflow-auto">
-          <div className='m-2 rounded-lg bg-white shadow-sm overflow-hidden'>
+        <Content className="bg-gray-100 overflow-auto" style={{ minWidth: 0 }}>
+          <div
+            className="m-2 rounded-lg bg-white shadow-sm"
+            style={{ minWidth: 0, overflow: 'hidden' }}
+          >
             <Outlet context={{ appVersion }} />
           </div>
         </Content>

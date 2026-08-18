@@ -10,12 +10,17 @@ import {
   Card,
   Badge,
   message,
+  DatePicker,
+  Select,
+  Row,
+  Col,
 } from "antd";
-import { Search, Loader2, RefreshCw, SquareMenu } from "lucide-react";
+import { Search, Loader2, RefreshCw, SquareMenu, FileSpreadsheet, X } from "lucide-react";
 import dayjs from "dayjs";
 
 import { correctiveActionsApi } from "../utils/correctiveActionsApi";
 import { dateFormat, isOverdue } from "../utils/config";
+import { api } from "../utils/api";
 
 const { Header, Content } = Layout;
 
@@ -23,6 +28,15 @@ const STATUS_META = {
   open: { label: "Ouverte", color: "gold" },
   completed: { label: "Terminée", color: "green" },
 };
+
+const STATUS_PARAM = { Ouverte: "open", Terminée: "completed" };
+
+const EFFECTIVENESS_OPTIONS = [
+  { value: "efficace", label: "Efficace" },
+  { value: "non_efficace", label: "Non efficace" },
+];
+
+const { RangePicker } = DatePicker;
 
 /**
  * Register / registre view of corrective actions.
@@ -38,15 +52,45 @@ export default function CorrectiveActionsRegister() {
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("Toutes");
+  const [effectiveness, setEffectiveness] = useState(undefined);
+  const [serviceId, setServiceId] = useState(undefined);
+  const [services, setServices] = useState([]);
+  const [dateRange, setDateRange] = useState(null);
   const didMountRef = useRef(false);
+
+  // Fetch the services list once for the "Processus" filter Select.
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("services");
+        const opts = (data?.data || []).map((item) => ({
+          label: item.name,
+          value: item.id,
+        }));
+        setServices(opts);
+      } catch (error) {
+        message.error(
+          error?.response?.data?.message || "Erreur lors du chargement des services."
+        );
+      }
+    })();
+  }, []);
+
+  const buildParams = useCallback((search) => {
+    const params = { per_page: 50 };
+    if (search) params.reclamation_code = search;
+    if (statusFilter !== "Toutes") params.status = STATUS_PARAM[statusFilter];
+    if (effectiveness) params.effectiveness = effectiveness;
+    if (serviceId) params.service_id = serviceId;
+    if (dateRange?.[0]) params.date_from = dateRange[0].format("YYYY-MM-DD");
+    if (dateRange?.[1]) params.date_to = dateRange[1].format("YYYY-MM-DD");
+    return params;
+  }, [statusFilter, effectiveness, serviceId, dateRange]);
 
   const refresh = useCallback(async (search = "") => {
     setLoading(true);
     try {
-      const res = await correctiveActionsApi.list({
-        per_page: 50,
-        reclamation_code: search || undefined,
-      });
+      const res = await correctiveActionsApi.list(buildParams(search));
 
       const arr = Array.isArray(res) ? res : res?.data;
       setItems(Array.isArray(arr) ? arr : []);
@@ -56,11 +100,14 @@ export default function CorrectiveActionsRegister() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [buildParams]);
 
+  // Fires on mount and whenever any filter changes (search is debounced
+  // separately below via the `query` -> refresh(query) effect).
   useEffect(() => {
     if (!didMountRef.current) {
       didMountRef.current = true;
+      refresh(query.trim());
       return;
     }
 
@@ -69,7 +116,39 @@ export default function CorrectiveActionsRegister() {
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [query, refresh]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, statusFilter, effectiveness, serviceId, dateRange]);
+
+  const hasActiveFilters = !!(
+    query || statusFilter !== "Toutes" || effectiveness || serviceId || dateRange
+  );
+
+  function resetFilters() {
+    setQuery("");
+    setStatusFilter("Toutes");
+    setEffectiveness(undefined);
+    setServiceId(undefined);
+    setDateRange(null);
+  }
+
+  const handleExport = useCallback(async () => {
+    const params = buildParams(query.trim());
+
+    try {
+      const response = await api.get('corrective-actions/register/export', {
+        params,
+        responseType: 'blob', // <-- required: tells axios not to parse the xlsx as text/JSON
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `registre-des-reclamations-${dayjs().format("YYYY-MM-DD")}.xlsx`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      message.error("Échec de l'export.");
+    }
+  }, [query, buildParams]);
 
   // Register rule: only top-level actions, no sub-actions — and no
   // "children" field on the rows we keep either. antd's Table treats a
@@ -77,6 +156,10 @@ export default function CorrectiveActionsRegister() {
   // expandable nested rows, so we strip it here rather than just
   // filtering parent_id, or sub-actions would still show up nested
   // under their parent.
+  //
+  // All other filtering (status, effectiveness, service, date range,
+  // search) is resolved server-side via buildParams, so this stays a
+  // pure structural transform — no filtering logic here.
   const topLevel = useMemo(
     () =>
       items
@@ -84,12 +167,6 @@ export default function CorrectiveActionsRegister() {
         .map(({ children, ...rest }) => rest),
     [items]
   );
-
-  const filtered = useMemo(() => {
-    return topLevel.filter(
-      (i) => statusFilter === "Toutes" || STATUS_META[i.status]?.label === statusFilter
-    );
-  }, [topLevel, statusFilter]);
 
   const openCount = topLevel.filter((i) => i.status === "open").length;
   const overdueCount = topLevel.filter(isOverdue).length;
@@ -107,18 +184,20 @@ export default function CorrectiveActionsRegister() {
       width: 90,
       render: (reclamation) => dateFormat(reclamation?.claimant_date) ?? "—",
     },
+      {
+      title: <span className="whitespace-nowrap">Date d'enregistrement</span>,
+      dataIndex: "reclamation",
+      width: 90,
+      render: (reclamation) => reclamation?.registration_date ? dateFormat(reclamation?.registration_date) : "—",
+    },
+
     {
       title: "Client",
       dataIndex: "reclamation",
       width: 90,
       render: (reclamation) => reclamation?.client_code ?? "—",
     },
-    {
-      title: <span className="whitespace-nowrap">Date d'enregistrement</span>,
-      dataIndex: "reclamation",
-      width: 90,
-      render: (reclamation) => reclamation?.registration_date ? dateFormat(reclamation?.registration_date) : "—",
-    },
+  
     {
       title: "Objet",
       dataIndex: "reclamation",
@@ -129,7 +208,7 @@ export default function CorrectiveActionsRegister() {
     },
     {
       title: "Actions",
-      dataIndex: "sub_actions_count",
+      dataIndex: "children_count",
       width: 100,
       align: "center",
       render: (count) =>
@@ -158,6 +237,12 @@ export default function CorrectiveActionsRegister() {
       dataIndex: "completion_date",
       width: 90,
       render: (completion_date) => (completion_date ? dateFormat(completion_date) : "—"),
+    },
+    {
+      title: "Efficacité",
+      dataIndex: "effectiveness",
+      width: 90,
+      render: (effectiveness) => <span className="whitespace-nowrap">{effectiveness ?? "—"}</span>,
     },
     {
       title: <span className="whitespace-nowrap">Fiche d'amélioration</span>,
@@ -196,21 +281,12 @@ export default function CorrectiveActionsRegister() {
         </div>
 
         <Space>
-          <Input
-            allowClear
-            placeholder="Ref réclamation..."
-            prefix={<Search size={14} className="text-slate-400" />}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onClear={() => setQuery("")}
-            className="w-64"
-          />
-
-          <Segmented
-            options={["Toutes", "Ouverte", "Terminée"]}
-            value={statusFilter}
-            onChange={setStatusFilter}
-          />
+          <Button
+            icon={<FileSpreadsheet size={14} />}
+            onClick={handleExport}
+          >
+            Exporter
+          </Button>
 
           <Button
             icon={
@@ -226,12 +302,80 @@ export default function CorrectiveActionsRegister() {
       </Header>
 
       <Content className="mx-auto w-full px-4 py-4">
-        <Card size="small" bodyStyle={{ padding: 0 }}>
+        {/* Search & filters */}
+        <Card size="small" className="mb-3">
+          <Row gutter={[12, 12]} align="middle">
+            <Col flex="240px">
+              <Input
+                allowClear
+                placeholder="Ref réclamation..."
+                prefix={<Search size={14} className="text-slate-400" />}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onClear={() => setQuery("")}
+              />
+            </Col>
+
+            <Col flex="270px">
+              <RangePicker
+                className="w-full"
+                placeholder={["Créée après", "Créée avant"]}
+                value={dateRange}
+                onChange={setDateRange}
+                format="DD MMM YYYY"
+              />
+            </Col>
+
+            <Col flex="200px">
+              <Select
+                allowClear
+                showSearch
+                placeholder="Processus"
+                className="w-full"
+                options={services}
+                value={serviceId}
+                onChange={setServiceId}
+                filterOption={(input, option) =>
+                  (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                }
+              />
+            </Col>
+
+            <Col flex="180px">
+              <Select
+                allowClear
+                placeholder="Efficacité"
+                className="w-full"
+                options={EFFECTIVENESS_OPTIONS}
+                value={effectiveness}
+                onChange={setEffectiveness}
+              />
+            </Col>
+
+            {/* <Col>
+              <Segmented
+                options={["Toutes", "Ouverte", "Terminée"]}
+                value={statusFilter}
+                onChange={setStatusFilter}
+              />
+            </Col> */}
+
+            {hasActiveFilters && (
+              <Col>
+                <Button icon={<X size={14} />} onClick={resetFilters}>
+                  Réinitialiser
+                </Button>
+              </Col>
+            )}
+          </Row>
+        </Card>
+
+        <Card size="small" styles={{ body: {padding: 0} }}>
           <Table
             rowKey="id"
             size="small"
             columns={columns}
-            dataSource={filtered}
+            dataSource={topLevel}
             loading={loading}
             scroll={{ x: "max-content" }}
             pagination={{ pageSize: 20 }}

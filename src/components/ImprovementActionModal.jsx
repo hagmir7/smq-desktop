@@ -128,7 +128,7 @@ export default function ImprovementActionModal({
       confirmLoading={submitting}
       okText={isUpdate ? "Mettre à jour" : "Créer"}
       cancelText="Annuler"
-      destroyOnClose
+      destroyOnHidden
       maskClosable={false}
     >
       <Form form={form} layout="vertical">

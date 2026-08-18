@@ -129,7 +129,7 @@ export default function NotificationBell() {
       open={open}
       onOpenChange={setOpen}
       trigger={['click']}
-      dropdownRender={() => dropdownContent}
+      popupRender={() => dropdownContent}
       placement="bottomRight"
     >
       <Badge count={unreadCount} size="small" offset={[-2, 2]}>

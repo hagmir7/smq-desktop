@@ -519,7 +519,7 @@ function Roles() {
               )}
 
               {/* Role information */}
-              <Card size="small" style={{ background: '#fafafa' }} bodyStyle={{ padding: 12 }}>
+              <Card size="small" style={{ background: '#fafafa' }} styles={{body: { padding: 12} }}>
                 <Space wrap size={12}>
                   <Tag color="default" style={{ padding: '4px 10px', fontSize: 13, fontWeight: 500 }}>
                     {role.label || capitalizeFirst(role.role)}
@@ -642,7 +642,7 @@ function Roles() {
         confirmLoading={renaming}
         okText="Enregistrer"
         cancelText="Annuler"
-        destroyOnClose
+        destroyOnHidden
       >
         <Input
           value={renameValue}
@@ -667,7 +667,7 @@ function Roles() {
         confirmLoading={creating}
         okText="Créer"
         cancelText="Annuler"
-        destroyOnClose
+        destroyOnHidden
       >
         <Input
           value={createValue}

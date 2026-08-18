@@ -45,7 +45,7 @@ export default function ReclamationDetailDrawer({ reclamationId, open, onClose, 
       open={open}
       onClose={onClose}
       width={640}
-      destroyOnClose
+      destroyOnHidden
     >
       {loading || !record ? (
         <Skeleton active />
@@ -61,7 +61,7 @@ export default function ReclamationDetailDrawer({ reclamationId, open, onClose, 
               </Button>
             </Space>
 
-            <Descriptions column={1} size="small" bordered>
+            <Descriptions column={1} size="small" variant>
               <Descriptions.Item label="Réclamant">{record.claimant_name}</Descriptions.Item>
               <Descriptions.Item label="Date">{dateFormat(record.claimant_date)}</Descriptions.Item>
               <Descriptions.Item label="Client">

@@ -5,9 +5,9 @@ const { Text, Title } = Typography;
 
 const KpiCard = ({ label, value, delta, deltaColor }) => (
   <Card
-    bordered={false}
+    variant={false}
     className="rounded-2xl shadow-sm"
-    bodyStyle={{ padding: "20px 22px" }}
+    styles={{ body: { padding: "20px 22px" } }}
   >
     <Text className="text-[12px] tracking-wide text-gray-600 font-semibold uppercase">
       {label}

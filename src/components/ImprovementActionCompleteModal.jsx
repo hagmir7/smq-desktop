@@ -81,7 +81,7 @@ export default function ImprovementActionCompleteModal({ open, record, onClose, 
       confirmLoading={submitting}
       okText="Clôturer"
       cancelText="Annuler"
-      destroyOnClose
+      destroyOnHidden
       maskClosable={false}
     >
       <Form form={form} layout="vertical">

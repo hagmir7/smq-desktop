@@ -260,15 +260,18 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
   ];
 
   return (
-    <>
+    <div style={{ width: "100%", minWidth: 0, overflowX: "auto" }}>
       <Table
         rowKey="id"
         loading={loading}
         dataSource={data}
         columns={columns}
-       
-        style={{display: permissions('voir.action_amelioration') ? 'table' : 'none'}}
+        style={{
+          display: permissions('voir.action_amelioration') ? 'table' : 'none',
+          minWidth: 0,
+        }}
         size="small"
+        className="w-full"
         scroll={{ x: 1350 }}
         locale={{
           emptyText: (
@@ -282,7 +285,7 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
               <Button icon={<ReloadOutlined />} onClick={loadData} loading={loading}>
                 Actualiser
               </Button>
-              <Button type="primary"  disabled={!permissions('creer.action_amelioration')} icon={<PlusOutlined />} onClick={openCreateModal}>
+              <Button type="primary" disabled={!permissions('creer.action_amelioration')} icon={<PlusOutlined />} onClick={openCreateModal}>
                 Nouvelle action
               </Button>
             </Space>
@@ -306,6 +309,6 @@ export default function ImprovementActionsTable({ improvementSheetId }) {
         onClose={() => setCompleteModalOpen(false)}
         onSuccess={handleCompleteSuccess}
       />
-    </>
+    </div>
   );
 }

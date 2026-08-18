@@ -8,19 +8,19 @@ const { Text } = Typography;
 
 
 const WORKFLOW_STEPS = {
-  1: { label: 'Création', color: 'default' },
-  2: { label: 'Validation', color: 'blue' },
-  3: { label: 'Analyse et Traitement', color: 'orange' },
-  4: { label: 'Affectation', color: 'purple' },
-  5: { label: 'Clôturé', color: 'green' },
+    1: { label: 'Création', color: 'default' },
+    2: { label: 'Validation', color: 'blue' },
+    3: { label: 'Analyse et Traitement', color: 'orange' },
+    4: { label: 'Affectation', color: 'purple' },
+    5: { label: 'Clôturé', color: 'green' },
 };
 
 
 const SectionCard = ({ title, extra, children }) => (
     <Card
-        bordered={false}
+        variant={false}
         className="rounded-2xl shadow-sm"
-        bodyStyle={{ padding: "20px 22px" }}
+        styles={{ body: { padding: "20px 22px" } }}
     >
         <div className="flex items-center justify-between">
             <Text className="text-[12px] tracking-wide text-gray-600 font-semibold uppercase">
@@ -61,25 +61,25 @@ const columns = [
         render: (text) => <Text className="text-gray-500">{text}</Text>,
     },
     {
-        title: "Réclamant",
-        dataIndex: "claimant_name",
-        key: "claimant_name",
-        render: (text) => <Text className="text-gray-500">{text || "—"}</Text>,
-    },
-
-    {
-        title: "Créé par",
-        dataIndex: "user",
-        key: "user",
-        render: (user) => <Text className="text-gray-500">{user.full_name || "—"}</Text>,
-    },
-
-     {
-        title: "Créé le",
+        title: "Date de création",
         dataIndex: "created_at",
         key: "created_at",
         render: (created_at) => <Text className="text-gray-500">{dateFormat(created_at) || "—"}</Text>,
     },
+    // {
+    //     title: "Réclamant",
+    //     dataIndex: "claimant_name",
+    //     key: "claimant_name",
+    //     render: (text) => <Text className="text-gray-500">{text || "—"}</Text>,
+    // },
+
+    {
+        title: "Objet de réclamation ",
+        dataIndex: "object",
+        key: "object",
+    },
+
+
 
     {
         title: "Statut",

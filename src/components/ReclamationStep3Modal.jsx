@@ -101,7 +101,7 @@ export default function ReclamationStep3Modal({
       confirmLoading={submitting}
       okText="Enregistrer"
       cancelText="Annuler"
-      destroyOnClose
+      destroyOnHidden
     >
       <Form form={form} layout="vertical" className="mt-4">
         <Form.Item

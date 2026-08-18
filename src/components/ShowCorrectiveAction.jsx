@@ -56,7 +56,7 @@ export default function ShowCorrectiveAction({ item, children }) {
                     <InfoRow label="Efficacité" value={item.effectiveness} />
                 </div>
             )}
-            {children.length > 0 && (
+            {children?.length > 0 && (
                 <div>
                     <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Sous-actions</div>
                     <Space direction="vertical" className="w-full">

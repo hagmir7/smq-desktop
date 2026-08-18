@@ -34,18 +34,12 @@ const EFFECTIVENESS_OPTIONS = [
     // { value: "en_cours", label: "En cours d'évaluation" },
 ];
 
-// Recursively flattens a tree of records (each possibly carrying a
-// `children` array, as returned by the API / consumed by AntD's Table
-// for expand/collapse rendering) into a single flat array. This lets us
-// look up ANY row — parent or nested child — by id, while still passing
-// the original nested `items` to <Table dataSource> so AntD keeps
-// drawing the tree expand arrows correctly.
 function flattenTree(list) {
     const out = [];
     const walk = (arr) => {
         arr.forEach(item => {
             out.push(item);
-            if (Array.isArray(item.children) && item.children.length) {
+            if (Array.isArray(item.children) && item.children?.length) {
                 walk(item.children);
             }
         });
@@ -54,11 +48,7 @@ function flattenTree(list) {
     return out;
 }
 
-// Cell renderer for the "Réalisation" (completion_date) column.
-// - If the row already has a completion_date, it's shown as plain text.
-// - If it doesn't, a small "+ Ajouter" trigger is shown; clicking it
-//   opens an inline DatePicker so the user can set the date without
-//   leaving the table. Selecting a date calls `onSave(id, date)`.
+
 function RealisationCell({ record, onSave, saving }) {
     const [editing, setEditing] = useState(false);
 
@@ -199,7 +189,7 @@ export default function CorrectiveActions() {
             setPagination({
                 current: paginator?.current_page ?? page,
                 pageSize: paginator?.per_page ?? pageSize,
-                total: paginator?.total ?? (Array.isArray(list) ? list.length : 0),
+                total: paginator?.total ?? (Array.isArray(list) ? list?.length : 0),
             });
         } catch (e) {
             message.error(extractErrorMessage(e));
@@ -350,7 +340,7 @@ export default function CorrectiveActions() {
                 Modal.confirm({
                     title: "Supprimer cette action corrective ?",
                     content: row.children?.length > 0
-                        ? `Elle a ${row.children.length} suivi(s) lié(s) — le comportement de l'API dans ce cas n'est pas confirmé.`
+                        ? `Elle a ${row.children?.length} suivi(s) lié(s) — le comportement de l'API dans ce cas n'est pas confirmé.`
                         : "Cette action est irréversible.",
                     okText: "Supprimer",
                     okButtonProps: { danger: true },
@@ -386,8 +376,8 @@ export default function CorrectiveActions() {
         );
     }, [flatItems, handleRowMenuClick]);
 
-    const overdueCount = flatItems.filter(isOverdue).length;
-    const openCount = flatItems.filter(i => i.status === "open").length;
+    const overdueCount = flatItems.filter(isOverdue)?.length;
+    const openCount = flatItems.filter(i => i.status === "open")?.length;
 
     const hasActiveFilters = !!(search || statusFilter !== "Toutes" || effectiveness || serviceId || dateRange);
 
@@ -410,7 +400,7 @@ export default function CorrectiveActions() {
                 return (
                     <Tooltip title={description}>
                         <span className="whitespace-nowrap">
-                            {description.length > 50
+                            {description?.length > 50
                                 ? `${description.slice(0, 50)}...`
                                 : description}
                         </span>
@@ -557,7 +547,7 @@ export default function CorrectiveActions() {
                     </Row>
                 </Card>
 
-                <Card size="small" bodyStyle={{ padding: 0 }}>
+                <Card size="small" styles={{ body: {padding: 0} }}>
                     <Table
                         rowKey="id"
                         size="small"
@@ -597,18 +587,18 @@ export default function CorrectiveActions() {
                 extra={selected && <Tag color={STATUS_AC[selected.status]?.color}>{STATUS_AC[selected.status]?.label || selected.status}</Tag>}
             >
                 {selected && (
-                    <DrawerBody
-                        item={selected}
-                        parent={parentOf(selected)}
-                        children={childrenOf(selected.id)}
-                        activeTab={drawerTab}
-                        setActiveTab={setDrawerTab}
-                        onOpenRelated={(id) => openDrawer(id, "view")}
-                        onUpdate={(payload) => handleUpdate(selected.id, payload)}
-                        onComplete={(payload) => handleComplete(selected.id, payload)}
-                        onCreateChild={(payload) => handleCreateChild(selected.id, payload)}
-                        loading={loading}
-                    />
+                   <DrawerBody
+    item={selected}
+    parent={parentOf(selected)}
+    childActions={childrenOf(selected.id)}   // renamed
+    activeTab={drawerTab}
+    setActiveTab={setDrawerTab}
+    onOpenRelated={(id) => openDrawer(id, "view")}
+    onUpdate={(payload) => handleUpdate(selected.id, payload)}
+    onComplete={(payload) => handleComplete(selected.id, payload)}
+    onCreateChild={(payload) => handleCreateChild(selected.id, payload)}
+    loading={loading}
+/>
                 )}
             </Drawer>
 
@@ -618,7 +608,7 @@ export default function CorrectiveActions() {
                 title="Nouvelle action corrective"
                 onCancel={() => setCreateOpen(false)}
                 footer={null}
-                destroyOnClose
+                destroyOnHidden
             >
                 <CreateForm onSubmit={handleCreate} onCancel={() => setCreateOpen(false)} loading={loading} />
             </Modal>

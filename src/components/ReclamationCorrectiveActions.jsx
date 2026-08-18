@@ -422,7 +422,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
         confirmLoading={submitting}
         okText={editingAction ? 'Enregistrer' : 'Créer'}
         cancelText="Annuler"
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" className="mt-4">
           <Form.Item label="Type" name="type">

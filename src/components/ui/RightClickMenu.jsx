@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown, Menu } from "antd";
+import { Dropdown } from "antd";
 
 /**
  * Reusable RightClickMenu component
@@ -9,23 +9,24 @@ import { Dropdown, Menu } from "antd";
  */
 const RightClickMenu = ({ children, menuItems, onItemClick }) => {
   // Transform menu items to include id in key if provided
-  const transformedItems = menuItems.map(item => ({
+  const transformedItems = menuItems.map((item) => ({
     ...item,
-    key: item.id ? `${item.key}-${item.id}` : item.key
+    key: item.id ? `${item.key}-${item.id}` : item.key,
   }));
 
-  const menu = (
-    <Menu
-      onClick={({ key }) => {
-        const [itemKey, id] = key.split("-");
-        onItemClick(itemKey, id); // id could be undefined
-      }}
-      items={transformedItems}
-    />
-  );
+  const handleMenuClick = ({ key }) => {
+    const [itemKey, id] = key.split("-");
+    onItemClick(itemKey, id); // id could be undefined
+  };
 
   return (
-    <Dropdown overlay={menu} trigger={["contextMenu"]}>
+    <Dropdown
+      menu={{
+        items: transformedItems,
+        onClick: handleMenuClick,
+      }}
+      trigger={["contextMenu"]}
+    >
       {children}
     </Dropdown>
   );

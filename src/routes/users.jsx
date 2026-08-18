@@ -56,7 +56,7 @@ export default function Users() {
   }, [search, users])
 
   const handleShow = async (id) => {
-    if (!roles('admin')) {
+    if (!roles(['admin', 'smq'])) {
       return
     }
     try {

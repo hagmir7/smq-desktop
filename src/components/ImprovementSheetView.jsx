@@ -172,7 +172,7 @@ export default function ImprovementSheetView({ id, onEdit }) {
 
             <div className="md:flex gap-6">
                 <div className="w-full">
-                    <Card size="small" className="mb-4" bordered>
+                    <Card size="small" className="mb-4" variant>
                         <Divider orientation="left" orientationMargin={0} style={{ marginTop: 0 }}>
                             Informations générales
                         </Divider>
@@ -216,7 +216,7 @@ export default function ImprovementSheetView({ id, onEdit }) {
                 </div>
 
                 <div className="w-full">
-                    <Card size="small" bordered>
+                    <Card size="small" variant>
                         <Divider orientation="left" orientationMargin={0} style={{ marginTop: 0 }}>
                             Suivi & Évaluation
                         </Divider>
@@ -283,14 +283,14 @@ export default function ImprovementSheetView({ id, onEdit }) {
                 
             </div>
 
-            <Card size="small" bordered>
+            <Card size="small" variant>
                 <Divider orientation="left" orientationMargin={0} style={{ marginTop: 0 }}>
                     Responsables
                 </Divider>
 
-                {sheet.responsibles?.length > 0 ? (
+                {sheet.improvement_actions?.length > 0 ? (
                     <Space direction="horizontal" size={12} className="w-full">
-                        {sheet.responsibles.map((r) => (
+                        {sheet.improvement_actions.map((r) => (
                             <div
                                 key={r.id}
                                 className="flex items-center justify-between border border-slate-100 rounded-md px-3 py-2"

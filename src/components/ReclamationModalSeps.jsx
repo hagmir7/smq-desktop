@@ -193,7 +193,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                 {
                   data.description && (<div>
                     <strong>Description:</strong>
-                    <p className="text-sm text-slate-500 max-w-2xl">{data.description || "—"}</p>
+                    <p className="text-sm text-slate-500 max-w-2xl m-0 p-0">{data.description || "—"}</p>
                   </div>)
                 }
               </div>
@@ -236,7 +236,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
             <SummaryStat icon={CalendarCheck2} label="Clôture effective" value={formatDate(data.closing_date)} accent="#0EA5E9" />
           </div>) :  <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 px-7 py-4 bg-slate-50/70 border-b border-slate-100">
             <SummaryStat icon={UserOutlined} label="Réclamant" value={data.claimant_name} accent="#4F46E5" />
-            <SummaryStat icon={BankOutlined} label="Client" value={data.client_company_name} accent="#0EA5E9" />
+            <SummaryStat icon={BankOutlined} label="Client" value={`${data.client_code} ${data?.client_company_name || ''}`} accent="#0EA5E9" />
             <SummaryStat icon={CalendarOutlined} label="Enregistré le" value={formatDate(data.registration_date)} accent="#F59E0B" />
             <SummaryStat icon={CalendarOutlined} label="Clôture prévue" value={formatDate(data.planned_closing_date)} accent="#10B981" />
           </div>
@@ -256,7 +256,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                   label: "Général",
                   disabled: roles('pilote'),
                   children: (
-                    <Descriptions column={2} size="small" bordered>
+                    <Descriptions column={2} size="small" variant>
                       <Descriptions.Item label="Réclamant">{data.claimant_name ?? "—"}</Descriptions.Item>
                       <Descriptions.Item label="Date de réclamation">
                         {formatDate(data.claimant_date)}
@@ -282,7 +282,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                   key: "analyse",
                   label: "Analyse & Traitement",
                   children: (
-                    <Descriptions column={1} size="small" bordered>
+                    <Descriptions column={1} size="small" variant>
 
                       <Descriptions.Item
                         label={
@@ -333,7 +333,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
                   label: "Clôture",
                   disabled: roles('pilote'),
                   children: (
-                    <Descriptions column={2} size="small" bordered>
+                    <Descriptions column={2} size="small" variant>
                       <Descriptions.Item label="Responsable">
                         {data.responsable ? data.responsable.full_name : "Non assigné"}
                       </Descriptions.Item>

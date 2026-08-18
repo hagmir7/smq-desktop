@@ -132,7 +132,7 @@ export default function UserCreateModal({ fetchData, permissions }) {
                 onCancel={handleClose}
                 footer={null}
                 width={760}
-                destroyOnClose
+                destroyOnHidden
                 maskClosable={!loading}
             >
                 {errorsMessage.length > 0 && (

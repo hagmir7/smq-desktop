@@ -13,8 +13,7 @@ const TitleBar = ({ title = 'Intercocina' }) => {
 
   useEffect(() => {
     if (!hasElectron) return;
-
-    // Sync initial state in case the window was already maximized
+    
     // (e.g. restored from a previous session) before this component mounted.
     window.electron.isWindowMaximized?.().then((v) => {
       if (typeof v === 'boolean') setIsMaximized(v);

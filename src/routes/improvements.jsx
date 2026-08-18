@@ -86,6 +86,7 @@ export default function Improvements() {
 
       setImprovements(data.data);
 
+
       setPagination({
         current: data.current_page,
         total: data.total,
@@ -129,7 +130,7 @@ export default function Improvements() {
   const filteredData = useMemo(() => {
     return improvements.filter((item) => {
       const responsibleNames =
-        item.responsibles
+        item.improvement_actions
           ?.map((r) => r.responsable?.full_name)
           .filter(Boolean)
           .join(" ") || "";
@@ -213,41 +214,10 @@ export default function Improvements() {
       ),
     },
     {
-      title: "Responsables",
-      key: "responsibles",
+      title: "Processus",
+      key: "service",
       width: 220,
-      render: (_, record) =>
-        record.responsibles?.length ? (
-          <Space direction="vertical" size={2}>
-            {record.responsibles.slice(0, 2).map((r) => (
-              <Space key={r.id} size="small">
-                <Avatar size="small" icon={<UserOutlined />} />
-                <span className="whitespace-nowrap text-xs">
-                  {r.responsable?.full_name || "-"}
-                  {r.service?.name ? ` (${r.service.name})` : ""}
-                </span>
-              </Space>
-            ))}
-            {record.responsibles.length > 2 && (
-              <Tooltip
-                title={record.responsibles
-                  .slice(2)
-                  .map(
-                    (r) =>
-                      `${r.responsable?.full_name || "-"}${r.service?.name ? ` (${r.service.name})` : ""
-                      }`
-                  )
-                  .join(", ")}
-              >
-                <Text type="secondary" className="text-xs cursor-pointer">
-                  +{record.responsibles.length - 2} autre(s)
-                </Text>
-              </Tooltip>
-            )}
-          </Space>
-        ) : (
-          <Text type="secondary">-</Text>
-        ),
+      render: (_, record) => record?.service?.name,
     },
     {
       title: "Action corrective",
@@ -464,9 +434,9 @@ export default function Improvements() {
             </Descriptions.Item>
 
             <Descriptions.Item label="Responsables" span={2}>
-              {selected.responsibles?.length ? (
+              {selected.improvementActions?.length ? (
                 <Space direction="vertical" size={4}>
-                  {selected.responsibles.map((r) => (
+                  {selected.improvementActions.map((r) => (
                     <Space key={r.id} size="small">
                       <Avatar size="small" icon={<UserOutlined />} />
                       <span>{r.responsable?.full_name || "-"}</span>

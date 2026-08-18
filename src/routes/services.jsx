@@ -259,7 +259,7 @@ export default function Services() {
         onCancel={closeModal}
         okText={editingService ? 'Enregistrer' : 'Créer'}
         cancelText="Annuler"
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" className="mt-4">
 

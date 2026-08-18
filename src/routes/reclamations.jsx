@@ -85,8 +85,6 @@ export default function Reclamations() {
 
   useEffect(() => {
     const reclamationId = searchParams.get("reclamation_id");
-
-    console.log("Search params changed:", searchParams.toString());
     if (reclamationId) {
       setSelectedId(Number(reclamationId));
       setIsModalOpen(true);
@@ -154,7 +152,6 @@ export default function Reclamations() {
     fetchData({ page: 1, workflowStep: value });
   };
 
-  // Initial load
   useEffect(() => {
     fetchData({ page: 1 });
     // eslint-disable-next-line react-hooks/exhaustive-deps

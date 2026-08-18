@@ -181,7 +181,7 @@ export default function CorrectiveActions({ reclamationId }) {
         confirmLoading={submitting}
         okText="Créer"
         cancelText="Annuler"
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" className="mt-4">
           <Form.Item

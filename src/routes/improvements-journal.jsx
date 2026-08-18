@@ -292,7 +292,7 @@ export default function ImprovementsJournal() {
             dataSource={filteredData}
             scroll={{ x: 1400 }}
             size="small"
-            bordered={false}
+            variant={false}
             className="rounded-xl overflow-hidden shadow-sm"
             locale={{
               emptyText: <Empty description="Aucune action d'amélioration trouvée." />,
