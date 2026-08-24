@@ -16,6 +16,7 @@ const { Text } = Typography;
 const NOTIFICATION_ROUTES = {
   'App\\Notifications\\CorrectiveActionCreated': (data) => `/reclamations?reclamation_id=${data.reclamation_id}`,
   'App\\Notifications\\ReclamationCreated': (data) => `/reclamations?reclamation_id=${data.reclamation_id}`,
+  'App\Notifications\CorrectiveActionCompletionDate': (data) => `/reclamations?reclamation_id=${data.reclamation_id}`,
 };
 
 export default function NotificationBell() {
