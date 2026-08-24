@@ -34,9 +34,9 @@ export const createShowWindow = (data) => {
 
 
     if (isDev) {
-        childWindow.loadURL(`http://localhost:5173/${data.url}`);
+        childWindow.loadURL(`http://localhost:5173/#${data.url}`);
     } else {
-        childWindow.loadFile(path.join(app.getAppPath(), 'react-dist', 'index.html'), {
+        childWindow.loadFile(path.join(app.getAppPath(), 'dist', 'index.html'), {
             hash: data.url
         });
         childWindow.setMenu(null);

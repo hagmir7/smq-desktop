@@ -139,7 +139,7 @@ export default function ImprovementsJournal() {
       width: 170,
       render: (_, record) =>
         record.improvement_sheet?.code ? (
-          <Link to={permissions('voir.fiches_amelioration') ? `/improvements/${record.improvement_sheet_id}` : '#'}>
+          <Link to={permissions('voir.fiche_amelioration') ? `/improvements/${record.improvement_sheet_id}` : '#'}>
             <Space size={4}>
               <FileTextOutlined className="text-gray-400" />
               {record.improvement_sheet.code}

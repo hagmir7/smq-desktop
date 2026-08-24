@@ -395,7 +395,7 @@ export default function Reclamations() {
             onConfirm={() => handleDelete(record.id)}
           >
             <Tooltip title="Supprimer">
-              <Button disabled={!permissions('supprimer.reclamation')} size="small" danger icon={<DeleteOutlined />} />
+              <Button disabled={!permissions('supprimer.reclamation') || record?.closing_date} size="small" danger icon={<DeleteOutlined />} />
             </Tooltip>
           </Popconfirm>
 

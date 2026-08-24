@@ -11,17 +11,25 @@ import {
 } from "antd";
 import { GitBranch } from "lucide-react";
 import { api } from "../utils/api";
+import { PlusOutlined } from "@ant-design/icons";
+import PersonForm from "./PersonForm";
 
 const { TextArea } = Input;
 
 export default function CorrectiveActionChildForm({ onSubmit, loading }) {
     const [form] = Form.useForm();
 
+    const [personModalOpen, setPersonModalOpen] = useState(false);
+
     const [services, setServices] = useState([]);
-    const [responsables, setResponsables] = useState([]);
+    const [persons, setPersons] = useState([]);
+    const [servicesLoading, setServicesLoading] = useState(false);
+    const [personsLoading, setPersonsLoading] = useState(false);
 
     const getServices = async () => {
         try {
+            setServicesLoading(true);
+
             const { data } = await api.get("services");
 
             const items = (data?.data || []).map((item) => ({
@@ -36,36 +44,43 @@ export default function CorrectiveActionChildForm({ onSubmit, loading }) {
             }
         } catch (error) {
             message.error(
-                error?.response?.data?.message || "Erreur lors du chargement des services."
+                error?.response?.data?.message ||
+                "Erreur lors du chargement des services."
             );
+        } finally {
+            setServicesLoading(false);
         }
     };
 
-    const getResponsables = async () => {
+    const getPersons = async () => {
         try {
-            const { data } = await api.get("users/responsibles");
+            setPersonsLoading(true);
+
+            const { data } = await api.get("persons");
 
             const items = (data || []).map((item) => ({
-                label: item.full_name || item.name,
+                label: item.full_name,
                 value: item.id,
             }));
 
-            setResponsables(items);
+            setPersons(items);
 
             if (items.length) {
-                form.setFieldValue("responsable_id", items[0].value);
+                form.setFieldValue("person_id", items[0].value);
             }
         } catch (error) {
             message.error(
                 error?.response?.data?.message ||
-                "Erreur lors du chargement des responsables."
+                "Erreur lors du chargement des personnes."
             );
+        } finally {
+            setPersonsLoading(false);
         }
     };
 
     useEffect(() => {
         getServices();
-        getResponsables();
+        getPersons();
     }, []);
 
     const handleFinish = (values) => {
@@ -74,7 +89,7 @@ export default function CorrectiveActionChildForm({ onSubmit, loading }) {
             due_date: values.due_date?.format("YYYY-MM-DD"),
             type: "Action corrective",
             service_id: Number(values.service_id),
-            responsable_id: Number(values.responsable_id),
+            person_id: Number(values.person_id),
         };
 
         onSubmit(payload);
@@ -123,34 +138,54 @@ export default function CorrectiveActionChildForm({ onSubmit, loading }) {
                         rules={[
                             {
                                 required: true,
-                                message: "Veuillez sélectionner un processus.",
+                                message:
+                                    "Veuillez sélectionner un processus.",
                             },
                         ]}
                     >
                         <Select
                             options={services}
                             placeholder="Sélectionner un processus"
-                            loading={!services.length}
+                            loading={servicesLoading}
                         />
                     </Form.Item>
                 </Col>
 
                 <Col span={12}>
                     <Form.Item
-                        name="responsable_id"
-                        label="Responsable"
-                        rules={[
-                            {
-                                required: true,
-                                message: "Veuillez sélectionner un responsable.",
-                            },
-                        ]}
+                        label="Personne"
+                        required
                     >
-                        <Select
-                            options={responsables}
-                            placeholder="Sélectionner un responsable"
-                            loading={!responsables.length}
-                        />
+                        <div className="flex items-start gap-2">
+                            <Form.Item
+                                name="person_id"
+                                noStyle
+                                rules={[
+                                    {
+                                        required: true,
+                                        message:
+                                            "Veuillez sélectionner une personne.",
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    options={persons}
+                                    placeholder="Sélectionner une personne"
+                                    loading={personsLoading}
+                                    showSearch
+                                    optionFilterProp="label"
+                                    allowClear
+                                    className="flex-1"
+                                />
+                            </Form.Item>
+
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                onClick={() => setPersonModalOpen(true)}
+                                title="Ajouter une personne"
+                            />
+                        </div>
                     </Form.Item>
                 </Col>
             </Row>
@@ -165,6 +200,27 @@ export default function CorrectiveActionChildForm({ onSubmit, loading }) {
                     Créer le suivi
                 </Button>
             </Form.Item>
+
+            <PersonForm
+                open={personModalOpen}
+                onCancel={() =>
+                    setPersonModalOpen(false)
+                }
+                onSuccess={async (person) => {
+                    setPersonModalOpen(false);
+
+                    // Refresh the Select
+                    await getPersons();
+
+                    // Automatically select the new person
+                    if (person?.id) {
+                        form.setFieldValue(
+                            'person_id',
+                            Number(person.id)
+                        );
+                    }
+                }}
+            />
         </Form>
     );
 }

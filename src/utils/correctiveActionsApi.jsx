@@ -34,6 +34,7 @@ export const correctiveActionsApi = {
 
     createChild: (id, payload) =>
         api.post(`corrective-actions/${id}/children?root_only=1`, payload).then(r => r.data),
+
 };
 
 export function extractErrorMessage(err) {

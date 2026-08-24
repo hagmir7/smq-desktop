@@ -261,7 +261,7 @@ export default function Improvements() {
           <Tooltip title="Voir le détail">
             <Link to={`/improvements/${record.id}`}>
 
-              <Button disabled={!permissions('modifier.fiche_amelioration')} size="small" icon={<EyeOutlined />} />
+              <Button disabled={!permissions('voir.fiche_amelioration')} size="small" icon={<EyeOutlined />} />
             </Link>
           </Tooltip>
 
@@ -285,7 +285,7 @@ export default function Improvements() {
 
           <Tooltip title="Modifier">
             <Button
-              disabled={!permissions('modifier.fiche_amelioration')}
+              disabled={!permissions('modifier.fiche_amelioration') || record?.closing_date}
               size="small"
               icon={<EditOutlined />}
               onClick={() => {
@@ -307,7 +307,7 @@ export default function Improvements() {
             <Tooltip title="Supprimer">
               <Button
                 size="small"
-                disabled={!permissions('supprimer.fiche_amelioration')}
+                disabled={!permissions('supprimer.fiche_amelioration') || record?.closing_date}
                 danger
                 icon={<DeleteOutlined />}
                 loading={deletingId === record.id}

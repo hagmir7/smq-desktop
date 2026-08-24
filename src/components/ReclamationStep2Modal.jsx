@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Radio, message } from 'antd';
 import reclamationApi from '../utils/reclamationApi';
+import { useAuth } from '../contexts/AuthContext';
 
 const { TextArea } = Input;
 
@@ -12,6 +13,8 @@ export default function ReclamationStep2Modal({
 }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
+  const { permissions } = useAuth()
+  const [reclamation, setReclamation] = useState(null);
 
   const isRecevable = Form.useWatch('is_recevable', form);
 
@@ -34,6 +37,7 @@ export default function ReclamationStep2Modal({
       setSubmitting(true);
       const response = await reclamationApi.show(reclamationId);
       populateForm(response.data);
+      setReclamation(response.data)
     } catch (err) {
       message.error("Impossible de charger les données.");
     } finally {
@@ -82,10 +86,11 @@ export default function ReclamationStep2Modal({
       cancelText="Annuler"
       destroyOnHidden
     >
-      <Form form={form} layout="vertical" className="mt-4">
+      <Form form={form} layout="vertical" className="mt-4" disabled={!reclamation?.post_analysis && (!permissions('modifier.validation')) ? false : true}>
         <Form.Item
           label="Analyse (post-analysis)"
           name="post_analysis"
+          
           // rules={[
           //   {
           //     required: true,

@@ -8,6 +8,8 @@ import {
 import {
     Plus, GitBranch, Search, Loader2, RefreshCw, X,
     Astroid,
+    UserRoundX,
+    User,
 } from "lucide-react";
 import dayjs from "dayjs";
 
@@ -21,6 +23,7 @@ import RightClickMenu from "../components/ui/RightClickMenu";
 import ImprovementSheetModal from "../components/ImprovementSheetModal";
 import { useAuth } from "../contexts/AuthContext";
 import reclamationApi from "../utils/reclamationApi";
+import { Link } from "react-router-dom";
 
 const { Header, Content } = Layout;
 const { RangePicker } = DatePicker;
@@ -64,15 +67,19 @@ function RealisationCell({ record, onSave, saving }) {
                 open
                 format="DD MMM YYYY"
                 disabled={saving}
+                disabledDate={(current) => {
+                    return current && current.isBefore(dayjs(), "day");
+                }}
                 onChange={(date) => {
                     setEditing(false);
-                    if (date) onSave(record.id, date.format("YYYY-MM-DD"));
+
+                    if (date) {
+                        onSave(record.id, date.format("YYYY-MM-DD"));
+                    }
                 }}
                 onOpenChange={(open) => {
                     if (!open) setEditing(false);
                 }}
-                // Prevent the row's contextmenu/click handlers from
-                // interfering with picker interactions.
                 onClick={(e) => e.stopPropagation()}
             />
         );
@@ -92,7 +99,6 @@ function RealisationCell({ record, onSave, saving }) {
         </Button>
     );
 }
-
 
 /* ------------------------------ App ------------------------------- */
 
@@ -382,12 +388,21 @@ export default function CorrectiveActions() {
     const hasActiveFilters = !!(search || statusFilter !== "Toutes" || effectiveness || serviceId || dateRange);
 
     const columns = [
+         {
+            title: "Ref", dataIndex: "code", width: 140,
+            render: (code) => (
+                <span className="flex items-center gap-1">
+                    {code ?? "—"}
+                </span>
+            ),
+        },
+
         {
             title: "Reclamation", dataIndex: "reclamation", width: 140,
             render: (reclamation) => (
-                <span className="flex items-center gap-1">
+                <Link to={`/reclamations?reclamation_id=${reclamation.id}`} className="flex items-center gap-1">
                     {reclamation?.code ?? "—"}
-                </span>
+                </Link>
             ),
         },
         {
@@ -417,8 +432,35 @@ export default function CorrectiveActions() {
             render: (service) => <div className="whitespace-nowrap">{service?.name ?? ""}</div>,
         },
         {
-            title: "Responsable", dataIndex: "responsable", width: 140,
-            render: (responsable) => <span className="whitespace-nowrap">{responsable?.full_name}</span> ?? "",
+            title: "Responsable",
+            dataIndex: "responsable",
+            width: 160,
+            render: (responsable, record) => {
+                const isPerson = !!record?.person;
+
+                const name =
+                    record?.person?.full_name ||
+                    responsable?.full_name ||
+                    "";
+
+                return (
+                    <span className="whitespace-nowrap flex items-center gap-1.5">
+                        {isPerson ? (
+                            <UserRoundX
+                                size={15}
+                                className="text-orange-500"
+                            />
+                        ) : (
+                            <User
+                                size={15}
+                                className="text-blue-500"
+                            />
+                        )}
+
+                        {name}
+                    </span>
+                );
+            },
         },
         {
             title: "Statut", dataIndex: "status", width: 130,

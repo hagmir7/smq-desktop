@@ -186,6 +186,7 @@ export default function ImprovementSheetModal({
       if (isEdit) {
         const res = await api.put(`improvement-sheets/${editingId}`, values);
         data = res.data;
+        console.log(res);
         message.success("Fiche d'amélioration mise à jour avec succès.");
       } else {
         const res = await api.post("improvement-sheets", values);
