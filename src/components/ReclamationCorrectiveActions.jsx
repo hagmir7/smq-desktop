@@ -242,7 +242,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
 
       message.error(
         error?.response?.data?.message ||
-        "Une erreur s'est produite lors du chargement des personnes."
+        "Une erreur s'est produite lors du chargement des ResponsableS."
       );
     }
   }, []);
@@ -954,7 +954,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
           </div>
           {isNewSubAction ? (
             <Form.Item
-              label="Personne"
+              label="RSP de traitment"
               required
             >
               <div className="flex items-start gap-2">
@@ -965,13 +965,13 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
                     {
                       required: true,
                       message:
-                        'Veuillez sélectionner une personne.',
+                        'Veuillez sélectionner une Responsable.',
                     },
                   ]}
                 >
                   <Select
                     options={persons}
-                    placeholder="Sélectionnez une personne"
+                    placeholder="Sélectionnez une Responsable"
                     loading={personsLoading}
                     suffixIcon={<User size={16} />}
                     showSearch
@@ -981,7 +981,7 @@ export default function ReclamationCorrectiveActions({ reclamationId }) {
                   />
                 </Form.Item>
 
-                <Tooltip title="Ajouter une personne">
+                <Tooltip title="Ajouter une Responsable">
                   <Button
                     type="primary"
                     icon={<PlusOutlined />}

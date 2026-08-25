@@ -1,7 +1,7 @@
 {
   "name": "smq-pro",
   "private": true,
-  "version": "1.0.8",
+  "version": "1.1.2",
   "description": "SMQ Pro - SYSTEME DE MANAGEMENT DE LA QUALITE",
   "author": "Intercocina",
   "main": "electron/main.js",
@@ -60,9 +60,12 @@
         "provider": "github",
         "repo": "smq-desktop",
         "owner": "hagmir7"
+        
       }
     ],
     "win": {
+      "icon": "build/icon.png",
+      "executableName": "SMQ",
       "target": [
         {
           "target": "nsis",

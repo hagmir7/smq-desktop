@@ -30,7 +30,7 @@ const Login = () => {
 
   useEffect(() => {
     form.setFieldsValue({
-      email: import.meta.env.MODE === 'development' ? 'admin@admin.com' : '',
+      login: import.meta.env.MODE === 'development' ? 'admin@admin.com' : '',
       password: import.meta.env.MODE === 'development' ? 'password' : ''
     });
     checkAuth();
@@ -47,7 +47,7 @@ const Login = () => {
         return;
       }
 
-      const updated = Array.from(new Set([values.email, ...usernames]));
+      const updated = Array.from(new Set([values.login, ...usernames]));
       localStorage.setItem('usernames', JSON.stringify(updated));
       setUsernames(updated);
     } catch (error) {

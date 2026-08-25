@@ -174,6 +174,17 @@ export const STATUS_COLORS = {
   "En cours": "#f59e0b",
 };
 
+
+export const IMPROVEMENT_SHEET_STATUT_COLORS = {
+  "En attente": "processing",
+  "Approuvé": "success",
+  "Enregistré": "blue",
+  "En cours": "gold",
+  "Clôturée": "#0f5c4f",
+  "Annulé": "red",
+};
+
+
 export const CURRENT_YEAR = new Date().getFullYear();
 
 // Adjust the range as needed, or fetch available years from the backend

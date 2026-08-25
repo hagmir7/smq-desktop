@@ -90,9 +90,20 @@ export default function MainLayout() {
       {
         key: '/improvements',
         icon: <Pyramid size={18} />,
-        label: <>Améliorations</>,
+        label: (
+          <>
+            Améliorations
+            {roles(['dr_general']) && (
+              <Badge
+                className="ml-2"
+                count={notifications?.registered_improvement_sheets || 0}
+                showZero={false}
+              />
+            )}
+          </>
+        ),
         title: 'Améliorations',
-        disabled: !permissions('voir.fiches_amelioration')
+        disabled: !permissions('voir.fiches_amelioration'),
       },
       {
         key: '/improvements-journal',
@@ -155,7 +166,7 @@ export default function MainLayout() {
 
 
     <Layout style={{ height: '100vh' }}>
-      {/* <UpdateNotifier /> */}
+      <UpdateNotifier />
 
       <Sider
         width={220}

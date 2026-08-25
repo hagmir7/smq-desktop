@@ -20,7 +20,7 @@ export const createShowWindow = (data) => {
         width: data.width ?? 1200,
         height: data.height ?? 700,
         resizable: data.resizable ?? false,
-        icon: path.join(__dirname, '..', 'inter.png'),
+        icon: path.join(__dirname, "..", "assets",  "icon.png"),
 
         parent: mainWindowReference,
         modal: true,

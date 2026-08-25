@@ -264,7 +264,7 @@ export default function CorrectiveActionEditForm({
 
         {isSubAction ? (
           <Form.Item
-            label="Personne"
+            label="RSP de traitment"
             required
           >
             <div className="flex items-start gap-2">

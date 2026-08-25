@@ -1,24 +1,28 @@
 import React, { useEffect, useState } from 'react';
+
 import { notification, Progress, Button, Space } from 'antd';
+
 import { DownloadOutlined, ReloadOutlined } from '@ant-design/icons';
 
-// Talks to electron/preload.js -> electron/main.js -> electron-updater.
-// Renders nothing visible except toast notifications, so it can sit
-// anywhere in the tree (mounted once, near the app root).
+// Communique avec electron/preload.js -> electron/main.js -> electron-updater.
+// N'affiche rien de visible, à l'exception des notifications toast.
+// Le composant peut donc être placé n'importe où dans l'arbre React
+// (idéalement monté une seule fois, près de la racine de l'application).
+
 export default function UpdateNotifier() {
   const [api, contextHolder] = notification.useNotification();
   const [progress, setProgress] = useState(null);
 
   useEffect(() => {
-    if (!window.updater) return; // not running inside Electron (e.g. plain browser preview)
+    if (!window.updater) return; // Pas exécuté dans Electron (ex. aperçu dans un navigateur)
 
     const offAvailable = window.updater.onUpdateAvailable((info) => {
       api.info({
         key: 'update-available',
-        message: 'Update available',
-        description: `Version ${info?.version ?? ''} is downloading in the background.`,
+        message: 'Mise à jour disponible',
+        description: `La version ${info?.version ?? ''} est en cours de téléchargement en arrière-plan.`,
         icon: <DownloadOutlined style={{ color: '#1677ff' }} />,
-        duration: 4
+        duration: 4,
       });
     });
 
@@ -28,28 +32,32 @@ export default function UpdateNotifier() {
 
     const offDownloaded = window.updater.onUpdateDownloaded((info) => {
       setProgress(null);
+
       api.success({
         key: 'update-downloaded',
-        message: 'Update ready to install',
+        message: 'Mise à jour prête à être installée',
         description: (
           <Space direction="vertical">
-            <span>Version {info?.version ?? ''} has been downloaded.</span>
+            <span>
+              La version {info?.version ?? ''} a été téléchargée.
+            </span>
+
             <Button
               type="primary"
               size="small"
               icon={<ReloadOutlined />}
               onClick={() => window.updater.quitAndInstall()}
             >
-              Restart and install
+              Redémarrer et installer
             </Button>
           </Space>
         ),
-        duration: 0
+        duration: 0,
       });
     });
 
     const offError = window.updater.onUpdateError((message) => {
-      console.error('Auto-update error:', message);
+      console.error('Erreur de mise à jour automatique :', message);
     });
 
     return () => {
@@ -58,15 +66,20 @@ export default function UpdateNotifier() {
       offDownloaded?.();
       offError?.();
     };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <>
       {contextHolder}
+
       {progress !== null && (
         <div className="fixed bottom-4 right-4 z-50 w-64 rounded-lg bg-white p-3 shadow-lg border border-gray-100">
-          <div className="text-xs text-gray-500 mb-1">Downloading update…</div>
+          <div className="text-xs text-gray-500 mb-1">
+            Téléchargement de la mise à jour…
+          </div>
+
           <Progress percent={progress} size="small" />
         </div>
       )}

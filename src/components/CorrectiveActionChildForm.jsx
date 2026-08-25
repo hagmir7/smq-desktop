@@ -153,7 +153,7 @@ export default function CorrectiveActionChildForm({ onSubmit, loading }) {
 
                 <Col span={12}>
                     <Form.Item
-                        label="Personne"
+                        label="RSP de traitment"
                         required
                     >
                         <div className="flex items-start gap-2">

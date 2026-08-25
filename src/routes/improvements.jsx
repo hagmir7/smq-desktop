@@ -34,15 +34,11 @@ import ImprovementEvaluationModal from "../components/ImprovementEvaluationModal
 import { Plus, Pyramid } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import ImprovementSheetModal from "../components/ImprovementSheetModal";
+import { IMPROVEMENT_SHEET_STATUT_COLORS } from "../utils/config";
 const { Header, Content } = Layout;
+import ImprovementStatusActions from "../components/ImprovementStatusActions";
 
 const { Title, Text, Paragraph } = Typography;
-
-const statusColors = {
-  Planifié: "processing",
-  "En cours": "warning",
-  Clôturée: "success",
-};
 
 
 export default function Improvements() {
@@ -204,13 +200,13 @@ export default function Improvements() {
       dataIndex: "statut",
       key: "statut",
       width: 130,
-      filters: Object.keys(statusColors).map((s) => ({
+      filters: Object.keys(IMPROVEMENT_SHEET_STATUT_COLORS).map((s) => ({
         text: s,
         value: s,
       })),
       onFilter: (value, record) => record.statut === value,
       render: (statut) => (
-        <Tag color={statusColors[statut] || "default"}>{statut}</Tag>
+        <Tag color={IMPROVEMENT_SHEET_STATUT_COLORS[statut] || "default"}>{statut}</Tag>
       ),
     },
     {
@@ -242,51 +238,67 @@ export default function Improvements() {
       sorter: (a, b) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
       render: (date) => dayjs(date).format("DD/MM/YYYY"),
     },
+
     {
       title: "",
       key: "actions",
-      width: 160,
+      width: 220,
       fixed: "right",
       render: (_, record) => (
-        <Space >
-          {/* <Tooltip title="Voir le détail">
-            <Button
-              size="small"
-              disabled={!permissions('voir.fiche_amelioration')}
-              icon={<EyeOutlined />}
-              onClick={() => showDetails(record)}
-            />
-          </Tooltip> */}
+        <Space size={4}>
 
+          {/* Approuver / Annuler */}
+          <ImprovementStatusActions
+            record={record}
+            permissions={permissions}
+            onStatusChanged={() => loadData(pagination.current)}
+          />
+
+          {/* Voir */}
           <Tooltip title="Voir le détail">
             <Link to={`/improvements/${record.id}`}>
-
-              <Button disabled={!permissions('voir.fiche_amelioration')} size="small" icon={<EyeOutlined />} />
+              <Button
+                size="small"
+                disabled={
+                  !permissions("voir.fiche_amelioration")
+                }
+                icon={<EyeOutlined />}
+              />
             </Link>
           </Tooltip>
 
+          {/* Évaluer */}
           <Tooltip title="Évaluer">
             <Button
               size="small"
-              disabled={!permissions('evaluer.fiche_amelioration')}
+              disabled={
+                !permissions("evaluer.fiche_amelioration")
+              }
               icon={<AuditOutlined />}
               onClick={() => openEvaluateModal(record)}
             />
           </Tooltip>
 
+          {/* Imprimer */}
           <Tooltip title="Imprimer">
             <Button
               size="small"
-              disabled={!permissions('imprimer.fiche_amelioration')}
+              disabled={
+                !permissions("imprimer.fiche_amelioration")
+              }
               icon={<PrinterOutlined />}
               onClick={() => download(record.id)}
             />
           </Tooltip>
 
+          {/* Modifier */}
           <Tooltip title="Modifier">
             <Button
-              disabled={!permissions('modifier.fiche_amelioration') || record?.closing_date}
               size="small"
+              disabled={
+                !permissions("modifier.fiche_amelioration") ||
+                !!record?.approved_date
+              }
               icon={<EditOutlined />}
               onClick={() => {
                 setEditingRecord(record);
@@ -295,7 +307,7 @@ export default function Improvements() {
             />
           </Tooltip>
 
-
+          {/* Supprimer */}
           <Popconfirm
             title="Supprimer cette fiche ?"
             description="Cette action est irréversible."
@@ -307,13 +319,18 @@ export default function Improvements() {
             <Tooltip title="Supprimer">
               <Button
                 size="small"
-                disabled={!permissions('supprimer.fiche_amelioration') || record?.closing_date}
                 danger
+                disabled={
+                  !permissions(
+                    "supprimer.fiche_amelioration"
+                  ) || !!record?.approved_date
+                }
                 icon={<DeleteOutlined />}
                 loading={deletingId === record.id}
               />
             </Tooltip>
           </Popconfirm>
+
         </Space>
       ),
     },
@@ -332,8 +349,6 @@ export default function Improvements() {
           </div>
         </div>
 
-
-
         <Space>
           <Input
             allowClear
@@ -349,7 +364,7 @@ export default function Improvements() {
             style={{ width: 150 }}
             value={statusFilter}
             onChange={setStatusFilter}
-            options={Object.keys(statusColors).map((s) => ({
+            options={Object.keys(IMPROVEMENT_SHEET_STATUT_COLORS).map((s) => ({
               label: s,
               value: s,
             }))}
@@ -420,7 +435,7 @@ export default function Improvements() {
             </Descriptions.Item>
 
             <Descriptions.Item label="Statut">
-              <Tag color={statusColors[selected.statut]}>
+              <Tag color={IMPROVEMENT_SHEET_STATUT_COLORS[selected.statut]}>
                 {selected.statut}
               </Tag>
             </Descriptions.Item>
