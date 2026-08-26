@@ -5,7 +5,7 @@ import KpiCard from "./KpiCard";
 const KpiRow = ({ states }) => {
   const kpis = [
     {
-      label: "TOTAL RÉCLAMATIONS",
+      label: "RÉCLAMATIONS",
       value: states?.total_reclamations ?? 0,
       delta: "",
       deltaColor: "text-emerald-600",
@@ -39,7 +39,7 @@ const KpiRow = ({ states }) => {
   return (
     <Row gutter={[16, 16]}>
       {kpis.map((kpi) => (
-        <Col xs={24} sm={12} lg={4} key={kpi.label}>
+        <Col xs={24} sm={12} lg={6} xl={4} key={kpi.label}>
           <KpiCard {...kpi} />
         </Col>
       ))}

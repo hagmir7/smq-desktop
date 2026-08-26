@@ -6,35 +6,50 @@ import { dateFormat } from "../utils/config";
 
 const { Text } = Typography;
 
-
 const WORKFLOW_STEPS = {
-    1: { label: 'Création', color: 'default' },
-    2: { label: 'Validation', color: 'blue' },
-    3: { label: 'Analyse et Traitement', color: 'orange' },
-    4: { label: 'Affectation', color: 'purple' },
-    5: { label: 'Clôturé', color: 'green' },
+    1: { label: "Création", color: "default" },
+    2: { label: "Validation", color: "blue" },
+    3: { label: "Analyse et Traitement", color: "orange" },
+    4: { label: "Affectation", color: "purple" },
+    5: { label: "Clôturé", color: "green" },
 };
-
 
 const SectionCard = ({ title, extra, children }) => (
     <Card
         variant={false}
         className="rounded-2xl shadow-sm"
-        styles={{ body: { padding: "20px 22px" } }}
+        styles={{
+            body: {
+                padding: "16px",
+            },
+        }}
     >
-        <div className="flex items-center justify-between">
-            <Text className="text-[12px] tracking-wide text-gray-600 font-semibold uppercase">
+        {/* Section header */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <Text className="text-[12px] font-semibold uppercase tracking-wide text-gray-600">
                 {title}
             </Text>
-            {extra}
+
+            {extra && (
+                <div className="self-start sm:self-auto">
+                    {extra}
+                </div>
+            )}
         </div>
-        <div className="mt-4">{children}</div>
+
+        <div className="mt-3 sm:mt-4">
+            {children}
+        </div>
     </Card>
 );
 
 function getStatusMeta(claim) {
     const step = WORKFLOW_STEPS[claim.workflow_step];
-    return step || { label: "Inconnu", color: "default" };
+
+    return step || {
+        label: "Inconnu",
+        color: "default",
+    };
 }
 
 const columns = [
@@ -42,57 +57,93 @@ const columns = [
         title: "Ref",
         dataIndex: "code",
         key: "code",
+        width: 110,
+        fixed: "left",
+
         render: (text, record) => (
             <Link
                 to={`/reclamations?reclamation_id=${record.id}`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <Text strong className="text-gray-900 hover:!text-blue-600">
+                <Text
+                    strong
+                    className="text-gray-900 hover:!text-blue-600"
+                >
                     {text}
                 </Text>
             </Link>
         ),
-        sorter: (a, b) => String(a.code).localeCompare(String(b.code)),
+
+        sorter: (a, b) =>
+            String(a.code).localeCompare(String(b.code)),
     },
+
     {
         title: "Client",
         dataIndex: "client_code",
         key: "client_code",
-        render: (text) => <Text className="text-gray-500">{text}</Text>,
+        width: 130,
+
+        render: (text) => (
+            <Text className="text-gray-500">
+                {text || "—"}
+            </Text>
+        ),
     },
+
     {
         title: "Date de création",
         dataIndex: "created_at",
         key: "created_at",
-        render: (created_at) => <Text className="text-gray-500">{dateFormat(created_at) || "—"}</Text>,
+        width: 150,
+
+        render: (created_at) => (
+            <Text className="whitespace-nowrap text-gray-500">
+                {dateFormat(created_at) || "—"}
+            </Text>
+        ),
     },
-    // {
-    //     title: "Réclamant",
-    //     dataIndex: "claimant_name",
-    //     key: "claimant_name",
-    //     render: (text) => <Text className="text-gray-500">{text || "—"}</Text>,
-    // },
 
     {
-        title: "Objet de réclamation ",
+        title: "Objet de réclamation",
         dataIndex: "object",
         key: "object",
+        width: 260,
+
+        render: (text) => (
+            <Text
+                className="block max-w-[260px] truncate text-gray-700"
+                title={text}
+            >
+                {text || "—"}
+            </Text>
+        ),
     },
-
-
 
     {
         title: "Statut",
         key: "status",
+        width: 150,
         align: "right",
-        filters: Object.entries(WORKFLOW_STEPS).map(([step, { label }]) => ({
-            text: label,
-            value: Number(step),
-        })),
-        onFilter: (value, record) => record.workflow_step === value,
+
+        filters: Object.entries(WORKFLOW_STEPS).map(
+            ([step, { label }]) => ({
+                text: label,
+                value: Number(step),
+            })
+        ),
+
+        onFilter: (value, record) =>
+            record.workflow_step === value,
+
         render: (_, record) => {
             const { label, color } = getStatusMeta(record);
-            return <Tag color={color}>{label}</Tag>;
+
+            return (
+                <Tag color={color}>
+                    {label}
+                </Tag>
+            );
         },
     },
 ];
@@ -101,30 +152,51 @@ export default function LastReclamations({ recentClaims }) {
     const navigate = useNavigate();
 
     return (
-        <Row gutter={[16, 16]} className="mt-4">
+        <Row
+            gutter={[16, 16]}
+            className="mt-4"
+        >
             <Col xs={24}>
                 <SectionCard
                     title="Dernières réclamations"
                     extra={
                         <Link to="/reclamations">
-                            <Button type="link" size="small" className="!px-0 text-green-700">
-                                Voir tout <ArrowRightOutlined />
+                            <Button
+                                type="link"
+                                size="small"
+                                className="!px-0 !text-green-700"
+                            >
+                                Voir tout
+                                <ArrowRightOutlined />
                             </Button>
                         </Link>
                     }
                 >
-                    <div className="border border-solid border-gray-200 rounded-lg border-b-0">
+                    <div className="overflow-hidden rounded-lg border border-solid border-gray-200">
                         <Table
                             rowKey="id"
                             columns={columns}
                             dataSource={recentClaims}
                             pagination={false}
                             size="small"
-                            locale={{ emptyText: "Aucune réclamation récente." }}
+                            locale={{
+                                emptyText:
+                                    "Aucune réclamation récente.",
+                            }}
+
+                            /* Responsive horizontal scroll */
+                            scroll={{
+                                x: 800,
+                            }}
+
                             onRow={(record) => ({
                                 onClick: () =>
-                                    navigate(`/reclamations?reclamation_id=${record.id}`),
-                                className: "cursor-pointer",
+                                    navigate(
+                                        `/reclamations?reclamation_id=${record.id}`
+                                    ),
+
+                                className:
+                                    "cursor-pointer hover:bg-gray-50",
                             })}
                         />
                     </div>

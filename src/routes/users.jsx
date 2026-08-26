@@ -107,7 +107,7 @@ export default function Users() {
       title: 'Processus',
       dataIndex: 'service',
       key: 'service',
-      render: (service) => <Tag>{service.name}</Tag>,
+      render: (service) => <Tag>{service?.name}</Tag>,
     },
     {
       title: 'Statut',

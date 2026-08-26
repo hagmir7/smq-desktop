@@ -409,59 +409,91 @@ export default function Reclamations() {
 
   return (
     <Layout className="min-h-full bg-slate-100">
+
       <Header
-        className="flex items-center justify-between !bg-white !px-6 border-b border-slate-200"
-        style={{ height: 64, lineHeight: '64px' }}
+        className="!h-auto min-h-16 !bg-white !px-3 sm:!px-4 lg:!px-6 border-b border-slate-200"
+        style={{ lineHeight: "normal" }}
       >
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-teal-700 text-white">
-            <Flag size={18} />
+        <div className="flex w-full flex-col gap-3 py-3 lg:flex-row lg:items-center lg:justify-between">
+
+          {/* Header title */}
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-teal-700 text-white">
+              <Flag size={18} />
+            </div>
+
+            <div className="min-w-0 leading-tight">
+              <div className="truncate text-base font-semibold text-slate-900">
+                Réclamations
+              </div>
+
+              <div className="truncate text-xs text-slate-500">
+                Gestion des réclamations
+              </div>
+            </div>
           </div>
-          <div className="leading-tight">
-            <div className="text-base font-semibold text-slate-900">Réclamations</div>
-            <div className="text-xs text-slate-500">Gestion des réclamations</div>
+
+          {/* Filters / Actions */}
+          <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:justify-end">
+
+            {/* Search */}
+            <Input
+              allowClear
+              placeholder="Rechercher..."
+              prefix={<SearchOutlined className="text-gray-400" />}
+              value={search}
+              onChange={handleSearchChange}
+              onClear={() => fetchData({ page: 1, search: "" })}
+              className="w-full sm:w-64 lg:w-72"
+            />
+
+            {/* Date */}
+            <RangePicker
+              allowClear
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              format="DD/MM/YYYY"
+              placeholder={["Date début", "Date fin"]}
+              className="w-full sm:w-auto"
+            />
+
+            {/* Status */}
+            <Select
+              allowClear
+              placeholder="Filtrer par état"
+              value={workflowStep}
+              onChange={handleWorkflowStepChange}
+              className="w-full sm:w-48"
+              options={Object.entries(WORKFLOW_STEPS).map(
+                ([key, val]) => ({
+                  value: Number(key),
+                  label: val.label,
+                })
+              )}
+            />
+
+            {/* Refresh */}
+            <Tooltip title="Actualiser">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => fetchData()}
+                className="shrink-0"
+              />
+            </Tooltip>
+
+            {/* Create */}
+            <Button
+              disabled={!permissions("creer.reclamation")}
+              type="primary"
+              icon={<Plus size={16} />}
+              onClick={() => setCreateOpen(true)}
+              className="shrink-0"
+            >
+              <span className="hidden sm:inline">Nouvelle</span>
+              <span className="sm:hidden">Ajouter</span>
+            </Button>
           </div>
         </div>
-
-        <Space wrap>
-          <Input
-            allowClear
-            placeholder="Rechercher (client, code, email, téléphone...)"
-            prefix={<SearchOutlined className="text-gray-400" />}
-            value={search}
-            onChange={handleSearchChange}
-            onClear={() => fetchData({ page: 1, search: '' })}
-            className="w-72"
-          />
-
-          <RangePicker
-            allowClear
-            value={dateRange}
-            onChange={handleDateRangeChange}
-            format="DD/MM/YYYY"
-            placeholder={['Date début', 'Date fin']}
-          />
-
-          <Select
-            allowClear
-            placeholder="Filtrer par état"
-            value={workflowStep}
-            onChange={handleWorkflowStepChange}
-            className="w-48"
-            options={Object.entries(WORKFLOW_STEPS).map(([key, val]) => ({
-              value: Number(key),
-              label: val.label,
-            }))}
-          />
-
-          <Tooltip title="Actualiser">
-            <Button icon={<ReloadOutlined />} onClick={() => fetchData()} />
-          </Tooltip>
-
-          <Button disabled={!permissions('creer.reclamation')} type="primary" icon={<Plus size={16} />} onClick={() => setCreateOpen(true)}>
-            Nouvelle
-          </Button>
-        </Space>
       </Header>
 
       <Content>

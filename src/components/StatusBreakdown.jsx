@@ -1,54 +1,74 @@
 import React from "react";
 import { Typography } from "antd";
 import ReactApexChart from "react-apexcharts";
+
 import SectionCard from "./SectionCard";
 import { buildRadialOptions } from "../utils/chartOptions";
 
 const { Text } = Typography;
 
-// Workflow step considered "closed" for the radial gauge.
-// Keep in sync with WORKFLOW_STEPS (5 = "Clôturé") used across the app.
 const CLOTURE_STEP = 5;
 
-const StatusBreakdown = ({ statuses }) => {
-  // Always derive the "closed" rate from the workflow-step breakdown itself
-  // (step 5 = "Clôturé"). A separately-passed prop risks going stale or
-  // silently overriding this with 0.
-  const cloturePct = statuses.find((s) => s.step === CLOTURE_STEP)?.value ?? 0;
+const StatusBreakdown = ({ statuses = [] }) => {
+    // Closed percentage
+    const cloturePct =
+        statuses.find((s) => s.step === CLOTURE_STEP)?.value ?? 0;
 
-  // Display in workflow order (1 -> 5) when a step is available.
-  const orderedStatuses = [...statuses].sort(
-    (a, b) => (a.step ?? 0) - (b.step ?? 0)
-  );
+    // Workflow order
+    const orderedStatuses = [...statuses].sort(
+        (a, b) => (a.step ?? 0) - (b.step ?? 0)
+    );
 
-  return (
-    <SectionCard title="Statuts">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-3">
-          {orderedStatuses.map((s) => (
-            <div key={s.label} className="flex items-center gap-2">
-              <span
-                className="inline-block w-2.5 h-2.5 rounded-full"
-                style={{ backgroundColor: s.color }}
-              />
-              <Text className="text-sm text-gray-700">
-                {s.label} {s.value}%
-              </Text>
+    return (
+        <SectionCard title="Statuts">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+                {/* Status list */}
+                <div className="min-w-0 flex-1">
+                    <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-1">
+                        {orderedStatuses.map((s) => (
+                            <div
+                                key={s.label}
+                                className="flex min-w-0 items-center gap-2"
+                            >
+                                <span
+                                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                                    style={{
+                                        backgroundColor: s.color,
+                                    }}
+                                />
+
+                                <Text
+                                    className="min-w-0 truncate text-sm text-gray-700"
+                                    title={`${s.label} ${s.value}%`}
+                                >
+                                    {s.label}
+                                </Text>
+
+                                <Text
+                                    strong
+                                    className="shrink-0 text-sm text-gray-900"
+                                >
+                                    {s.value}%
+                                </Text>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Radial chart */}
+                <div className="flex w-full shrink-0 items-center justify-center sm:w-auto">
+                    <ReactApexChart
+                        options={buildRadialOptions()}
+                        series={[cloturePct]}
+                        type="radialBar"
+                        height={180}
+                        width="100%"
+                    />
+                </div>
             </div>
-          ))}
-        </div>
-        <div className="">
-          <ReactApexChart
-            options={buildRadialOptions()}
-            series={[cloturePct]}
-            type="radialBar"
-            height={200}
-            width={200}
-          />
-        </div>
-      </div>
-    </SectionCard>
-  );
+        </SectionCard>
+    );
 };
 
 export default StatusBreakdown;
