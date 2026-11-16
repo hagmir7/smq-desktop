@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const log = require("electron-log");
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = "http://192.168.1.56:30/api";
 const MAX_STORED_IDS = 200;
 
 const stateFile = path.join(

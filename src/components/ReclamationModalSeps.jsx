@@ -104,6 +104,7 @@ export default function ReclamationModalSeps({ reclamationId, isOpen, onClose })
     try {
       const res = await api.get(`reclamations/${id}`);
       setData(res.data);
+      console.log("Fetched reclamation:", res.data);
     } catch (err) {
       setError(
         err?.response?.data?.message || err?.message || "Impossible de charger la réclamation."

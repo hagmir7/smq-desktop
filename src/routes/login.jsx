@@ -18,15 +18,14 @@ import {
 } from '@ant-design/icons';
 
 import { useAuth } from '../contexts/AuthContext';
-import { api } from '../utils/api';
+import { api, BASE_URL } from '../utils/api';
 import Connection from '../components/Connection';
 import { Link } from 'lucide-react';
 import TitleBar from '../components/TitleBar';
 
 const { Title, Text } = Typography;
 
-// Default connection
-const DEFAULT_CONNECTION = 'http://192.168.1.38:30/api/';
+
 
 const Login = () => {
     const [form] = Form.useForm();
@@ -62,7 +61,7 @@ const Login = () => {
         if (!localStorage.getItem('connection_url')) {
             localStorage.setItem(
                 'connection_url',
-                DEFAULT_CONNECTION
+                BASE_URL
             );
         }
 
